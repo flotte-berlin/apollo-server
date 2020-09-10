@@ -234,7 +234,7 @@ type Organisation{
     vereinsregisternr: Int
 }
 type Query {
-    cargobike: CargoBike
+    cargobike(id:ID!): CargoBike
 }
 
 `;

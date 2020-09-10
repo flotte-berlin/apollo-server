@@ -64,4 +64,9 @@ task('watch', () => {
 task('watchnolint', () => {
     watch('**/*.ts', compileTypescript);
     watch(['src/**/*', '!src/**/*.ts'], moveRemaining());
+    nodemon({
+        script: 'dist/index.js',
+        watch: ['dist/**/*.js'],
+        ext: 'js'
+  });
 });
