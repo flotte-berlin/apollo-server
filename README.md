@@ -8,7 +8,7 @@ docker build -t <image name> .
 docker run --rm -p 4000:4000 <image name>
 ```
 The Dockerfile is pretty stupid and could produce a smaller image, e.g. with multistage build.
-### NPM and gulp
+### Compile and run
 Install gulp if not installed
 ```bash
 npm -g gulp
@@ -19,11 +19,13 @@ gulp
 npm start
 ```
 ### For Development
+Install node_modules and gulp
+```bash
+npm -g gulp
+npm install
+```
+And start gulp in watch mode
 ```bash
 gulp watch
 ```
-to compile in watch mode. And in another terminal run
-```bash
-npm start
-```
-The later command uses nodemon. I am sure you can so this with gulp as well.
+This will watch *.ts files in _./src_ and recompile to _./dist_ and finally restart the server.

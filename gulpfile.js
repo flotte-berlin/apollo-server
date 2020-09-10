@@ -1,8 +1,8 @@
 const {src, dest, watch, series, task} = require('gulp');
 const ts = require('gulp-typescript');
 const del = require('delete');
-var tslint = require("gulp-tslint");
-
+var tslint = require('gulp-tslint');
+const nodemon = require('gulp-nodemon');
 /**
  * Clears the dist folder by deleting all files inside.
  * @param cb
@@ -39,6 +39,7 @@ function runTSlint(){
     }))
     .pipe(tslint.report())
 }
+
 task("tslint", () =>
     src('src/**/*.ts')
         .pipe(tslint({
@@ -50,12 +51,17 @@ task("tslint", () =>
 task('default', series(clearDist, compileTypescript, moveRemaining));
 
 task('watch', () => {
+    watch('**/*.ts', runTSlint);
     watch('**/*.ts', compileTypescript);
     watch(['src/**/*', '!src/**/*.ts'], moveRemaining());
+    nodemon({
+        script: 'dist/index.js',
+        watch: ['dist/**/*.js'],
+        ext: 'js'
+  });
 });
 
-task('watchtslint', () => {
-    watch('**/*.ts', runTSlint);
+task('watchnolint', () => {
     watch('**/*.ts', compileTypescript);
     watch(['src/**/*', '!src/**/*.ts'], moveRemaining());
 });

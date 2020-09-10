@@ -1,11 +1,14 @@
 // tslint:disable: no-console
 import { ApolloServer } from 'apollo-server';
+import  bikeresolver  from './resolvers/cargobike';
 
-// import resolvers from './resolvers';
 import typeDefs from './schema/type-defs';
 
-const server = new ApolloServer({ typeDefs });
+const server = new ApolloServer({
+    resolvers:[bikeresolver],
+    typeDefs
+});
 
 server.listen()
-  .then(({ url }) => console.log(`Server ready at ${url}.. `));
+  .then(({ url }) => console.log(`Server ready at ${url} `));
 
