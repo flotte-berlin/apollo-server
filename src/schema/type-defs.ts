@@ -21,7 +21,13 @@ type CargoBike {
     TODO: Should this be calles Security?
     """
     security: Security
+    """
+    Does not refere to an extra table in the database.
+    """
     technicalEquipment: TechnicalEquipment
+    """
+    Does not refere to an extra table in the database.
+    """
     dimensionsAndLoad: DimensionsAndLoad
     events: [BikeEvent]
     equipment: [Equipment]
@@ -32,8 +38,23 @@ type CargoBike {
     stickerBikeNameState: StickerBikeNameState
     note: String
     provider: Provider
+    coordinator: Coordinator
+    insuranceData: InsuranceData
 }
 
+type InsuranceData {
+    """
+    Eventuelly, this field will become an enum or a seperate data table and user can choose from a pool of insurance companies.
+    """
+    name: String
+
+}
+type Coordinator {
+    id:ID!
+    contactInformation: ContactInformation!
+    note: String
+    corgoBikes: [CargoBike]!
+}
 enum Group{
     KL
     LI
@@ -230,11 +251,11 @@ type ContactInformation {
 
 type Organisation{
     id: ID!
-
-    vereinsregisternr: Int
+    "registration number of association"
+    associationNo: String
 }
 type Query {
-    cargobike(id:ID!): CargoBike
+    cargobike(token:String!,id:ID!): CargoBike
 }
 
 `;

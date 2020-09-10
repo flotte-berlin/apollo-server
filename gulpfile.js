@@ -1,7 +1,7 @@
 const {src, dest, watch, series, task} = require('gulp');
 const ts = require('gulp-typescript');
 const del = require('delete');
-var tslint = require('gulp-tslint');
+const eslint = require('gulp-eslint');
 const nodemon = require('gulp-nodemon');
 /**
  * Clears the dist folder by deleting all files inside.
@@ -32,26 +32,35 @@ function moveRemaining() {
         .pipe(dest('dist'));
 }
 
-function runTSlint(){
-    src('src/**/*.ts')
-    .pipe(tslint({
-        formatter: "verbose"
-    }))
-    .pipe(tslint.report())
+function runEslint() {
+    return src(['scripts/*.js'])
+        // eslint() attaches the lint output to the "eslint" property
+        // of the file object so it can be used by other modules.
+        .pipe(eslint())
+        // eslint.format() outputs the lint results to the console.
+        // Alternatively use eslint.formatEach() (see Docs).
+        .pipe(eslint.format())
+        // To have the process exit with an error code (1) on
+        // lint error, return the stream and pipe to failAfterError last.
+        .pipe(eslint.failAfterError());
 }
-
-task("tslint", () =>
-    src('src/**/*.ts')
-        .pipe(tslint({
-            formatter: "verbose"
-        }))
-        .pipe(tslint.report())
-);
+task('eslint', () => {
+    return src(['scripts/*.js'])
+    // eslint() attaches the lint output to the "eslint" property
+    // of the file object so it can be used by other modules.
+    .pipe(eslint())
+    // eslint.format() outputs the lint results to the console.
+    // Alternatively use eslint.formatEach() (see Docs).
+    .pipe(eslint.format())
+    // To have the process exit with an error code (1) on
+    // lint error, return the stream and pipe to failAfterError last.
+    .pipe(eslint.failAfterError());
+});
 
 task('default', series(clearDist, compileTypescript, moveRemaining));
 
 task('watch', () => {
-    watch('**/*.ts', runTSlint);
+    watch('**/*.ts', runEslint);
     watch('**/*.ts', compileTypescript);
     watch(['src/**/*', '!src/**/*.ts'], moveRemaining());
     nodemon({
