@@ -1,4 +1,3 @@
-// tslint:disable: no-console
 import { ApolloServer } from 'apollo-server';
 import  bikeresolver  from './resolvers/cargobikeResolver';
 import { CargoBikeAPI } from './datasources/db/cargobikeAPI';
