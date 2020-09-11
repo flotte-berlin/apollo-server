@@ -265,9 +265,10 @@ type UpdateBikeResponse {
     message: String
     bike: CargoBike
 }
+
 "for testing"
 type Mutation {
-    addBike(id: ID!):UpdateBikeResponse
+    addBike(id: ID!, token: String!, name: String):UpdateBikeResponse
 }
 
 `
