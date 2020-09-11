@@ -40,6 +40,7 @@ type CargoBike {
     provider: Provider
     coordinator: Coordinator
     insuranceData: InsuranceData
+    loantimes: [LoanTimes]
 }
 
 type InsuranceData {
@@ -55,6 +56,7 @@ type Coordinator {
     note: String
     corgoBikes: [CargoBike]!
 }
+
 enum Group{
     KL
     LI
@@ -65,6 +67,7 @@ enum Group{
     TS
     TK
 }
+
 """
 The BikeModel can be used for instantiate new bikes with a given model.
 It should only be used to fill in default values.
@@ -74,6 +77,7 @@ type BikeModel {
     id: ID!
     name: String
     dimensionsAndLoad: DimensionsAndLoad!
+    technicalEquipment: TechnicalEquipment!
 }
 
 type ActiveMentor {
@@ -81,6 +85,31 @@ type ActiveMentor {
     start: Date!
     end: Date!
     mentor: ContactInformation!
+    usernamefLotte: String
+    usernameSlack: String
+    memberADFC: Boolean!
+    locationZIPs: [String]
+    roleCoreTeam: Boolean!
+    roleCoordinator: Boolean!
+    roleEmployeADFC: Boolean!
+    """
+    Wahr, wenn die Person Pate ist.
+    """
+    roleMentor: Boolean!
+    roleAmbulanz: Boolean!
+    roleBringer: Boolean!
+    "Date of workshop to become Mentor dt. Pate"
+    workshopMentor: Date
+    "Date of last Erste Hilfe Kurs?"
+    workshopAmbulance: Date
+    """
+    Note the kommentierte Infodaten Tabelle.
+    This value is calculated form other values.
+    It is true, if the person is not on the black list and not retired
+    and is either Mentor dt. Pate or Partner Mentor dt. Partnerpate for at least one bike.
+    """
+    distributedActiveBikeParte: Boolean!
+    reserve: String
 }
 
 type Taxes {
@@ -102,6 +131,7 @@ type ChainSwap {
     timeOfSwap: Date
     keyNumberOldAXAChain: String
 }
+
 """
 This type represents a piece of equipment that represents a real physical object.
 The object must be unique. So it is possible to tell it apart from similar objects by a serial number.
@@ -195,26 +225,25 @@ enum StickerBikeNameState {
     UNKNOWN
 }
 
+"(dt. Anbieter)"
 type Provider {
     id: ID!
     name: String!
     formularName: String
-    address: String
+    address: Address
     "If Club, at what court registered"
     registeredAt: String
     registerNumber: String
     providerContactPerson: [ContactInformation]
-    email: String
-    phone: String
     isPrivatePerson: Boolean!
-    organisations: Organisation
+    organisation: Organisation
     cargoBikes: [CargoBike]!
 }
 
 type ContactInformation {
     id: ID!
     name: String!
-    firstName: String!
+    firstName: String
     retiredAt: Date
     phoneExtern: String
     phone2Extern: String
@@ -222,42 +251,61 @@ type ContactInformation {
     phone2Intern: String
     emailExtern: String
     emailIntern: String
-    usernamefLotte: String
-    usernameSlack: String
-    memberADFC: Boolean!
-    locationZIPs: [String]
-    roleCoreTeam: Boolean!
-    roleCoordinator: Boolean!
-    roleEmployeADFC: Boolean!
-    """
-    Wahr, wenn die Person Pate ist.
-    """
-    roleMentor: Boolean!
-    roleAmbulanz: Boolean!
-    roleBringer: Boolean!
-    "Date of workshop to become Mentor dt. Pate"
-    workshopMentor: Date
-    "Date of last Erste Hilfe Kurs?"
-    workshopAmbulance: Date
+ 
     note: String
-    """
-    Note the kommentierte Infodaten Tabelle.
-    This value is calculated form other values.
-    It is true, if the person is not on the black list and not retired
-    and is either Mentor dt. Pate or Partner Mentor dt. Partnerpate for at least one bike.
-    """
-    distributedActiveBikeParte: Boolean!
-    reserve: String
+
 }
 
 type Organisation{
     id: ID!
+    "(dt. Ausleihstation)"
+    lendinglocation: [LendingStation]
     "registration number of association"
     associationNo: String
+    otherdata: String
+}
+
+"(dt. Standort)"
+type LendingStation {
+    id: ID!
+    contactInformation: [ContactInformation]!
+    address: Address
+    loanTimes: LoanTimes
+    loanPeriods: [LoanPeriod]!
+}
+
+"(dt. Ausleihzeiten)"
+type LoanTimes {
+    notes: String
+}
+
+"(dt. Zeitscheibe)"
+type LoanPeriod{
+    id: ID!
+    from: Date!
+    to: Date
+    note: String
+    lendingstation: LendingStation!
+    cargobike: CargoBike!
+}
+
+type Address {
+    street: String
+    number: String
+    zip: String
 }
 
 type Query {
-    cargobike(token:String!,id:ID!): CargoBike
+    CargobikeById(token:String!,id:ID!): CargoBike
+    Cargobikes(token:String!): [CargoBike]!
+    CargobikesByProvider(token:String!,providerId:ID!): [CargoBike]!
+    ProviderById(token:String!,id:ID!): Provider
+    Providers(token:String!): [Provider]!
+    ActiveMentorById(token:String!,id:ID!): ActiveMentor
+    ActiveMentors(token:String!): [ActiveMentor]!
+    lendingStationById(token:String!, id:ID!): LendingStation
+    lendingStations(token:String!): [LendingStation]!
+    contactInformation(token:String!): [ContactInformation]!
 }
 
 type UpdateBikeResponse {
@@ -265,9 +313,46 @@ type UpdateBikeResponse {
     message: String
     bike: CargoBike
 }
-"for testing"
+
+input CargoBikeInput {
+    "if null, then new bike will be created, else old bike will be updated"
+    id: ID
+    "see column A in info tabelle"
+    group: Group
+    name: String
+    modelName: String
+    numberOfWheels: Int
+    forCargo: Boolean
+    forChildren: Boolean
+    numberOfChildren: Int
+    serialno: String
+    """
+    Safety is a custom type, that stores information about security features.
+    TODO: Should this be calles Security?
+    """
+    security: String
+    """
+    Does not refere to an extra table in the database.
+    """
+    technicalEquipment: String
+    """
+    Does not refere to an extra table in the database.
+    """
+    dimensionsAndLoad: String
+    "Refers to equipment that is not unique. See kommentierte info tabelle -> Fragen -> Frage 2"
+    otherEquipment: String
+    "Sticker State"
+    stickerBikeNameState: String
+    note: String
+    provider: String
+    coordinator: String
+    insuranceData: String
+}
 type Mutation {
-    addBike(id: ID!):UpdateBikeResponse
+    "for testing"
+    addBike(id: ID!, token: String!, name: String): UpdateBikeResponse!
+    "if id: null, then new bike will be created, else old bike will be updated"
+    cargoBike(token:String!,cargoBike: CargoBikeInput): UpdateBikeResponse!
 }
 
 `

@@ -1,6 +1,6 @@
 {
     "type": "postgres",
-    "host": "localhost",
+    "host": "127.17.42.1",
     "port": 5432,
     "username": "apollo",
     "database": "apollo_test",

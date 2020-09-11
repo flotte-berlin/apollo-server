@@ -2,10 +2,14 @@
 Apollo server written in typescript that handles business logic.
 
 ## Usage
+### Configure Postgres
+Install postgresql and configure it, so the Database is accessible from remote hosts (only necessary for docker container [Here](https://wiki.archlinux.org/index.php/PostgreSQL))
+
+See postgres client config in __ormconfig.json__
 ### Docker
 ```bash
 docker build -t <image name> .
-docker run --rm -p 4000:4000 <image name>
+docker run --rm --network="host" <image name>
 ```
 The Dockerfile is pretty stupid and could produce a smaller image, e.g. with multistage build.
 ### Compile and run
