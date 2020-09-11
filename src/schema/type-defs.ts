@@ -1,4 +1,4 @@
-import { gql } from 'apollo-server';
+import { gql } from 'apollo-server'
 
 export default gql`
 
@@ -32,7 +32,7 @@ type CargoBike {
     events: [BikeEvent]
     equipment: [Equipment]
     "Refers to equipment that is not unique. See kommentierte info tabelle -> Fragen -> Frage 2"
-    otherEquipment: [String]
+    otherEquipment: String
     chainSwaps: [ChainSwap]
     "Sticker State"
     stickerBikeNameState: StickerBikeNameState
@@ -75,6 +75,7 @@ type BikeModel {
     name: String
     dimensionsAndLoad: DimensionsAndLoad!
 }
+
 type ActiveMentor {
     id: ID!
     start: Date!
@@ -254,8 +255,19 @@ type Organisation{
     "registration number of association"
     associationNo: String
 }
+
 type Query {
     cargobike(token:String!,id:ID!): CargoBike
 }
 
-`;
+type UpdateBikeResponse {
+    success: Boolean
+    message: String
+    bike: CargoBike
+}
+"for testing"
+type Mutation {
+    addBike(id: ID!):UpdateBikeResponse
+}
+
+`

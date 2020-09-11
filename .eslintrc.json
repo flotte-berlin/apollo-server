@@ -1,7 +1,6 @@
 {
     "env": {
-        "browser": true,
-        "es2021": true
+        "browser": true
     },
     "extends": [
         "standard"
@@ -15,5 +14,17 @@
         "@typescript-eslint"
     ],
     "rules": {
-    }
+        "new-parens": 1,
+        "no-bitwise": 1,
+        "brace-style": "warn",
+        "no-namespace": 0,
+        "indent": ["warn", 4],
+        "no-internal-module": 0,
+        "max-classes-per-file": 0,
+        "no-var-requires": 0,
+        "array-type": 0,
+        "semi": 1,
+        "semi-style": ["error", "last"]
+      }
+    
 }

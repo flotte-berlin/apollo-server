@@ -1,0 +1,12 @@
+{
+    "type": "postgres",
+    "host": "localhost",
+    "port": 5432,
+    "username": "apollo",
+    "database": "apollo_test",
+    "synchronize": true,
+    "logging": false,
+    "entities": [
+       "dist/model/**/*.js"
+    ]
+ }
