@@ -6,10 +6,11 @@ import { CargoBike } from '../../model/CargoBike'
  */
 export class CargoBikeAPI extends DataSource {
     connection : Connection
-    constructor(){
+    constructor () {
         super()
         this.connection = getConnection()
     }
+
     /**
      * Finds cargo bike by id
      */
