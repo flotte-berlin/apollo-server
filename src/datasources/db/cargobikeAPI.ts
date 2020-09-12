@@ -26,7 +26,7 @@ export class CargoBikeAPI extends DataSource {
         bike.id = id
         bike.description = token
         bike.name = name
-        this.connection.manager.save(bike)
+        await this.connection.manager.save(bike)
         return {
             success: true,
             message: token,
