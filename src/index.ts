@@ -16,6 +16,7 @@ async function authenticate (req: any, res: any, next: any) {
         const token = req.headers.authorization?.replace('Bearer ', '')
         if (token) {
             if (await userAPI.validateToken(token)) {
+                req.permissions = await userAPI.getUserPermissions(token)
                 next()
             } else {
                 res.status(401)
@@ -40,7 +41,10 @@ const server = new ApolloServer({
     dataSources: () => ({
         cargoBikeAPI: new CargoBikeAPI(),
         userAPI
-    })
+    }),
+    context: (req: any) => {
+        return req
+    }
 })
 
 const app = express()
@@ -50,6 +54,7 @@ app.get(/\/graphql?&.*query=/, authenticate)
 server.applyMiddleware({ app })
 
 console.log(__dirname)
-app.listen(4000, () => {
+app.listen(4000, async () => {
     console.log('Server listening on port 4000')
+    await userAPI.createDefinedPermissions()
 })

@@ -7,5 +7,5 @@ export enum Method {
     GetRoles = 0x52_4f_4c_45,
     GetRolePermissions = 0x50_45_52_4d,
     CreateRole = 0x43_52_4f_4c,
-    CreatePermissionn = 0x43_50_45_52
+    CreatePermissions = 0x43_50_45_52
 }

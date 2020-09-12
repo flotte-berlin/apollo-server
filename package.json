@@ -31,6 +31,7 @@
     "@types/crc": "^3.4.0"
   },
   "dependencies": {
+    "apollo-server": "^2.17.0",
     "apollo-server-express": "^2.17.0",
     "crc": "^3.8.0",
     "dotenv": "^8.2.0",

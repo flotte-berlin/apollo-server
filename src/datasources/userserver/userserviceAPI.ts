@@ -3,7 +3,8 @@ import { Socket } from 'net'
 import { PromiseSocket } from 'promise-socket'
 import { RPCMessage } from './message'
 import { Method } from './method'
-import { GetInfoResponse, ValidateTokenResponse } from './responses'
+import { GetInfoResponse, GetRolesPermissionsResponse, GetRolesResponse, ValidateTokenResponse } from './responses'
+import { Permission, requiredPermissions } from './permission'
 
 /**
  * fetches datafrom user server, especially validates user tokens
@@ -23,10 +24,20 @@ export class UserServerAPI extends DataSource {
         }
     }
 
+    /**
+     * Returns the information about all available rpc methods
+     */
     async getInfo (): Promise<GetInfoResponse> {
         const response = await this.send<GetInfoResponse>(new RPCMessage(Method.Info, null))
 
         return response.data
+    }
+
+    /**
+     * Creates required API permissions
+     */
+    async createDefinedPermissions () {
+        await this.send<any>(new RPCMessage(Method.CreatePermissions, { permissions: requiredPermissions }))
     }
 
     /**
@@ -39,6 +50,32 @@ export class UserServerAPI extends DataSource {
         } else {
             return false
         }
+    }
+
+    /**
+     * Returns a list of roles the user is assigned to
+     * @param token
+     */
+    async getUserRoles (token: String): Promise<GetRolesResponse> {
+        const response = await this.send<any>(new RPCMessage(Method.GetRoles, { token }))
+        return response.data
+    }
+
+    /**
+     * Returns all permissions of the user
+     * @param token
+     */
+    async getUserPermissions (token: String): Promise<string[]> {
+        const roles = await this.getUserRoles(token)
+        const roleIds = roles.map(role => role[0])
+        const permissionsResponse = await this.send<GetRolesPermissionsResponse>(new RPCMessage(Method.GetRolePermissions, { roles: roleIds }))
+        const permissions: string[] = []
+
+        for (const id of roleIds) {
+            permissions.push(...permissionsResponse.data[id].map(entry => entry[1]))
+        }
+
+        return permissions
     }
 
     /**
