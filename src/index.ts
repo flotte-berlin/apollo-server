@@ -4,6 +4,9 @@ import { CargoBikeAPI } from './datasources/db/cargobikeAPI'
 import typeDefs from './schema/type-defs'
 import 'reflect-metadata'
 import { createConnection } from 'typeorm'
+import { UserServerAPI } from './datasources/userserver/userserviceAPI'
+
+require('dotenv').config()
 
 createConnection().then(async () => {
     console.log('connected to db')
@@ -13,7 +16,8 @@ const server = new ApolloServer({
     resolvers: [bikeresolver],
     typeDefs,
     dataSources: () => ({
-        cargoBikeAPI: new CargoBikeAPI()
+        cargoBikeAPI: new CargoBikeAPI(),
+        userAPI: new UserServerAPI(process.env.RPC_HOST)
     })
 })
 
