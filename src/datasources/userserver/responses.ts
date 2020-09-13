@@ -9,3 +9,5 @@ export type GetRolesResponse = [number, string, string][]
 
 // Permissions map where each roleId maps to an array of permissions
 export type GetRolesPermissionsResponse = {[id: string]: [number, string, string][]}
+
+export type CreateRoleResponse = [number, string, string]

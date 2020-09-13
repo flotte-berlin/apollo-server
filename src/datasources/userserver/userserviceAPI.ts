@@ -3,7 +3,13 @@ import { Socket } from 'net'
 import { PromiseSocket } from 'promise-socket'
 import { RPCMessage } from './message'
 import { Method } from './method'
-import { GetInfoResponse, GetRolesPermissionsResponse, GetRolesResponse, ValidateTokenResponse } from './responses'
+import {
+    CreateRoleResponse,
+    GetInfoResponse,
+    GetRolesPermissionsResponse,
+    GetRolesResponse,
+    ValidateTokenResponse
+} from './responses'
 import { Permission, requiredPermissions } from './permission'
 
 /**
@@ -38,6 +44,22 @@ export class UserServerAPI extends DataSource {
      */
     async createDefinedPermissions () {
         await this.send<any>(new RPCMessage(Method.CreatePermissions, { permissions: requiredPermissions }))
+    }
+
+    /**
+     * Creates a new role with the given parameters
+     * @param name - the name of the role
+     * @param description - a description of the role
+     * @param permissionIDs - an array of IDs the role is created with
+     */
+    async createRole (name: string, description: string, permissionIDs: number[]): Promise<CreateRoleResponse> {
+        const response = await this.send<CreateRoleResponse>(new RPCMessage<any>(Method.CreateRole, {
+            name,
+            description,
+            permissions: permissionIDs
+        }))
+
+        return response.data
     }
 
     /**
@@ -89,6 +111,10 @@ export class UserServerAPI extends DataSource {
         return promiseSocket
     }
 
+    /**
+     * Sends a message and reads and parses the response of it
+     * @param message
+     */
     async send<T> (message: RPCMessage<any>): Promise<RPCMessage<T>> {
         const socket = await this.getSocket()
         await socket.writeAll(message.toBuffer())

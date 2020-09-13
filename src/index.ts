@@ -9,6 +9,12 @@ import express from 'express'
 
 require('dotenv').config()
 
+/**
+ * Function that is called to authenticate a user by using the user rpc server
+ * @param req
+ * @param res
+ * @param next
+ */
 async function authenticate (req: any, res: any, next: any) {
     if (process.env.NODE_ENV === 'develop') {
         next()
