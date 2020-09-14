@@ -15,7 +15,7 @@ type CargoBike {
     forCargo: Boolean
     forChildren: Boolean
     numberOfChildren: Int
-    serialno: String
+    serialNo: String
     """
     Safety is a custom type, that stores information about security features.
     TODO: Should this be calles Security?
@@ -38,9 +38,11 @@ type CargoBike {
     stickerBikeNameState: StickerBikeNameState
     note: String
     provider: Provider
-    coordinator: Coordinator
+    coordinator:  Participants
     insuranceData: InsuranceData
     loantimes: [LoanTimes]
+    "null if not locked by other user"
+    lockedBy: ID
 }
 
 type InsuranceData {
@@ -49,12 +51,6 @@ type InsuranceData {
     """
     name: String
 
-}
-type Coordinator {
-    id:ID!
-    contactInformation: ContactInformation!
-    note: String
-    corgoBikes: [CargoBike]!
 }
 
 enum Group{
@@ -80,7 +76,7 @@ type BikeModel {
     technicalEquipment: TechnicalEquipment!
 }
 
-type ActiveMentor {
+type  Participants {
     id: ID!
     start: Date!
     end: Date!
@@ -96,7 +92,7 @@ type ActiveMentor {
     Wahr, wenn die Person Pate ist.
     """
     roleMentor: Boolean!
-    roleAmbulanz: Boolean!
+    roleAmbulance: Boolean!
     roleBringer: Boolean!
     "Date of workshop to become Mentor dt. Pate"
     workshopMentor: Date
@@ -296,13 +292,13 @@ type Address {
 }
 
 type Query {
-    CargobikeById(token:String!,id:ID!): CargoBike
+    CargobikeById(id:ID!): CargoBike
     Cargobikes(token:String!): [CargoBike]!
     CargobikesByProvider(token:String!,providerId:ID!): [CargoBike]!
     ProviderById(token:String!,id:ID!): Provider
     Providers(token:String!): [Provider]!
-    ActiveMentorById(token:String!,id:ID!): ActiveMentor
-    ActiveMentors(token:String!): [ActiveMentor]!
+     ParticipantsById(token:String!,id:ID!):  Participants
+     Participantss(token:String!): [ Participants]!
     lendingStationById(token:String!, id:ID!): LendingStation
     lendingStations(token:String!): [LendingStation]!
     contactInformation(token:String!): [ContactInformation]!
@@ -345,14 +341,13 @@ input CargoBikeInput {
     stickerBikeNameState: String
     note: String
     provider: String
-    coordinator: String
     insuranceData: String
 }
 type Mutation {
     "for testing"
-    addBike(id: ID!, token: String!, name: String): UpdateBikeResponse!
+    addBike(id: ID!, name: String): UpdateBikeResponse!
     "if id: null, then new bike will be created, else old bike will be updated"
-    cargoBike(token:String!,cargoBike: CargoBikeInput): UpdateBikeResponse!
+    cargoBike(cargoBike: CargoBikeInput): UpdateBikeResponse!
 }
 
 `;
