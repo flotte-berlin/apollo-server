@@ -10,7 +10,7 @@ import {
     GetRolesResponse,
     ValidateTokenResponse
 } from './responses';
-import { Permission, requiredPermissions } from './permission';
+import { requiredPermissions } from './permission';
 
 /**
  * fetches datafrom user server, especially validates user tokens
