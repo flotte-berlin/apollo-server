@@ -37,7 +37,10 @@ async function authenticate (req: any, res: any, next: any) {
     }
 }
 
-createConnection().then(async () => {
+createConnection({
+    type: 'postgres',
+    url: process.env.POSTGRES_CONNECTION_URL
+}).then(async () => {
     console.log('connected to db');
 }).catch(error => console.log(error));
 
