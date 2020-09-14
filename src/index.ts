@@ -7,6 +7,7 @@ import { createConnection } from 'typeorm';
 import { UserServerAPI } from './datasources/userserver/userserviceAPI';
 import express from 'express';
 import { requiredPermissions } from './datasources/userserver/permission';
+import { CargoBike } from './model/CargoBike';
 
 require('dotenv').config();
 
@@ -39,7 +40,12 @@ async function authenticate (req: any, res: any, next: any) {
 
 createConnection({
     type: 'postgres',
-    url: process.env.POSTGRES_CONNECTION_URL
+    url: process.env.POSTGRES_CONNECTION_URL,
+    entities: [
+        CargoBike
+    ],
+    synchronize: true,
+    logging: false
 }).then(async () => {
     console.log('connected to db');
 }).catch(error => console.log(error));
