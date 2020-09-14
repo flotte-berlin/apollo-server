@@ -24,8 +24,9 @@
         "max-classes-per-file": 0,
         "no-var-requires": 0,
         "array-type": 0,
-        "semi": 1,
-        "semi-style": ["error", "last"]
+        "semi": ["error", "always"],
+        "semi-style": ["error", "last"],
+        "no-extra-semi": "off"
       }
-    
+
 }
