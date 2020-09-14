@@ -1,16 +1,16 @@
-import { DataSource } from 'apollo-datasource'
-import { Socket } from 'net'
-import { PromiseSocket } from 'promise-socket'
-import { RPCMessage } from './message'
-import { Method } from './method'
+import { DataSource } from 'apollo-datasource';
+import { Socket } from 'net';
+import { PromiseSocket } from 'promise-socket';
+import { RPCMessage } from './message';
+import { Method } from './method';
 import {
     CreateRoleResponse,
     GetInfoResponse,
     GetRolesPermissionsResponse,
     GetRolesResponse,
     ValidateTokenResponse
-} from './responses'
-import { Permission, requiredPermissions } from './permission'
+} from './responses';
+import { Permission, requiredPermissions } from './permission';
 
 /**
  * fetches datafrom user server, especially validates user tokens
@@ -20,13 +20,13 @@ export class UserServerAPI extends DataSource {
     host: string
 
     constructor (address: string) {
-        super()
-        const parts = address.split(':')
-        this.host = parts[0]
+        super();
+        const parts = address.split(':');
+        this.host = parts[0];
         if (parts.length === 2) {
-            this.port = Number(parts[1])
+            this.port = Number(parts[1]);
         } else {
-            this.port = 5000
+            this.port = 5000;
         }
     }
 
@@ -34,16 +34,16 @@ export class UserServerAPI extends DataSource {
      * Returns the information about all available rpc methods
      */
     async getInfo (): Promise<GetInfoResponse> {
-        const response = await this.send<GetInfoResponse>(new RPCMessage(Method.Info, null))
+        const response = await this.send<GetInfoResponse>(new RPCMessage(Method.Info, null));
 
-        return response.data
+        return response.data;
     }
 
     /**
      * Creates required API permissions
      */
     async createDefinedPermissions () {
-        await this.send<any>(new RPCMessage(Method.CreatePermissions, { permissions: requiredPermissions }))
+        await this.send<any>(new RPCMessage(Method.CreatePermissions, { permissions: requiredPermissions }));
     }
 
     /**
@@ -57,20 +57,20 @@ export class UserServerAPI extends DataSource {
             name,
             description,
             permissions: permissionIDs
-        }))
+        }));
 
-        return response.data
+        return response.data;
     }
 
     /**
      * validates user token
      */
     async validateToken (token:string): Promise<boolean> {
-        const response = await this.send<ValidateTokenResponse>(new RPCMessage(Method.ValidateToken, { token }))
+        const response = await this.send<ValidateTokenResponse>(new RPCMessage(Method.ValidateToken, { token }));
         if (response) {
-            return response.data[0]
+            return response.data[0];
         } else {
-            return false
+            return false;
         }
     }
 
@@ -79,8 +79,8 @@ export class UserServerAPI extends DataSource {
      * @param token
      */
     async getUserRoles (token: String): Promise<GetRolesResponse> {
-        const response = await this.send<any>(new RPCMessage(Method.GetRoles, { token }))
-        return response.data
+        const response = await this.send<any>(new RPCMessage(Method.GetRoles, { token }));
+        return response.data;
     }
 
     /**
@@ -88,27 +88,27 @@ export class UserServerAPI extends DataSource {
      * @param token
      */
     async getUserPermissions (token: String): Promise<string[]> {
-        const roles = await this.getUserRoles(token)
-        const roleIds = roles.map(role => role[0])
-        const permissionsResponse = await this.send<GetRolesPermissionsResponse>(new RPCMessage(Method.GetRolePermissions, { roles: roleIds }))
-        const permissions: string[] = []
+        const roles = await this.getUserRoles(token);
+        const roleIds = roles.map(role => role[0]);
+        const permissionsResponse = await this.send<GetRolesPermissionsResponse>(new RPCMessage(Method.GetRolePermissions, { roles: roleIds }));
+        const permissions: string[] = [];
 
         for (const id of roleIds) {
-            permissions.push(...permissionsResponse.data[id].map(entry => entry[1]))
+            permissions.push(...permissionsResponse.data[id].map(entry => entry[1]));
         }
 
-        return permissions
+        return permissions;
     }
 
     /**
      * Connects to the socket and returns the client
      */
     async getSocket (): Promise<PromiseSocket<Socket>> {
-        const socket = new Socket()
-        const promiseSocket = new PromiseSocket(socket)
-        await promiseSocket.connect(this.port, this.host)
+        const socket = new Socket();
+        const promiseSocket = new PromiseSocket(socket);
+        await promiseSocket.connect(this.port, this.host);
 
-        return promiseSocket
+        return promiseSocket;
     }
 
     /**
@@ -116,12 +116,12 @@ export class UserServerAPI extends DataSource {
      * @param message
      */
     async send<T> (message: RPCMessage<any>): Promise<RPCMessage<T>> {
-        const socket = await this.getSocket()
-        await socket.writeAll(message.toBuffer())
-        const response = await socket.readAll() as Buffer
+        const socket = await this.getSocket();
+        await socket.writeAll(message.toBuffer());
+        const response = await socket.readAll() as Buffer;
 
         if (response?.length > 0) {
-            return RPCMessage.fromBuffer<T>(response)
+            return RPCMessage.fromBuffer<T>(response);
         }
     }
 }

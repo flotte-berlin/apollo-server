@@ -14,4 +14,4 @@ export const requiredPermissions = [
         name: Permission.WriteBike,
         description: 'Allows the modification of bike information'
     }
-]
+];
