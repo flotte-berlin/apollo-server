@@ -6,6 +6,7 @@ import 'reflect-metadata'
 import { createConnection } from 'typeorm'
 import { UserServerAPI } from './datasources/userserver/userserviceAPI'
 import express from 'express'
+import { requiredPermissions } from './datasources/userserver/permission'
 
 require('dotenv').config()
 
@@ -17,6 +18,7 @@ require('dotenv').config()
  */
 async function authenticate (req: any, res: any, next: any) {
     if (process.env.NODE_ENV === 'develop') {
+        req.permissions = requiredPermissions.map((e) => e.name)
         next()
     } else {
         const token = req.headers.authorization?.replace('Bearer ', '')
