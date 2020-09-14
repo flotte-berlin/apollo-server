@@ -1,5 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn, OneToMany } from 'typeorm';
 import { ContactInformation } from './ContactInformation';
+import { CargoBike } from './CargoBike';
 
 @Entity()
 export class Participant {
@@ -33,6 +34,9 @@ export class Participant {
         type: 'simple-array'
     })
     locationZIPs: string[];
+
+    @OneToMany(type => CargoBike, cargoBike => cargoBike.coordinator)
+    cargoBikes: CargoBike[];
 
     @Column()
     roleCoreTeam: boolean;

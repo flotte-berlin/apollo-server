@@ -1,7 +1,10 @@
 /* eslint no-unused-vars: "off" */
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany, ManyToOne, OneToOne } from 'typeorm';
 import { Bike } from './BikeFeatures';
 import { ChainSwap } from './ChainSwap';
+import { Provider } from './Provider';
+import { Participant } from './Participant';
+import { InsuranceData } from './InsuranceData';
 
 export enum Group {
     KL,
@@ -64,4 +67,13 @@ export class CargoBike extends Bike {
 
     @Column()
     note: string;
+
+    @ManyToOne(type => Provider)
+    provider: Provider;
+
+    @ManyToOne(type => Participant, participant => participant.cargoBikes)
+    coordinator: Participant;
+
+    @OneToOne(type => InsuranceData)
+    insuranceData: InsuranceData;
 }

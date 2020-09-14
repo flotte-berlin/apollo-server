@@ -38,9 +38,9 @@ type CargoBike {
     stickerBikeNameState: StickerBikeNameState
     note: String
     provider: Provider
-    coordinator:  Participants
-    insuranceData: InsuranceData
-    loantimes: [LoanTimes]
+    coordinator:  Participant
+    insuranceData: InsuranceData!
+    lendingstation: LendingStation
     "null if not locked by other user"
     lockedBy: ID
 }
@@ -49,8 +49,19 @@ type InsuranceData {
     """
     Eventuelly, this field will become an enum or a seperate data table and user can choose from a pool of insurance companies.
     """
-    name: String
-
+    name: String!
+    benefactor: String!
+    billing: String!
+    noPnP: String!
+    "eg. Anbieter, flotte, eigenleistung"
+    maintananceResponsible: String!
+    maintanceBenefector: String!
+    maintananceAgreement: String
+    hasFixedRate: Boolean!
+    fixedRate: Float
+    "Projektzuschuss"
+    projectAllowance: Float
+    notes: String
 }
 
 enum Group{
@@ -76,7 +87,7 @@ type BikeModel {
     technicalEquipment: TechnicalEquipment!
 }
 
-type  Participants {
+type  Participant {
     id: ID!
     start: Date!
     end: Date!
@@ -273,6 +284,20 @@ type LendingStation {
 "(dt. Ausleihzeiten)"
 type LoanTimes {
     notes: String
+    mof: String
+    mot: String
+    tuf: String
+    tut: String
+    wef: String
+    wet: String
+    thf: String
+    tht: String
+    frf: String
+    frt: String
+    saf: String
+    sat: String
+    suf: String
+    sut: String
 }
 
 "(dt. Zeitscheibe)"
@@ -297,8 +322,8 @@ type Query {
     CargobikesByProvider(token:String!,providerId:ID!): [CargoBike]!
     ProviderById(token:String!,id:ID!): Provider
     Providers(token:String!): [Provider]!
-     ParticipantsById(token:String!,id:ID!):  Participants
-     Participantss(token:String!): [ Participants]!
+     ParticipantById(token:String!,id:ID!):  Participant
+     Participants(token:String!): [ Participant]!
     lendingStationById(token:String!, id:ID!): LendingStation
     lendingStations(token:String!): [LendingStation]!
     contactInformation(token:String!): [ContactInformation]!
