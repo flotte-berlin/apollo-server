@@ -5,6 +5,10 @@ import { ChainSwap } from './ChainSwap';
 import { Provider } from './Provider';
 import { Participant } from './Participant';
 import { InsuranceData } from './InsuranceData';
+import { LoanPeriod } from './LoanPeriod';
+import { LendingStation } from './LendingStation';
+import { Taxes } from './Taxes';
+import { Equipment } from './Equipment';
 
 export enum Group {
     KL,
@@ -40,7 +44,19 @@ export class CargoBike extends Bike {
     @Column()
     serialNo: string;
 
-    @OneToMany(type => ChainSwap, chainSwap => chainSwap.cargoBike)
+    @OneToMany(type => Equipment, equipment => equipment.cargoBike, {
+        nullable: true
+    })
+    equipment: Equipment[];
+
+    @Column({
+        nullable: true
+    })
+    otherEquipment: string;
+
+    @OneToMany(type => ChainSwap, chainSwap => chainSwap.cargoBike, {
+        nullable: true
+    })
     chainSwaps: ChainSwap[]
 
     // Security information
@@ -68,12 +84,39 @@ export class CargoBike extends Bike {
     @Column()
     note: string;
 
-    @ManyToOne(type => Provider)
+    @ManyToOne(type => Provider, {
+        nullable: true
+    })
     provider: Provider;
 
     @ManyToOne(type => Participant, participant => participant.cargoBikes)
     coordinator: Participant;
 
-    @OneToOne(type => InsuranceData)
+    @Column(type => InsuranceData)
     insuranceData: InsuranceData;
+
+    @OneToMany(type => LoanPeriod, loanPeriod => loanPeriod.cargoBike, {
+        nullable: true
+    })
+    loanPeriods: LoanPeriod[];
+
+    // This relation is a little redundant because one could also check all LoanPeriods for current station
+    @ManyToOne(type => LendingStation, lendingStation => lendingStation.cargoBikes, {
+        nullable: true
+    })
+    lendingStation: LendingStation;
+
+    @Column(type => Taxes)
+    taxes: Taxes;
+
+    @Column({
+        nullable: true
+    })
+    lockedBy: number;
+
+    @Column({
+        type: 'date',
+        nullable: true
+    })
+    lockedUntil: Date;
 }

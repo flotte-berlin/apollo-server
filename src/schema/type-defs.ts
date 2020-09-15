@@ -41,8 +41,10 @@ type CargoBike {
     coordinator:  Participant
     insuranceData: InsuranceData!
     lendingstation: LendingStation
+    taxes: Taxes
     "null if not locked by other user"
     lockedBy: ID
+    lockedUntil: Date
 }
 
 type InsuranceData {
@@ -82,7 +84,7 @@ Even bikes of the same model can have different properties.
 """
 type BikeModel {
     id: ID!
-    name: String
+    name: String!
     dimensionsAndLoad: DimensionsAndLoad!
     technicalEquipment: TechnicalEquipment!
 }
@@ -147,7 +149,7 @@ type Equipment {
     id: ID!
     serialNo: String!
     """
-    TODO unclear what this means
+    TODO unclear what this means. tomy fragen
     """
     investable: Boolean
     name: String
@@ -156,10 +158,8 @@ type Equipment {
 "An Event is a point in time, when the state of the bike somehow changed."
 type BikeEvent {
     id: ID!
-    type: BikeEventType
-    """
-    TODO: An Event should have a date field (Leon).
-    """
+    eventType: BikeEventType
+    date: Date!
     note: String
     """
     Path to documents
@@ -238,9 +238,7 @@ type Provider {
     name: String!
     formularName: String
     address: Address
-    "If Club, at what court registered"
-    registeredAt: String
-    registerNumber: String
+    
     providerContactPerson: [ContactInformation]
     isPrivatePerson: Boolean!
     organisation: Organisation
@@ -266,15 +264,19 @@ type ContactInformation {
 type Organisation{
     id: ID!
     "(dt. Ausleihstation)"
-    lendinglocation: [LendingStation]
+    lendingStations: [LendingStation]
     "registration number of association"
     associationNo: String
+    "If Club, at what court registered"
+    registeredAt: String
+    provider: Provider
     otherdata: String
 }
 
 "(dt. Standort)"
 type LendingStation {
     id: ID!
+    name: String!
     contactInformation: [ContactInformation]!
     address: Address
     loanTimes: LoanTimes
@@ -322,8 +324,8 @@ type Query {
     CargobikesByProvider(token:String!,providerId:ID!): [CargoBike]!
     ProviderById(token:String!,id:ID!): Provider
     Providers(token:String!): [Provider]!
-     ParticipantById(token:String!,id:ID!):  Participant
-     Participants(token:String!): [ Participant]!
+    ParticipantById(token:String!,id:ID!):  Participant
+    Participants(token:String!): [ Participant]!
     lendingStationById(token:String!, id:ID!): LendingStation
     lendingStations(token:String!): [LendingStation]!
     contactInformation(token:String!): [ContactInformation]!

@@ -1,10 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Column } from 'typeorm';
 
-@Entity()
 export class InsuranceData {
-    @PrimaryGeneratedColumn()
-    id: number
-
     @Column()
     name: string;
 

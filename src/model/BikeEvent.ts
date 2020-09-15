@@ -13,18 +13,24 @@ export class BikeEvent {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column()
+    @Column({
+        nullable: true
+    })
     note: string;
 
-    @Column('simple-array')
+    @Column({
+        type: 'date'
+    })
+    date: Date;
+
+    @Column('simple-array', {
+        nullable: true
+    })
     documents: string[];
 
     @Column({
         type: 'enum',
         enum: BikeEventType
     })
-    type: BikeEventType
-
-    @Column()
-    otherEquipment: string;
+    eventType: BikeEventType
 }

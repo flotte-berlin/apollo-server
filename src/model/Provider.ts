@@ -1,7 +1,9 @@
 /* eslint no-unused-vars: "off" */
 
-import { PrimaryGeneratedColumn, Column, OneToMany, Entity } from 'typeorm';
+import { PrimaryGeneratedColumn, Column, OneToMany, Entity, OneToOne } from 'typeorm';
 import { ContactInformation } from './ContactInformation';
+import { LendingStation } from './LendingStation';
+import { Organization } from './Organization';
 
 @Entity()
 export class Provider {
@@ -11,7 +13,9 @@ export class Provider {
     @Column()
     name: string;
 
-    @Column()
+    @Column({
+        nullable: false
+    })
     formularName: String;
 
     @Column()
@@ -23,12 +27,14 @@ export class Provider {
     @Column()
     zip: string;
 
-    @Column()
-    registerdAt: string;
-
-    @Column()
-    registerNo: string;
-
     @OneToMany(type => ContactInformation, contactInformation => contactInformation.provider)
     contactInformation: ContactInformation[];
+
+    @Column()
+    isPrivatePerson: boolean;
+
+    @OneToOne(type => Organization, organization => organization.provider, {
+        nullable: true
+    })
+    organization: Organization;
 }
