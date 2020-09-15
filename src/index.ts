@@ -8,6 +8,16 @@ import { UserServerAPI } from './datasources/userserver/userserviceAPI';
 import express from 'express';
 import { requiredPermissions } from './datasources/userserver/permission';
 import { CargoBike } from './model/CargoBike';
+import { BikeEvent } from './model/BikeEvent';
+import { BikeModel } from './model/BikeModel';
+import { ChainSwap } from './model/ChainSwap';
+import { ContactInformation } from './model/ContactInformation';
+import { Equipment } from './model/Equipment';
+import { LendingStation } from './model/LendingStation';
+import { LoanPeriod } from './model/LoanPeriod';
+import { Participant } from './model/Participant';
+import { Organization } from './model/Organization';
+import { Provider } from './model/Provider';
 
 require('dotenv').config();
 
@@ -42,7 +52,17 @@ createConnection({
     type: 'postgres',
     url: process.env.POSTGRES_CONNECTION_URL,
     entities: [
-        CargoBike
+        CargoBike,
+        BikeEvent,
+        BikeModel,
+        ChainSwap,
+        ContactInformation,
+        Equipment,
+        LendingStation,
+        LoanPeriod,
+        Organization,
+        Participant,
+        Provider
     ],
     synchronize: true,
     logging: false

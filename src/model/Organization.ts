@@ -1,7 +1,8 @@
-import { PrimaryGeneratedColumn, OneToOne, OneToMany, Column } from 'typeorm';
+import { PrimaryGeneratedColumn, OneToOne, OneToMany, Column, Entity } from 'typeorm';
 import { LendingStation } from './LendingStation';
 import { Provider } from './Provider';
 
+@Entity()
 export class Organization {
     @PrimaryGeneratedColumn()
     id: number;
