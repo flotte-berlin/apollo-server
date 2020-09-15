@@ -15,7 +15,7 @@ type CargoBike {
     forCargo: Boolean
     forChildren: Boolean
     numberOfChildren: Int
-    serialno: String
+    serialNo: String
     """
     Safety is a custom type, that stores information about security features.
     TODO: Should this be calles Security?
@@ -38,23 +38,32 @@ type CargoBike {
     stickerBikeNameState: StickerBikeNameState
     note: String
     provider: Provider
-    coordinator: Coordinator
-    insuranceData: InsuranceData
-    loantimes: [LoanTimes]
+    coordinator:  Participant
+    insuranceData: InsuranceData!
+    lendingstation: LendingStation
+    taxes: Taxes
+    "null if not locked by other user"
+    lockedBy: ID
+    lockedUntil: Date
 }
 
 type InsuranceData {
     """
     Eventuelly, this field will become an enum or a seperate data table and user can choose from a pool of insurance companies.
     """
-    name: String
-
-}
-type Coordinator {
-    id:ID!
-    contactInformation: ContactInformation!
-    note: String
-    corgoBikes: [CargoBike]!
+    name: String!
+    benefactor: String!
+    billing: String!
+    noPnP: String!
+    "eg. Anbieter, flotte, eigenleistung"
+    maintananceResponsible: String!
+    maintanceBenefector: String!
+    maintananceAgreement: String
+    hasFixedRate: Boolean!
+    fixedRate: Float
+    "Projektzuschuss"
+    projectAllowance: Float
+    notes: String
 }
 
 enum Group{
@@ -75,12 +84,12 @@ Even bikes of the same model can have different properties.
 """
 type BikeModel {
     id: ID!
-    name: String
+    name: String!
     dimensionsAndLoad: DimensionsAndLoad!
     technicalEquipment: TechnicalEquipment!
 }
 
-type ActiveMentor {
+type  Participant {
     id: ID!
     start: Date!
     end: Date!
@@ -96,7 +105,7 @@ type ActiveMentor {
     Wahr, wenn die Person Pate ist.
     """
     roleMentor: Boolean!
-    roleAmbulanz: Boolean!
+    roleAmbulance: Boolean!
     roleBringer: Boolean!
     "Date of workshop to become Mentor dt. Pate"
     workshopMentor: Date
@@ -140,7 +149,7 @@ type Equipment {
     id: ID!
     serialNo: String!
     """
-    TODO unclear what this means
+    TODO unclear what this means. tomy fragen
     """
     investable: Boolean
     name: String
@@ -149,10 +158,8 @@ type Equipment {
 "An Event is a point in time, when the state of the bike somehow changed."
 type BikeEvent {
     id: ID!
-    type: BikeEventType
-    """
-    TODO: An Event should have a date field (Leon).
-    """
+    eventType: BikeEventType
+    date: Date!
     note: String
     """
     Path to documents
@@ -231,9 +238,7 @@ type Provider {
     name: String!
     formularName: String
     address: Address
-    "If Club, at what court registered"
-    registeredAt: String
-    registerNumber: String
+    
     providerContactPerson: [ContactInformation]
     isPrivatePerson: Boolean!
     organisation: Organisation
@@ -259,15 +264,19 @@ type ContactInformation {
 type Organisation{
     id: ID!
     "(dt. Ausleihstation)"
-    lendinglocation: [LendingStation]
+    lendingStations: [LendingStation]
     "registration number of association"
     associationNo: String
+    "If Club, at what court registered"
+    registeredAt: String
+    provider: Provider
     otherdata: String
 }
 
 "(dt. Standort)"
 type LendingStation {
     id: ID!
+    name: String!
     contactInformation: [ContactInformation]!
     address: Address
     loanTimes: LoanTimes
@@ -277,6 +286,20 @@ type LendingStation {
 "(dt. Ausleihzeiten)"
 type LoanTimes {
     notes: String
+    mof: String
+    mot: String
+    tuf: String
+    tut: String
+    wef: String
+    wet: String
+    thf: String
+    tht: String
+    frf: String
+    frt: String
+    saf: String
+    sat: String
+    suf: String
+    sut: String
 }
 
 "(dt. Zeitscheibe)"
@@ -296,13 +319,13 @@ type Address {
 }
 
 type Query {
-    CargobikeById(token:String!,id:ID!): CargoBike
+    CargobikeById(id:ID!): CargoBike
     Cargobikes(token:String!): [CargoBike]!
     CargobikesByProvider(token:String!,providerId:ID!): [CargoBike]!
     ProviderById(token:String!,id:ID!): Provider
     Providers(token:String!): [Provider]!
-    ActiveMentorById(token:String!,id:ID!): ActiveMentor
-    ActiveMentors(token:String!): [ActiveMentor]!
+    ParticipantById(token:String!,id:ID!):  Participant
+    Participants(token:String!): [ Participant]!
     lendingStationById(token:String!, id:ID!): LendingStation
     lendingStations(token:String!): [LendingStation]!
     contactInformation(token:String!): [ContactInformation]!
@@ -345,14 +368,13 @@ input CargoBikeInput {
     stickerBikeNameState: String
     note: String
     provider: String
-    coordinator: String
     insuranceData: String
 }
 type Mutation {
     "for testing"
-    addBike(id: ID!, token: String!, name: String): UpdateBikeResponse!
+    addBike(id: ID!, name: String): UpdateBikeResponse!
     "if id: null, then new bike will be created, else old bike will be updated"
-    cargoBike(token:String!,cargoBike: CargoBikeInput): UpdateBikeResponse!
+    cargoBike(cargoBike: CargoBikeInput): UpdateBikeResponse!
 }
 
 `;

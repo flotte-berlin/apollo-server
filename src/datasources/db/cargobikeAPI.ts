@@ -14,22 +14,22 @@ export class CargoBikeAPI extends DataSource {
     /**
      * Finds cargo bike by id
      */
-    async findCargoBikeById ({ id, token }:{id: any, token:string}) {
+    async findCargoBikeById ({ id }:{id: any}) {
         return {
             id,
-            name: token
+            name: 'token'
         };
     }
 
-    async updateBike ({ id, token, name }:{id:any, token: string, name: string }) {
+    async updateBike ({ id, name }:{id:any, name: string }) {
         const bike = new CargoBike();
         bike.id = id;
-        bike.description = token;
+        bike.description = 'text';
         bike.name = name;
         await this.connection.manager.save(bike);
         return {
             success: true,
-            message: token,
+            message: 'bla',
             bike: {
                 id,
                 name
