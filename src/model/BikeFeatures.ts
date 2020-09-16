@@ -1,14 +1,16 @@
 import { Column } from 'typeorm';
 
 export abstract class Bike {
-    @Column()
+    @Column({
+        nullable: true
+    })
     description: string;
 
     @Column()
     modelName: string;
 
     @Column()
-    numerOfWheels: number;
+    numberOfWheels: number;
 
     @Column()
     forCargo: boolean;
@@ -60,12 +62,18 @@ export abstract class Bike {
     @Column()
     bikeLength: number;
 
-    @Column()
+    @Column({
+        nullable: true
+    })
     bikeWidth: number;
 
-    @Column()
+    @Column({
+        nullable: true
+    })
     bikeHeight: number;
 
-    @Column()
+    @Column({
+        nullable: true
+    })
     bikeWeight: number;
 }

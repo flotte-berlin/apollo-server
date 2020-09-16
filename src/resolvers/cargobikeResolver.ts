@@ -3,7 +3,7 @@ import { GraphQLError } from 'graphql';
 
 export default {
     Query: {
-        CargobikeById: (_: any, { id }:{id: any}, { dataSources, req }:{dataSources: any, req: any }) => {
+        cargobikeById: (_: any, { id }:{id: any}, { dataSources, req }:{dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.ReadBike)) {
                 return dataSources.cargoBikeAPI.findCargoBikeById({ id });
             } else {
@@ -15,6 +15,13 @@ export default {
         addBike: (_: any, { id, name }:{id: any, name:string}, { dataSources, req }:{dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.WriteBike)) {
                 return dataSources.cargoBikeAPI.updateBike({ id, name });
+            } else {
+                throw new GraphQLError('Insufficient Permissions');
+            }
+        },
+        cargoBike: (_: any, { cargoBike }: { cargoBike: any }, { dataSources, req }:{dataSources: any, req: any }) => {
+            if (req.permissions.includes(Permission.WriteBike)) {
+                return dataSources.cargoBikeAPI.updateCargoBike({ cargoBike });
             } else {
                 throw new GraphQLError('Insufficient Permissions');
             }

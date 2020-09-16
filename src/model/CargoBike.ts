@@ -11,14 +11,14 @@ import { Taxes } from './Taxes';
 import { Equipment } from './Equipment';
 
 export enum Group {
-    KL,
-    LI,
-    SP,
-    FK,
-    MH,
-    SZ,
-    TS,
-    TK
+    KL = 'KL',
+    LI = 'LI',
+    SP = 'SP',
+    FK = 'FK',
+    MH = 'MH',
+    SZ = 'SZ',
+    TS = 'TS',
+    TK = 'TK'
 }
 
 export enum StickerBikeNameState {
@@ -35,14 +35,14 @@ export class CargoBike extends Bike {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column()
+    @Column({
+        type: 'enum',
+        enum: Group
+    })
     group: Group;
 
     @Column()
     name: string;
-
-    @Column()
-    serialNo: string;
 
     @OneToMany(type => Equipment, equipment => equipment.cargoBike, {
         nullable: true
@@ -50,9 +50,10 @@ export class CargoBike extends Bike {
     equipment: Equipment[];
 
     @Column({
+        type: 'simple-array',
         nullable: true
     })
-    otherEquipment: string;
+    otherEquipment: string[];
 
     @OneToMany(type => ChainSwap, chainSwap => chainSwap.cargoBike, {
         nullable: true
@@ -63,16 +64,24 @@ export class CargoBike extends Bike {
     @Column()
     frameNumber: string;
 
-    @Column()
+    @Column({
+        nullable: true
+    })
     keyNoFrameLock: string;
 
-    @Column()
+    @Column({
+        nullable: true
+    })
     keyNoAXAChain: string;
 
-    @Column()
+    @Column({
+        nullable: true
+    })
     policeCodeing: string;
 
-    @Column()
+    @Column({
+        nullable: true
+    })
     adfsCoding: string;
 
     @Column({
@@ -89,7 +98,9 @@ export class CargoBike extends Bike {
     })
     provider: Provider;
 
-    @ManyToOne(type => Participant, participant => participant.cargoBikes)
+    @ManyToOne(type => Participant, participant => participant.cargoBikes, {
+        nullable: true
+    })
     coordinator: Participant;
 
     @Column(type => InsuranceData)
