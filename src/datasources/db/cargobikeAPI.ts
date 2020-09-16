@@ -1,6 +1,7 @@
 import { DataSource } from 'apollo-datasource';
 import { getConnection, Connection } from 'typeorm';
 import { CargoBike } from '../../model/CargoBike';
+import { GraphQLError } from 'graphql';
 /**
  * extended datasource to feed resolvers with data about cargoBikes
  */
@@ -53,32 +54,18 @@ export class CargoBikeAPI extends DataSource {
                     .set({ name: bike.name })
                     .where('id = :id', { id: bike.id })
                     .execute();
-                return {
-                    success: true
-                };
+                return bike;
             } else {
-                return {
-                    success: false,
-                    message: 'no bike with given id ' + cargoBike.id + ' found.'
-                };
+                return new GraphQLError('ID not in database');
             }
         } else {
             // create new bike
             await this.connection.manager.createQueryBuilder()
                 .insert()
                 .into(CargoBike)
-                .values([{
-                    modelName: cargoBike.modelName,
-                    numberOfWheels: cargoBike.numberOfWheels,
-                    forCargo: cargoBike.forCargo,
-                    forChildren: cargoBike.forChildren
-                }
-                ])
+                .values([cargoBike])
                 .execute();
-            return {
-                success: true,
-                message: 'new entry'
-            };
+            return cargoBike;
         }
     }
 }

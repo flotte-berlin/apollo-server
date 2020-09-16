@@ -14,12 +14,12 @@ type CargoBike {
     numberOfWheels: Int
     forCargo: Boolean
     forChildren: Boolean
-    numberOfChildren: Int
+    numberOfChildren: Int!
     """
     Safety is a custom type, that stores information about security features.
     TODO: Should this be calles Security?
     """
-    security: Security
+    security: Security!
     """
     Does not refere to an extra table in the database.
     """
@@ -56,7 +56,26 @@ type InsuranceData {
     noPnP: String!
     "eg. Anbieter, flotte, eigenleistung"
     maintananceResponsible: String!
-    maintanceBenefector: String!
+    maintananceBenefactor: String!
+    maintananceAgreement: String
+    hasFixedRate: Boolean!
+    fixedRate: Float
+    "Projektzuschuss"
+    projectAllowance: Float
+    notes: String
+}
+
+input InsuranceDataInput {
+    """
+    Eventuelly, this field will become an enum or a seperate data table and user can choose from a pool of insurance companies.
+    """
+    name: String!
+    benefactor: String!
+    billing: String!
+    noPnP: String!
+    "eg. Anbieter, flotte, eigenleistung"
+    maintananceResponsible: String!
+    maintananceBenefactor: String!
     maintananceAgreement: String
     hasFixedRate: Boolean!
     fixedRate: Float
@@ -121,7 +140,12 @@ type  Participant {
 }
 
 type Taxes {
-    costCenter: String
+    costCenter: String!
+    organizationArea: OrganizationArea
+}
+
+input TaxesInput {
+    costCenter: String!
     organizationArea: OrganizationArea
 }
 
@@ -184,7 +208,7 @@ enum BikeEventType {
 type DimensionsAndLoad {
     hasCoverBox: Boolean!
     lockable: Boolean!
-    boxLenght: Float!
+    boxLength: Float!
     boxWidth: Float!
     boxHeight: Float!
     maxWeightBox: Float!
@@ -199,7 +223,7 @@ type DimensionsAndLoad {
 input DimensionsAndLoadInput {
     hasCoverBox: Boolean!
     lockable: Boolean!
-    boxLenght: Float!
+    boxLength: Float!
     boxWidth: Float!
     boxHeight: Float!
     maxWeightBox: Float!
@@ -217,16 +241,16 @@ This should be 1-1 Relation with the CargoBike.
 So no id needed for mutation. One Mutation for the CargoBike will be enough.
 """
 type TechnicalEquipment {
-    bicycleShift: String
-    isEBike: Boolean
-    hasLightingSystem: Boolean
+    bicycleShift: String!
+    isEBike: Boolean!
+    hasLightSystem: Boolean!
     specialFeatures: String
 }
 
 input TechnicalEquipmentInput {
-    bicycleShift: String
-    isEBike: Boolean
-    hasLightingSystem: Boolean
+    bicycleShift: String!
+    isEBike: Boolean!
+    hasLightSystem: Boolean!
     specialFeatures: String
 }
 
@@ -351,12 +375,6 @@ type Query {
     contactInformation: [ContactInformation]!
 }
 
-type UpdateBikeResponse {
-    success: Boolean!
-    message: String
-    cargoBike: CargoBike
-}
-
 input CargoBikeInput {
     "if null, then new bike will be created, else old bike will be updated."
     id: ID
@@ -372,22 +390,25 @@ input CargoBikeInput {
     Safety is a custom type, that stores information about security features.
     TODO: Should this be calles Security?
     """
-    security: SecurityInput
+    security: SecurityInput!
     """
     Does not refere to an extra table in the database.
     """
-    technicalEquipment: TechnicalEquipmentInput
+    technicalEquipment: TechnicalEquipmentInput!
     """
     Does not refere to an extra table in the database.
     """
-    dimensionsAndLoad: DimensionsAndLoadInput
+    dimensionsAndLoad: DimensionsAndLoadInput!
     "Refers to equipment that is not unique. See kommentierte info tabelle -> Fragen -> Frage 2"
     otherEquipment: [String]
+
     "Sticker State"
     stickerBikeNameState: StickerBikeNameState
     note: String
     provider: String
-    insuranceData: String
+    insuranceData: InsuranceDataInput!
+    taxes: TaxesInput
+
 }
 
 input SecurityInput {
@@ -400,9 +421,9 @@ input SecurityInput {
 
 type Mutation {
     "for testing"
-    addBike(id: ID!, name: String): UpdateBikeResponse!
+    addBike(id: ID!, name: String): CargoBike!
     "if id: null, then new bike will be created, else old bike will be updated"
-    cargoBike(cargoBike: CargoBikeInput!): UpdateBikeResponse!
+    cargoBike(cargoBike: CargoBikeInput!): CargoBike!
 }
 
 `;

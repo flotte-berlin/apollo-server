@@ -30,6 +30,31 @@ export enum StickerBikeNameState {
     UNKNOWN
 }
 
+export class Security {
+    @Column()
+    frameNumber: string;
+
+    @Column({
+        nullable: true
+    })
+    keyNoFrameLock: string;
+
+    @Column({
+        nullable: true
+    })
+    keyNoAXAChain: string;
+
+    @Column({
+        nullable: true
+    })
+    policeCodeing: string;
+
+    @Column({
+        nullable: true
+    })
+    adfsCoding: string;
+}
+
 @Entity()
 export class CargoBike extends Bike {
     @PrimaryGeneratedColumn()
@@ -61,36 +86,19 @@ export class CargoBike extends Bike {
     chainSwaps: ChainSwap[]
 
     // Security information
-    @Column()
-    frameNumber: string;
-
-    @Column({
-        nullable: true
-    })
-    keyNoFrameLock: string;
-
-    @Column({
-        nullable: true
-    })
-    keyNoAXAChain: string;
-
-    @Column({
-        nullable: true
-    })
-    policeCodeing: string;
-
-    @Column({
-        nullable: true
-    })
-    adfsCoding: string;
+    @Column(type => Security)
+    security: Security;
 
     @Column({
         type: 'enum',
-        enum: StickerBikeNameState
+        enum: StickerBikeNameState,
+        nullable: true
     })
     stickerBikeNameState: StickerBikeNameState;
 
-    @Column()
+    @Column({
+        nullable: true
+    })
     note: string;
 
     @ManyToOne(type => Provider, {

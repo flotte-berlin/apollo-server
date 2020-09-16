@@ -5,21 +5,21 @@ export class InsuranceData {
     name: string;
 
     @Column()
-    benefector: string;
+    benefactor: string;
 
     @Column()
     noPnP: string;
 
     @Column()
-    maintananceResponisble: string;
+    maintananceResponsible: string;
 
     @Column()
-    maintanceBenfector: string;
+    maintananceBenefactor: string;
 
     @Column({
         nullable: true
     })
-    maintanceAgreement: string;
+    maintananceAgreement: string;
 
     @Column({
         nullable: true
