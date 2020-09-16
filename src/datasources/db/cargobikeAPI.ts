@@ -38,6 +38,11 @@ export class CargoBikeAPI extends DataSource {
         };
     }
 
+    /**
+     * Creates or Updates CargoBike
+     * Will create bike, if no id given, else it will update bike with given id.
+     * @param param0 cargoBike to be updated or created
+     */
     async updateCargoBike ({ cargoBike }:{ cargoBike: any }) {
         if (cargoBike.id) {
             // update bike with given id
@@ -51,21 +56,30 @@ export class CargoBikeAPI extends DataSource {
                 await this.connection
                     .createQueryBuilder()
                     .update(CargoBike)
-                    .set({ name: bike.name })
+                    .set({ ...cargoBike })
                     .where('id = :id', { id: bike.id })
                     .execute();
-                return bike;
+                return await this.connection
+                    .createQueryBuilder()
+                    .select('cargoBike')
+                    .from(CargoBike, 'cargoBike')
+                    .where('cargoBike.id = :id', { id: bike.id })
+                    .getOne();
             } else {
                 return new GraphQLError('ID not in database');
             }
         } else {
             // create new bike
-            await this.connection.manager.createQueryBuilder()
+            const inserts = await this.connection.manager
+                .createQueryBuilder()
                 .insert()
                 .into(CargoBike)
                 .values([cargoBike])
+                .returning('*')
                 .execute();
-            return cargoBike;
+            const newbike = inserts.generatedMaps[0];
+            newbike.id = inserts.identifiers[0].id;
+            return newbike;
         }
     }
 }

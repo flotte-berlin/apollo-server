@@ -8,6 +8,9 @@ export class InsuranceData {
     benefactor: string;
 
     @Column()
+    billing: string;
+
+    @Column()
     noPnP: string;
 
     @Column()

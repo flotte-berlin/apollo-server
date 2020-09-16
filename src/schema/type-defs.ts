@@ -27,7 +27,7 @@ type CargoBike {
     """
     Does not refere to an extra table in the database.
     """
-    dimensionsAndLoad: DimensionsAndLoad
+    dimensionsAndLoad: DimensionsAndLoad!
     events: [BikeEvent]
     equipment: [Equipment]
     "Refers to equipment that is not unique. See kommentierte info tabelle -> Fragen -> Frage 2"
@@ -327,23 +327,18 @@ type LendingStation {
     loanPeriods: [LoanPeriod]!
 }
 
-"(dt. Ausleihzeiten)"
+"""
+(dt. Ausleihzeiten)
+"""
 type LoanTimes {
-    notes: String
-    mof: String
-    mot: String
-    tuf: String
-    tut: String
-    wef: String
-    wet: String
-    thf: String
-    tht: String
-    frf: String
-    frt: String
-    saf: String
-    sat: String
-    suf: String
-    sut: String
+    generalRemark: String
+    "notes for each day of the week, starting on Monday"
+    notes: [String]
+    """
+    Loan times from and until for each day of the week.
+    Starting with Monday from, Monday to, Tuesday from, ..., Sunday to 
+    """
+    times: [String]
 }
 
 "(dt. Zeitscheibe)"
