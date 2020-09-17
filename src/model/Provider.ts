@@ -5,6 +5,17 @@ import { ContactInformation } from './ContactInformation';
 import { LendingStation } from './LendingStation';
 import { Organization } from './Organization';
 
+export class Address {
+    @Column()
+    street: string;
+
+    @Column()
+    number: string;
+
+    @Column()
+    zip: string;
+}
+
 @Entity()
 export class Provider {
     @PrimaryGeneratedColumn()
@@ -18,14 +29,8 @@ export class Provider {
     })
     formularName: String;
 
-    @Column()
-    street: string;
-
-    @Column()
-    number: string;
-
-    @Column()
-    zip: string;
+    @Column(type => Address)
+    address: Address;
 
     @OneToMany(type => ContactInformation, contactInformation => contactInformation.provider)
     contactInformation: ContactInformation[];

@@ -3,11 +3,18 @@ import { GraphQLError } from 'graphql';
 
 export default {
     Query: {
-        cargobikeById: (_: any, { id }:{id: any}, { dataSources, req }:{dataSources: any, req: any }) => {
+        cargoBikeById: (_: any, { id }:{id: any}, { dataSources, req }:{dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.ReadBike)) {
                 return dataSources.cargoBikeAPI.findCargoBikeById({ id });
             } else {
                 return new GraphQLError('Insufficient Permissions');
+            }
+        },
+        cargoBikes: (_: any, __: any, { dataSources, req }: { dataSources: any, req: any }) => {
+            if (req.permissions.includes(Permission.ReadBike)) {
+                return dataSources.cargoBikeAPI.getCargoBikes();
+            } else {
+                return new GraphQLError('Insufficiant Permissions');
             }
         }
     },
@@ -19,7 +26,14 @@ export default {
                 return new GraphQLError('Insufficient Permissions');
             }
         },
-        cargoBike: (_: any, { cargoBike }: { cargoBike: any }, { dataSources, req }:{dataSources: any, req: any }) => {
+        createCargoBike: (_: any, { cargoBike }: { cargoBike: any }, { dataSources, req }:{dataSources: any, req: any }) => {
+            if (req.permissions.includes(Permission.WriteBike)) {
+                return dataSources.cargoBikeAPI.createCargoBike({ cargoBike });
+            } else {
+                return new GraphQLError('Insufficient Permissions');
+            }
+        },
+        updateCargoBike: (_: any, { cargoBike }: { cargoBike: any }, { dataSources, req }:{dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.WriteBike)) {
                 return dataSources.cargoBikeAPI.updateCargoBike({ cargoBike });
             } else {
