@@ -46,9 +46,7 @@ type CargoBike {
     lockedUntil: Date
 }
 
-input CargoBikeInput {
-    "if null, then new bike will be created, else old bike will be updated."
-    id: ID
+input CargoBikeCreateInput {
     "see column A in info tabelle"
     group: Group!
     name: String!
@@ -61,15 +59,15 @@ input CargoBikeInput {
     Safety is a custom type, that stores information about security features.
     TODO: Should this be calles Security?
     """
-    security: SecurityInput!
+    security: SecurityCreateInput!
     """
     Does not refere to an extra table in the database.
     """
-    technicalEquipment: TechnicalEquipmentInput!
+    technicalEquipment: TechnicalEquipmentCreateInput!
     """
     Does not refere to an extra table in the database.
     """
-    dimensionsAndLoad: DimensionsAndLoadInput!
+    dimensionsAndLoad: DimensionsAndLoadCreateInput!
     "Refers to equipment that is not unique. See kommentierte info tabelle -> Fragen -> Frage 2"
     otherEquipment: [String]
 
@@ -77,8 +75,42 @@ input CargoBikeInput {
     stickerBikeNameState: StickerBikeNameState
     note: String
     provider: String
-    insuranceData: InsuranceDataInput!
-    taxes: TaxesInput
+    insuranceData: InsuranceDataCreateInput!
+    taxes: TaxesCreateInput
+}
+
+input CargoBikeUpdateInput {
+    id: ID!
+    "see column A in info tabelle"
+    group: Group
+    name: String
+    modelName: String
+    numberOfWheels: Int
+    forCargo: Boolean
+    forChildren: Boolean
+    numberOfChildren: Int
+    """
+    Safety is a custom type, that stores information about security features.
+    TODO: Should this be calles Security?
+    """
+    security: SecurityUpdateInput
+    """
+    Does not refere to an extra table in the database.
+    """
+    technicalEquipment: TechnicalEquipmentUpdateInput
+    """
+    Does not refere to an extra table in the database.
+    """
+    dimensionsAndLoad: DimensionsAndLoadUpdateInput
+    "Refers to equipment that is not unique. See kommentierte info tabelle -> Fragen -> Frage 2"
+    otherEquipment: [String]
+
+    "Sticker State"
+    stickerBikeNameState: StickerBikeNameState
+    note: String
+    provider: String
+    insuranceData: InsuranceDataUpdateInput
+    taxes: TaxesUpdateInput
 }
 
 type InsuranceData {
@@ -100,7 +132,7 @@ type InsuranceData {
     notes: String
 }
 
-input InsuranceDataInput {
+input InsuranceDataCreateInput {
     """
     Eventuelly, this field will become an enum or a seperate data table and user can choose from a pool of insurance companies.
     """
@@ -111,6 +143,25 @@ input InsuranceDataInput {
     "eg. Anbieter, flotte, eigenleistung"
     maintananceResponsible: String!
     maintananceBenefactor: String!
+    maintananceAgreement: String
+    hasFixedRate: Boolean!
+    fixedRate: Float
+    "Projektzuschuss"
+    projectAllowance: Float
+    notes: String
+}
+
+input InsuranceDataUpdateInput {
+    """
+    Eventuelly, this field will become an enum or a seperate data table and user can choose from a pool of insurance companies.
+    """
+    name: String
+    benefactor: String
+    billing: String
+    noPnP: String
+    "eg. Anbieter, flotte, eigenleistung"
+    maintananceResponsible: String
+    maintananceBenefactor: String
     maintananceAgreement: String
     hasFixedRate: Boolean!
     fixedRate: Float
@@ -179,8 +230,13 @@ type Taxes {
     organizationArea: OrganizationArea
 }
 
-input TaxesInput {
+input TaxesCreateInput {
     costCenter: String!
+    organizationArea: OrganizationArea
+}
+
+input TaxesUpdateInput {
+    costCenter: String
     organizationArea: OrganizationArea
 }
 
@@ -255,7 +311,7 @@ type DimensionsAndLoad {
     bikeWeight: Float
 }
 
-input DimensionsAndLoadInput {
+input DimensionsAndLoadCreateInput {
     hasCoverBox: Boolean!
     lockable: Boolean!
     boxLength: Float!
@@ -265,6 +321,21 @@ input DimensionsAndLoadInput {
     maxWeightLuggageRack: Float!
     maxWeightTotal: Float!
     bikeLength: Float!
+    bikeWidth: Float
+    bikeHeight: Float
+    bikeWeight: Float
+}
+
+input DimensionsAndLoadUpdateInput {
+    hasCoverBox: Boolean
+    lockable: Boolean
+    boxLength: Float
+    boxWidth: Float
+    boxHeight: Float
+    maxWeightBox: Float
+    maxWeightLuggageRack: Float
+    maxWeightTotal: Float
+    bikeLength: Float
     bikeWidth: Float
     bikeHeight: Float
     bikeWeight: Float
@@ -282,10 +353,17 @@ type TechnicalEquipment {
     specialFeatures: String
 }
 
-input TechnicalEquipmentInput {
+input TechnicalEquipmentCreateInput {
     bicycleShift: String!
     isEBike: Boolean!
     hasLightSystem: Boolean!
+    specialFeatures: String
+}
+
+input TechnicalEquipmentUpdateInput {
+    bicycleShift: String
+    isEBike: Boolean
+    hasLightSystem: Boolean
     specialFeatures: String
 }
 
@@ -302,8 +380,16 @@ type Security {
     adfcCoding: String
 }
 
-input SecurityInput {
+input SecurityCreateInput {
     frameNumber: String!
+    keyNumberFrameLock: String
+    keyNumberAXAChain: String
+    policeCoding: String
+    adfcCoding: String
+}
+
+input SecurityUpdateInput {
+    frameNumber: String
     keyNumberFrameLock: String
     keyNumberAXAChain: String
     policeCoding: String
@@ -346,8 +432,21 @@ type ContactInformation {
     note: String
 }
 
-input ContactInformationInput {
-    id: ID
+input ContactInformationCreateInput {
+    name: String
+    firstName: String
+    retiredAt: Date
+    phoneExtern: String
+    phone2Extern: String
+    phoneIntern: String
+    phone2Intern: String
+    emailExtern: String
+    emailIntern: String
+    note: String
+}
+
+input ContactInformationUpdateInput {
+    id: ID!
     name: String
     firstName: String
     retiredAt: Date
@@ -382,13 +481,21 @@ type LendingStation {
     loanPeriods: [LoanPeriod]!
 }
 
-input LendingStationInput {
-    id: ID
-    name: String
-    contactInformation: [ContactInformationInput]
-    address: AddressInput
+input LendingStationCreateInput {
+    name: String!
+    contactInformation: [ContactInformationCreateInput]!
+    address: AddressCreateInput!
     loanTimes: LoanTimesInput
-    loanPeriods: [LoanPeriodInput]
+    loanPeriods: [LoanPeriodCreateInput]!
+}
+
+input LendingStationUpdateInput {
+    id: ID!
+    name: String
+    contactInformation: [ContactInformationUpdateInput]
+    address: AddressUpdateInput
+    loanTimes: LoanTimesInput
+    loanPeriods: [LoanPeriodUpdateInput]
 }
 
 """
@@ -426,17 +533,25 @@ type LoanPeriod {
     from: Date!
     to: Date
     note: String
-    lendingstation: LendingStation!
-    cargobike: CargoBike!
+    lendingStation: LendingStation!
+    cargoBike: CargoBike!
 }
 
-input LoanPeriodInput {
-    id: ID
+input LoanPeriodCreateInput {
     from: Date
     to: Date
     note: String
-    lendingstationID: Int!
-    cargobikeID: Int!
+    lendingStationID: LendingStationCreateInput
+    cargoBikeID: CargoBikeCreateInput
+}
+
+input LoanPeriodUpdateInput {
+    id: ID!
+    from: Date
+    to: Date
+    note: String
+    lendingStation: LendingStationUpdateInput
+    cargoBike: CargoBikeUpdateInput
 }
 
 type Address {
@@ -445,17 +560,23 @@ type Address {
     zip: String!
 }
 
-input AddressInput {
+input AddressCreateInput {
     street: String!
     number: String!
     zip: String!
 }
 
+input AddressUpdateInput {
+    street: String
+    number: String
+    zip: String
+}
+
 type Query {
-    cargobikeById(id:ID!): CargoBike
+    cargoBikeById(id:ID!): CargoBike
     "!!!!"
-    cargobikes: [CargoBike]!
-    cargobikesByProvider(providerId:ID!): [CargoBike]!
+    cargoBikes: [CargoBike]!
+    cargoBikesByProvider(providerId:ID!): [CargoBike]!
     providerById(id:ID!): Provider
     providers: [Provider]!
     participantById(id:ID!):  Participant
@@ -468,10 +589,14 @@ type Query {
 type Mutation {
     "for testing"
     addBike(id: ID!, name: String): CargoBike!
-    "if id: null, then new bike will be created, else old bike will be updated"
-    cargoBike(cargoBike: CargoBikeInput!): CargoBike!
-    "if id: null, then new lending station will be created, else existing one will be updated"
-    lendingStation(lendingStation: LendingStationInput): LendingStation!
+    "creates new cargoBike and returns cargobike with new ID"
+    createCargoBike(cargoBike: CargoBikeCreateInput!): CargoBike!
+    "updates cargoBike of given ID with supplied fields and returns updated cargoBike"
+    updateCargoBike(cargoBike: CargoBikeUpdateInput!): CargoBike!
+    "creates new lendingStation and returns lendingStation with new ID"
+    createLendingStation(lendingStation: LendingStationCreateInput): LendingStation!
+    "updates lendingStation of given ID with supplied fields and returns updated lendingStation"
+    updateLendingStation(lendingstation: LendingStationUpdateInput!): LendingStation!
 }
 
 `;

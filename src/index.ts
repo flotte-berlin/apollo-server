@@ -20,6 +20,8 @@ import { Organization } from './model/Organization';
 import { Provider } from './model/Provider';
 import { Engagement } from './model/Engagement';
 import { Workshop } from './model/Workshop';
+import { LendingStationAPI } from './datasources/db/lendingstationAPI';
+import lendingstationResolvers from './resolvers/lendingstationResolvers';
 
 require('dotenv').config();
 
@@ -77,10 +79,14 @@ createConnection({
 const userAPI = new UserServerAPI(process.env.RPC_HOST);
 
 const server = new ApolloServer({
-    resolvers: [bikeresolver],
+    resolvers: [
+        bikeresolver,
+        lendingstationResolvers
+    ],
     typeDefs,
     dataSources: () => ({
         cargoBikeAPI: new CargoBikeAPI(),
+        lendingStationAPI: new LendingStationAPI(),
         userAPI
     }),
     context: (req: any) => {

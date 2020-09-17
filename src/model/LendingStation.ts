@@ -3,6 +3,7 @@ import { ContactInformation } from './ContactInformation';
 import { LoanPeriod } from './LoanPeriod';
 import { CargoBike } from './CargoBike';
 import { Organization } from './Organization';
+import { Address } from './Provider';
 
 @Entity()
 export class LendingStation {
@@ -16,14 +17,8 @@ export class LendingStation {
     @JoinTable()
     contactInformation: ContactInformation[];
 
-    @Column()
-    addressStreet: string;
-
-    @Column()
-    addressStreetNo: string;
-
-    @Column()
-    addressZip: string;
+    @Column(type => Address)
+    address: Address;
 
     @OneToMany(type => LoanPeriod, loanPeriod => loanPeriod.lendingStation)
     loanPeriods: LoanPeriod[];

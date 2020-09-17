@@ -6,9 +6,16 @@ export default {
     Query: {
     },
     Mutation: {
-        lendingStation: (_: any, { lendingStation }:{ lendingStation: LendingStation }, { dataSources, req }:{dataSources: any, req: any }) => {
+        createLendingStation: (_: any, { lendingStation }:{ lendingStation: LendingStation }, { dataSources, req }:{dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.WriteBike)) {
-                return new GraphQLError('Not implemented');
+                return dataSources.lendingStationAPI.createLendingStation({ lendingStation });
+            } else {
+                return new GraphQLError('Insufficient Permissions');
+            }
+        },
+        updateLendingStation: (_: any, { lendingStation }:{ lendingStation: LendingStation }, { dataSources, req }:{dataSources: any, req: any }) => {
+            if (req.permissions.includes(Permission.WriteBike)) {
+                return dataSources.lendingStationAPI.updateLendingStation({ lendingStation });
             } else {
                 return new GraphQLError('Insufficient Permissions');
             }
