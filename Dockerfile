@@ -3,6 +3,8 @@ WORKDIR /
 
 COPY ./src /src
 COPY ./package*.json ./
+COPY ./gulpfile.js ./
+COPY ./tsconfig.json ./
 RUN npm install
 RUN npm install -g gulp
 RUN npm install gulp
