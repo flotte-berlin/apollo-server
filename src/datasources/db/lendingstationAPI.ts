@@ -10,6 +10,30 @@ export class LendingStationAPI extends DataSource {
         this.connection = getConnection();
     }
 
+    async getLendingStationById ({ id }: { id: any }) {
+        return await this.connection.manager
+            .createQueryBuilder()
+            .select('lendingStation')
+            .from(LendingStation, 'lendingStation')
+            .where('lendingStation.id = :id', { id: id })
+            .getOne();
+    }
+
+    /**
+     * get all lendingStations
+     */
+    async getLendingStations () {
+        return await this.connection.manager
+            .createQueryBuilder()
+            .select('lendingStation')
+            .from(LendingStation, 'lendingStation')
+            .getMany() || new GraphQLError('Internal Server Error: could not query data from table lendingStation');
+    }
+
+    /**
+     * creates new lendingStation and returns new lendingStation with its new id
+     * @param param0 new lendingStation
+     */
     async createLendingStation ({ lendingStation }:{ lendingStation: any }) {
         console.log(lendingStation);
         const inserts = await this.connection.manager
@@ -24,6 +48,10 @@ export class LendingStationAPI extends DataSource {
         return newLendingStaion;
     }
 
+    /**
+     * updates lendingStation and return updated lendingStation
+     * @param param0 lendingStation to be updated
+     */
     async updateLendingStation ({ lendingStation }:{ lendingStation: any }) {
         const oldLendingStation = await this.connection.manager.createQueryBuilder()
             .select('lendingStation')
@@ -37,12 +65,7 @@ export class LendingStationAPI extends DataSource {
                 .set({ ...lendingStation })
                 .where('id = :id', { id: lendingStation.id })
                 .execute();
-            return await this.connection
-                .createQueryBuilder()
-                .select('lendingStation')
-                .from(LendingStation, 'lendingStation')
-                .where('lendingStation.id = :id', { id: lendingStation.id })
-                .getOne();
+            return this.getLendingStationById({ id: lendingStation.id });
         } else {
             return new GraphQLError('ID not in database');
         }

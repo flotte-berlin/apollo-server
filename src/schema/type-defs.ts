@@ -574,8 +574,9 @@ input AddressUpdateInput {
 
 type Query {
     cargoBikeById(id:ID!): CargoBike
-    "!!!!"
+    "returns all cargoBikes"
     cargoBikes: [CargoBike]!
+    "not important, you can just use providerById {cargoBikes}"
     cargoBikesByProvider(providerId:ID!): [CargoBike]!
     providerById(id:ID!): Provider
     providers: [Provider]!
