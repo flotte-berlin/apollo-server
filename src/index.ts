@@ -18,6 +18,8 @@ import { LoanPeriod } from './model/LoanPeriod';
 import { Participant } from './model/Participant';
 import { Organization } from './model/Organization';
 import { Provider } from './model/Provider';
+import { Engagement } from './model/Engagement';
+import { Workshop } from './model/Workshop';
 
 require('dotenv').config();
 
@@ -62,7 +64,9 @@ createConnection({
         LoanPeriod,
         Organization,
         Participant,
-        Provider
+        Provider,
+        Engagement,
+        Workshop
     ],
     synchronize: true,
     logging: false

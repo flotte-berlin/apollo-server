@@ -9,6 +9,7 @@ import { LoanPeriod } from './LoanPeriod';
 import { LendingStation } from './LendingStation';
 import { Taxes } from './Taxes';
 import { Equipment } from './Equipment';
+import { Engagement } from './Engagement';
 
 export enum Group {
     KL = 'KL',
@@ -124,6 +125,9 @@ export class CargoBike extends Bike {
         nullable: true
     })
     lendingStation: LendingStation;
+
+    @OneToMany(type => Engagement, engagement => engagement.cargoBike)
+    engagement: Engagement[];
 
     @Column(type => Taxes)
     taxes: Taxes;

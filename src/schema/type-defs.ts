@@ -46,6 +46,41 @@ type CargoBike {
     lockedUntil: Date
 }
 
+input CargoBikeInput {
+    "if null, then new bike will be created, else old bike will be updated."
+    id: ID
+    "see column A in info tabelle"
+    group: Group!
+    name: String!
+    modelName: String!
+    numberOfWheels: Int!
+    forCargo: Boolean!
+    forChildren: Boolean!
+    numberOfChildren: Int!
+    """
+    Safety is a custom type, that stores information about security features.
+    TODO: Should this be calles Security?
+    """
+    security: SecurityInput!
+    """
+    Does not refere to an extra table in the database.
+    """
+    technicalEquipment: TechnicalEquipmentInput!
+    """
+    Does not refere to an extra table in the database.
+    """
+    dimensionsAndLoad: DimensionsAndLoadInput!
+    "Refers to equipment that is not unique. See kommentierte info tabelle -> Fragen -> Frage 2"
+    otherEquipment: [String]
+
+    "Sticker State"
+    stickerBikeNameState: StickerBikeNameState
+    note: String
+    provider: String
+    insuranceData: InsuranceDataInput!
+    taxes: TaxesInput
+}
+
 type InsuranceData {
     """
     Eventuelly, this field will become an enum or a seperate data table and user can choose from a pool of insurance companies.
@@ -267,6 +302,14 @@ type Security {
     adfcCoding: String
 }
 
+input SecurityInput {
+    frameNumber: String!
+    keyNumberFrameLock: String
+    keyNumberAXAChain: String
+    policeCoding: String
+    adfcCoding: String
+}
+
 enum StickerBikeNameState {
     OK
     IMPROVE
@@ -300,12 +343,24 @@ type ContactInformation {
     phone2Intern: String
     emailExtern: String
     emailIntern: String
- 
     note: String
-
 }
 
-type Organisation{
+input ContactInformationInput {
+    id: ID
+    name: String
+    firstName: String
+    retiredAt: Date
+    phoneExtern: String
+    phone2Extern: String
+    phoneIntern: String
+    phone2Intern: String
+    emailExtern: String
+    emailIntern: String
+    note: String
+}
+
+type Organisation {
     id: ID!
     "(dt. Ausleihstation)"
     lendingStations: [LendingStation]
@@ -322,9 +377,18 @@ type LendingStation {
     id: ID!
     name: String!
     contactInformation: [ContactInformation]!
-    address: Address
+    address: Address!
     loanTimes: LoanTimes
     loanPeriods: [LoanPeriod]!
+}
+
+input LendingStationInput {
+    id: ID
+    name: String
+    contactInformation: [ContactInformationInput]
+    address: AddressInput
+    loanTimes: LoanTimesInput
+    loanPeriods: [LoanPeriodInput]
 }
 
 """
@@ -341,8 +405,23 @@ type LoanTimes {
     times: [String]
 }
 
+"""
+(dt. Ausleihzeiten)
+"""
+input LoanTimesInput {
+    generalRemark: String
+    "notes for each day of the week, starting on Monday"
+    notes: [String]
+    """
+    Loan times from and until for each day of the week.
+    Starting with Monday from, Monday to, Tuesday from, ..., Sunday to 
+    """
+    times: [String]
+}
+
+
 "(dt. Zeitscheibe)"
-type LoanPeriod{
+type LoanPeriod {
     id: ID!
     from: Date!
     to: Date
@@ -351,14 +430,30 @@ type LoanPeriod{
     cargobike: CargoBike!
 }
 
+input LoanPeriodInput {
+    id: ID
+    from: Date
+    to: Date
+    note: String
+    lendingstationID: Int!
+    cargobikeID: Int!
+}
+
 type Address {
-    street: String
-    number: String
-    zip: String
+    street: String!
+    number: String!
+    zip: String!
+}
+
+input AddressInput {
+    street: String!
+    number: String!
+    zip: String!
 }
 
 type Query {
     cargobikeById(id:ID!): CargoBike
+    "!!!!"
     cargobikes: [CargoBike]!
     cargobikesByProvider(providerId:ID!): [CargoBike]!
     providerById(id:ID!): Provider
@@ -370,55 +465,13 @@ type Query {
     contactInformation: [ContactInformation]!
 }
 
-input CargoBikeInput {
-    "if null, then new bike will be created, else old bike will be updated."
-    id: ID
-    "see column A in info tabelle"
-    group: Group!
-    name: String!
-    modelName: String!
-    numberOfWheels: Int!
-    forCargo: Boolean!
-    forChildren: Boolean!
-    numberOfChildren: Int!
-    """
-    Safety is a custom type, that stores information about security features.
-    TODO: Should this be calles Security?
-    """
-    security: SecurityInput!
-    """
-    Does not refere to an extra table in the database.
-    """
-    technicalEquipment: TechnicalEquipmentInput!
-    """
-    Does not refere to an extra table in the database.
-    """
-    dimensionsAndLoad: DimensionsAndLoadInput!
-    "Refers to equipment that is not unique. See kommentierte info tabelle -> Fragen -> Frage 2"
-    otherEquipment: [String]
-
-    "Sticker State"
-    stickerBikeNameState: StickerBikeNameState
-    note: String
-    provider: String
-    insuranceData: InsuranceDataInput!
-    taxes: TaxesInput
-
-}
-
-input SecurityInput {
-    frameNumber: String!
-    keyNumberFrameLock: String
-    keyNumberAXAChain: String
-    policeCoding: String
-    adfcCoding: String
-}
-
 type Mutation {
     "for testing"
     addBike(id: ID!, name: String): CargoBike!
     "if id: null, then new bike will be created, else old bike will be updated"
     cargoBike(cargoBike: CargoBikeInput!): CargoBike!
+    "if id: null, then new lending station will be created, else existing one will be updated"
+    lendingStation(lendingStation: LendingStationInput): LendingStation!
 }
 
 `;
