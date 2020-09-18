@@ -9,6 +9,14 @@ export class Equipment {
     @Column()
     serialNo: string;
 
+    @Column()
+    title: string;
+
+    @Column({
+        nullable: true
+    })
+    description: string;
+
     @OneToMany(type => CargoBike, cargoBike => cargoBike.equipment, {
         nullable: true
     })

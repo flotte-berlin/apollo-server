@@ -28,7 +28,7 @@ type CargoBike {
     Does not refere to an extra table in the database.
     """
     dimensionsAndLoad: DimensionsAndLoad!
-    events: [BikeEvent]
+    bikeEvents: [BikeEvent]
     equipment: [Equipment]
     "Refers to equipment that is not unique. See kommentierte info tabelle -> Fragen -> Frage 2"
     otherEquipment: [String]
@@ -76,11 +76,11 @@ input CargoBikeCreateInput {
     note: String
     provider: String
     insuranceData: InsuranceDataCreateInput!
-    taxes: TaxesCreateInput
+    taxes: TaxesCreateInput!
 }
 
 input CargoBikeUpdateInput {
-    id: ID!
+    id: Int!
     "see column A in info tabelle"
     group: Group
     name: String
@@ -272,13 +272,26 @@ type Equipment {
 "An Event is a point in time, when the state of the bike somehow changed."
 type BikeEvent {
     id: ID!
-    eventType: BikeEventType
+    eventType: BikeEventType!
+    cargoBike: CargoBike!
     date: Date!
     note: String
     """
     Path to documents
     """
-    documents: [String]
+    documents: [String]!
+}
+
+input BikeEventCreateInput {
+    eventType: BikeEventType!
+    "it is enough to pass the cargoBike id"
+    cargoBikeId: ID!
+    date: Date!
+    note: String
+    """
+    Path to documents
+    """
+    documents: [String]!
 }
 
 "TODO: Some eventTypes are missing (und auf deutsch)"
@@ -293,6 +306,7 @@ enum BikeEventType {
     INBETRIEBNAHME
     AUSFALL
     WARTUNG
+    ANDERE
 }
 
 "How are the dimensions and how much weight can handle a bike. This data is merged in the CargoBike table and the BikeModel table."
@@ -574,8 +588,8 @@ input AddressUpdateInput {
 
 type Query {
     cargoBikeById(id:ID!): CargoBike
-    "returns all cargoBikes"
-    cargoBikes: [CargoBike]!
+    "returns cargoBikes ordered by name ascending"
+    cargoBikes(offset: Int!, limit: Int!): [CargoBike]!
     "not important, you can just use providerById {cargoBikes}"
     cargoBikesByProvider(providerId:ID!): [CargoBike]!
     providerById(id:ID!): Provider
@@ -585,11 +599,11 @@ type Query {
     lendingStationById(id:ID!): LendingStation
     lendingStations: [LendingStation]!
     contactInformation: [ContactInformation]!
+    "returns BikeEvent with CargoBike"
+    bikeEventById(id:ID!): BikeEvent!
 }
 
 type Mutation {
-    "for testing"
-    addBike(id: ID!, name: String): CargoBike!
     "creates new cargoBike and returns cargobike with new ID"
     createCargoBike(cargoBike: CargoBikeCreateInput!): CargoBike!
     "updates cargoBike of given ID with supplied fields and returns updated cargoBike"
@@ -598,6 +612,8 @@ type Mutation {
     createLendingStation(lendingStation: LendingStationCreateInput): LendingStation!
     "updates lendingStation of given ID with supplied fields and returns updated lendingStation"
     updateLendingStation(lendingstation: LendingStationUpdateInput!): LendingStation!
+    "creates new BikeEvent"
+    createBikeEvent(bikeEvent: BikeEventCreateInput): BikeEvent!
 }
 
 `;

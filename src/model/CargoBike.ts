@@ -1,5 +1,5 @@
 /* eslint no-unused-vars: "off" */
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany, ManyToOne, OneToOne } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany, ManyToOne, JoinColumn } from 'typeorm';
 import { Bike } from './BikeFeatures';
 import { ChainSwap } from './ChainSwap';
 import { Provider } from './Provider';
@@ -10,6 +10,7 @@ import { LendingStation } from './LendingStation';
 import { Taxes } from './Taxes';
 import { Equipment } from './Equipment';
 import { Engagement } from './Engagement';
+import { BikeEvent } from './BikeEvent';
 
 export enum Group {
     KL = 'KL',
@@ -111,6 +112,13 @@ export class CargoBike extends Bike {
         nullable: true
     })
     coordinator: Participant;
+
+    @OneToMany(type => BikeEvent, bikeEvent => bikeEvent.cargoBike, {
+        nullable: true,
+        cascade: true
+    })
+    @JoinColumn()
+    bikeEvents: BikeEvent[];
 
     @Column(type => InsuranceData)
     insuranceData: InsuranceData;

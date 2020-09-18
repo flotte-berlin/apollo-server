@@ -2,8 +2,8 @@
 import { Column } from 'typeorm';
 
 export enum OrganizationArea {
-    IB,
-    ZB
+    IB = 'IB',
+    ZB = 'ZB'
 }
 export class Taxes {
     @Column()
