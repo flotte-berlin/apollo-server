@@ -15,6 +15,7 @@ export class Organization {
     })
     provider: Provider;
 
+    // Court where association was registerd
     @Column({
         nullable: true
     })
