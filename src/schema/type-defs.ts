@@ -266,7 +266,32 @@ type Equipment {
     TODO unclear what this means. tomy fragen
     """
     investable: Boolean
-    name: String
+    title: String!
+    description: String
+    cargoBike: CargoBike
+}
+
+input EquipmentCreateInput {
+    serialNo: String!
+    """
+    TODO unclear what this means. tomy fragen
+    """
+    title: String!
+    description: String
+    investable: Boolean
+    cargoBikeId: ID
+}
+
+input EquipmentUpdateInput {
+    id: ID!
+    serialNo: String
+    """
+    TODO unclear what this means. tomy fragen
+    """
+    title: String
+    description: String
+    investable: Boolean
+    cargoBikeId: ID
 }
 
 "An Event is a point in time, when the state of the bike somehow changed."
@@ -294,7 +319,7 @@ input BikeEventCreateInput {
     documents: [String]!
 }
 
-"TODO: Some eventTypes are missing (und auf deutsch)"
+"TODO: Some eventTypes are missing"
 enum BikeEventType {
     """
     The enum EventType can also be represented as an enum in postgresQL.
@@ -587,12 +612,16 @@ input AddressUpdateInput {
 }
 
 type Query {
+    "Will (evetually) return all properties of cargo bike"
     cargoBikeById(id:ID!): CargoBike
-    "returns cargoBikes ordered by name ascending"
+    "returns cargoBikes ordered by name ascending, relations are not loaded, use cargoBikeById instead"
     cargoBikes(offset: Int!, limit: Int!): [CargoBike]!
     "not important, you can just use providerById {cargoBikes}"
-    cargoBikesByProvider(providerId:ID!): [CargoBike]!
     providerById(id:ID!): Provider
+    "unique equipment with pagination, contains relation to bike (with no further joins), so if you wanna know more about the bike, use cargoBikeById"
+    equipment(offset: Int!, limit: Int!): [Equipment]!
+    "equipment by id, will return null if id not found"
+    equipmentById(id: ID!): Equipment
     providers: [Provider]!
     participantById(id:ID!):  Participant
     participants: [ Participant]!
@@ -608,6 +637,10 @@ type Mutation {
     createCargoBike(cargoBike: CargoBikeCreateInput!): CargoBike!
     "updates cargoBike of given ID with supplied fields and returns updated cargoBike"
     updateCargoBike(cargoBike: CargoBikeUpdateInput!): CargoBike!
+    "creates new peace of unique Equipment, the returned Equipment will contain a cargoBike, but that cargoBike will not contain equipment"
+    createEquipment(equipment: EquipmentCreateInput!): Equipment!
+    "update Equipment, returns updated equipment. CargoBike will be null, if cargoBikeId is not set. Pass null for cargoBikeIs to delete the relation"
+    updateEquipment(equipment: EquipmentUpdateInput!): Equipment!
     "creates new lendingStation and returns lendingStation with new ID"
     createLendingStation(lendingStation: LendingStationCreateInput): LendingStation!
     "updates lendingStation of given ID with supplied fields and returns updated lendingStation"
