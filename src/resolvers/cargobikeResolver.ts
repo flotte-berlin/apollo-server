@@ -23,6 +23,20 @@ export default {
             } else {
                 return new GraphQLError('Insufficiant Permissions');
             }
+        },
+        equipment: (_:any, { offset, limit }: { offset: number, limit: number }, { dataSources, req }: { dataSources: any, req: any }) => {
+            if (req.permissions.includes(Permission.ReadBike)) {
+                return dataSources.cargoBikeAPI.getEquipment(offset, limit);
+            } else {
+                return new GraphQLError('Insufficiant Permissions');
+            }
+        },
+        equipmentById: (_:any, { id }: { id: number }, { dataSources, req }: { dataSources: any, req: any }) => {
+            if (req.permissions.includes(Permission.ReadBike)) {
+                return dataSources.cargoBikeAPI.findEquipmentJoinBikeById(id);
+            } else {
+                return new GraphQLError('Insufficiant Permissions');
+            }
         }
     },
     Mutation: {
@@ -43,6 +57,20 @@ export default {
         createBikeEvent: (_: any, { bikeEvent }: { bikeEvent: any }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.WriteBike)) {
                 return dataSources.cargoBikeAPI.createBikeEvent({ bikeEvent });
+            } else {
+                return new GraphQLError('Insufficient Permissions');
+            }
+        },
+        createEquipment: (_: any, { equipment }: { equipment: any }, { dataSources, req }: { dataSources: any, req: any }) => {
+            if (req.permissions.includes(Permission.WriteBike)) {
+                return dataSources.cargoBikeAPI.createEquipment({ equipment });
+            } else {
+                return new GraphQLError('Insufficient Permissions');
+            }
+        },
+        updateEquipment: (_: any, { equipment }: { equipment: any }, { dataSources, req }: { dataSources: any, req: any }) => {
+            if (req.permissions.includes(Permission.WriteBike)) {
+                return dataSources.cargoBikeAPI.updateEquipment({ equipment });
             } else {
                 return new GraphQLError('Insufficient Permissions');
             }

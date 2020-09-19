@@ -72,7 +72,8 @@ export class CargoBike extends Bike {
     name: string;
 
     @OneToMany(type => Equipment, equipment => equipment.cargoBike, {
-        nullable: true
+        nullable: true,
+        eager: true
     })
     equipment: Equipment[];
 
