@@ -23,7 +23,9 @@ export class LendingStation {
     @OneToMany(type => LoanPeriod, loanPeriod => loanPeriod.lendingStation)
     loanPeriods: LoanPeriod[];
 
-    @OneToMany(type => CargoBike, cargoBike => cargoBike.lendingStation)
+    @OneToMany(type => CargoBike, cargoBike => cargoBike.lendingStation, {
+        eager: false
+    })
     cargoBikes: CargoBike[];
 
     @ManyToOne(type => Organization, organization => organization.lendingStations)

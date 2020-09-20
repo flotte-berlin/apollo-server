@@ -131,7 +131,8 @@ export class CargoBike extends Bike {
 
     // This relation is a little redundant because one could also check all LoanPeriods for current station
     @ManyToOne(type => LendingStation, lendingStation => lendingStation.cargoBikes, {
-        nullable: true
+        nullable: true,
+        eager: true
     })
     lendingStation: LendingStation;
 

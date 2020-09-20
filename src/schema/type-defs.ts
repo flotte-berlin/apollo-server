@@ -39,7 +39,7 @@ type CargoBike {
     provider: Provider
     coordinator:  Participant
     insuranceData: InsuranceData!
-    lendingstation: LendingStation
+    lendingStation: LendingStation
     taxes: Taxes
     "null if not locked by other user"
     lockedBy: ID
@@ -104,7 +104,7 @@ input CargoBikeUpdateInput {
     dimensionsAndLoad: DimensionsAndLoadUpdateInput
     "Refers to equipment that is not unique. See kommentierte info tabelle -> Fragen -> Frage 2"
     otherEquipment: [String]
-
+    lendingStationId: ID
     "Sticker State"
     stickerBikeNameState: StickerBikeNameState
     note: String
@@ -518,6 +518,9 @@ type LendingStation {
     address: Address!
     loanTimes: LoanTimes
     loanPeriods: [LoanPeriod]!
+    cargoBikes: [CargoBike]
+    "Totola Amount of cargoBikes currently assigned to the lending station"
+    numCargoBikes: Int!
 }
 
 input LendingStationCreateInput {
@@ -535,6 +538,7 @@ input LendingStationUpdateInput {
     address: AddressUpdateInput
     loanTimes: LoanTimesInput
     loanPeriods: [LoanPeriodUpdateInput]
+    
 }
 
 """
