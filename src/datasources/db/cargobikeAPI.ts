@@ -4,6 +4,7 @@ import { CargoBike } from '../../model/CargoBike';
 import { GraphQLError } from 'graphql';
 import { BikeEvent } from '../../model/BikeEvent';
 import { Equipment } from '../../model/Equipment';
+import { Engagement } from '../../model/Engagement';
 
 /**
  * extended datasource to feed resolvers with data about cargoBikes
@@ -29,8 +30,8 @@ export class CargoBikeAPI extends DataSource {
      * Finds cargo bike by id, retuns null if id was not found
      * @param param0 id of bike
      */
-    async findCargoBikeById ({ id }:{id: any}) {
-        return await this.connection.manager.getRepository(CargoBike).findOne({ id: id });
+    async findCargoBikeById (id: number) {
+        return (await this.connection.manager.getRepository(CargoBike).findByIds([id], { relations: ['lendingStation'] }))[0];
         /* .createQueryBuilder()
             .select('cargoBike')
             .from(CargoBike, 'cargoBike')
@@ -38,24 +39,42 @@ export class CargoBikeAPI extends DataSource {
             .getOne() || new GraphQLError('ID not found'); */
     }
 
+    async findCargoBikeByEngagementId (id: number) {
+        return (await this.connection.getRepository(Engagement)
+            .createQueryBuilder('engagement')
+            .leftJoinAndSelect('engagement.cargoBike', 'cargoBike')
+            .where('engagement."cargoBikeId" = "cargoBike".id')
+            .andWhere('engagement.id = :id', { id: id })
+            .getOne())?.cargoBike;
+    }
+
     /**
      * Updates CargoBike and return updated cargoBike
      * @param param0 cargoBike to be updated
      */
-    async updateCargoBike ({ cargoBike }:{ cargoBike: CargoBike }) {
+    async updateCargoBike ({ cargoBike }:{ cargoBike: any }) {
         const bike = await this.connection.manager.createQueryBuilder()
             .select('cargoBike')
             .from(CargoBike, 'cargoBike')
             .where('cargoBike.id = :id', { id: cargoBike.id })
             .getOne();
         if (bike) {
+            const lendingStationId = cargoBike.lendingStationId;
+            delete cargoBike.lendingStationId;
             await this.connection.manager
                 .createQueryBuilder()
                 .update(CargoBike)
                 .set({ ...cargoBike })
                 .where('id = :id', { id: bike.id })
                 .execute();
-            return await this.findCargoBikeById({ id: bike.id });
+            if (lendingStationId || lendingStationId === null) {
+                await this.connection.getRepository(CargoBike)
+                    .createQueryBuilder()
+                    .relation(CargoBike, 'lendingStation')
+                    .of(cargoBike.id)
+                    .set(lendingStationId);
+            }
+            return await this.findCargoBikeById(bike.id);
         } else {
             return new GraphQLError('ID not in database');
         }
@@ -82,7 +101,7 @@ export class CargoBikeAPI extends DataSource {
     async createBikeEvent ({ bikeEvent }: { bikeEvent: any }) {
         const event = new BikeEvent();
         event.setValues(bikeEvent);
-        event.cargoBike = await this.findCargoBikeById({ id: bikeEvent.cargoBikeId }) as unknown as CargoBike;
+        event.cargoBike = await this.findCargoBikeById(bikeEvent.cargoBikeId) as unknown as CargoBike;
         if (event.cargoBike instanceof GraphQLError) {
             return event.cargoBike;
         }
@@ -109,12 +128,21 @@ export class CargoBikeAPI extends DataSource {
             .getOne();
     }
 
+    // think this can go
     async findEquipmentJoinBikeById (id: number) {
         return await this.connection.getRepository(Equipment)
             .createQueryBuilder('equipment')
             .leftJoinAndSelect('equipment.cargoBike', 'cargoBike')
             .where('equipment.id = :id', { id: id })
             .getOne();
+    }
+
+    async equipmentByCargoBikeId (offset: number, limit: number, id: number) {
+        return await this.connection.getRepository(Equipment)
+            .createQueryBuilder('equipment')
+            .select()
+            .where('equipment."cargoBikeId" = :id', { id: id })
+            .getMany();
     }
 
     async createEquipment ({ equipment }: { equipment: any }) {
@@ -131,9 +159,17 @@ export class CargoBikeAPI extends DataSource {
                 .relation(Equipment, 'cargoBike')
                 .of(equipment.id)
                 .set(equipment.cargoBikeId);
-            return this.findEquipmentJoinBikeById(inserts.identifiers[0].id);
+            // return this.findEquipmentJoinBikeById(inserts.identifiers[0].id);
         }
         return this.findEquipmentById(inserts.identifiers[0].id);
+    }
+
+    async cargoBikeByEquipmentId (id: number) {
+        return (await this.connection.getRepository(Equipment)
+            .createQueryBuilder('equipment')
+            .leftJoinAndSelect('equipment.cargoBike', 'cargoBike')
+            .where('equipment.id = :id', { id: id })
+            .getOne())?.cargoBike;
     }
 
     /**
@@ -142,18 +178,15 @@ export class CargoBikeAPI extends DataSource {
      * @param param0 struct with equipment properites
      */
     async updateEquipment ({ equipment }: { equipment: any }) {
-        console.log(equipment);
         const cargoBikeId = equipment.cargoBikeId;
         delete equipment.cargoBikeId;
-        console.log(equipment);
-        const inserts = await this.connection.getRepository(Equipment)
+        await this.connection.getRepository(Equipment)
             .createQueryBuilder('equipment')
             .update()
             .set({ ...equipment })
             .where('id = :id', { id: equipment.id })
             .returning('*')
             .execute();
-        console.log(inserts.raw[0]);
         if (cargoBikeId || cargoBikeId === null) {
             await this.connection.getRepository(Equipment)
                 .createQueryBuilder()

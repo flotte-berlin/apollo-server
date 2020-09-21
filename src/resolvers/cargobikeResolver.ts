@@ -5,7 +5,7 @@ export default {
     Query: {
         cargoBikeById: (_: any, { id }:{id: any}, { dataSources, req }:{dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.ReadBike)) {
-                return dataSources.cargoBikeAPI.findCargoBikeById({ id });
+                return dataSources.cargoBikeAPI.findCargoBikeById(id);
             } else {
                 return new GraphQLError('Insufficient Permissions');
             }
@@ -37,6 +37,22 @@ export default {
             } else {
                 return new GraphQLError('Insufficiant Permissions');
             }
+        }
+    },
+    CargoBike: {
+        engagement (parent: any, { offset, limit }: { offset: number, limit: number }, { dataSources, req }: { dataSources: any, req: any }) {
+            return dataSources.participantAPI.engagementByCargoBikeId(offset, limit, parent.id);
+        },
+        coordinator (parent: any, { offset, limit }: { offset: number, limit: number }, { dataSources, req }: { dataSources: any, req: any }) {
+            dataSources.participantAPI.participantByCargoBikeId(parent.id);
+        },
+        equipment (parent: any, { offset, limit }: { offset: number, limit: number }, { dataSources, req }: { dataSources: any, req: any }) {
+            return dataSources.cargoBikeAPI.equipmentByCargoBikeId(offset, limit, parent.id);
+        }
+    },
+    Equipment: {
+        cargoBike (parent: any, __: any, { dataSources, req }: { dataSources: any, req: any }) {
+            return dataSources.cargoBikeAPI.cargoBikeByEquipmentId(parent.id);
         }
     },
     Mutation: {

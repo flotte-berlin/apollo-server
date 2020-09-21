@@ -1,7 +1,6 @@
 /* eslint no-unused-vars: "off" */
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany, ManyToOne, JoinColumn } from 'typeorm';
 import { Bike } from './BikeFeatures';
-import { ChainSwap } from './ChainSwap';
 import { Provider } from './Provider';
 import { Participant } from './Participant';
 import { InsuranceData } from './InsuranceData';
@@ -81,12 +80,7 @@ export class CargoBike extends Bike {
         type: 'simple-array',
         nullable: true
     })
-    otherEquipment: string[];
-
-    @OneToMany(type => ChainSwap, chainSwap => chainSwap.cargoBike, {
-        nullable: true
-    })
-    chainSwaps: ChainSwap[]
+    miscellaneousEquipment: string[];
 
     // Security information
     @Column(type => Security)
@@ -131,7 +125,8 @@ export class CargoBike extends Bike {
 
     // This relation is a little redundant because one could also check all LoanPeriods for current station
     @ManyToOne(type => LendingStation, lendingStation => lendingStation.cargoBikes, {
-        nullable: true
+        nullable: true,
+        eager: true
     })
     lendingStation: LendingStation;
 

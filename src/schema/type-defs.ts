@@ -29,18 +29,18 @@ type CargoBike {
     """
     dimensionsAndLoad: DimensionsAndLoad!
     bikeEvents: [BikeEvent]
-    equipment: [Equipment]
+    equipment(offset: Int!, limit: Int!): [Equipment]
     "Refers to equipment that is not unique. See kommentierte info tabelle -> Fragen -> Frage 2"
-    otherEquipment: [String]
-    chainSwaps: [ChainSwap]
+    miscellaneousEquipment: [String]
     "Sticker State"
     stickerBikeNameState: StickerBikeNameState
     note: String
     provider: Provider
     coordinator:  Participant
     insuranceData: InsuranceData!
-    lendingstation: LendingStation
+    lendingStation: LendingStation
     taxes: Taxes
+    engagement(offset: Int!, limit: Int!): [Engagement]
     "null if not locked by other user"
     lockedBy: ID
     lockedUntil: Date
@@ -69,7 +69,7 @@ input CargoBikeCreateInput {
     """
     dimensionsAndLoad: DimensionsAndLoadCreateInput!
     "Refers to equipment that is not unique. See kommentierte info tabelle -> Fragen -> Frage 2"
-    otherEquipment: [String]
+    miscellaneousEquipment: [String]
 
     "Sticker State"
     stickerBikeNameState: StickerBikeNameState
@@ -103,8 +103,8 @@ input CargoBikeUpdateInput {
     """
     dimensionsAndLoad: DimensionsAndLoadUpdateInput
     "Refers to equipment that is not unique. See kommentierte info tabelle -> Fragen -> Frage 2"
-    otherEquipment: [String]
-
+    miscellaneousEquipment: [String]
+    lendingStationId: ID
     "Sticker State"
     stickerBikeNameState: StickerBikeNameState
     note: String
@@ -193,16 +193,16 @@ type BikeModel {
     technicalEquipment: TechnicalEquipment!
 }
 
-type  Participant {
+type Participant {
     id: ID!
     start: Date!
-    end: Date!
-    mentor: ContactInformation!
+    end: Date
+    contactInformation: ContactInformation!
     usernamefLotte: String
     usernameSlack: String
     memberADFC: Boolean!
     locationZIPs: [String]
-    roleCoreTeam: Boolean!
+    memberCoreTeam: Boolean!
     roleCoordinator: Boolean!
     roleEmployeADFC: Boolean!
     """
@@ -223,6 +223,58 @@ type  Participant {
     """
     distributedActiveBikeParte: Boolean!
     reserve: String
+    engagement: [Engagement]
+}
+
+input ParticipantCreateInput {
+    start: Date!
+    end: Date
+    "must create contactinformation first, if you want to use new"
+    contactInformationId: ID!
+    usernamefLotte: String
+    usernameSlack: String
+    memberADFC: Boolean!
+    locationZIPs: [String]
+    memberCoreTeam: Boolean!
+    
+    "Date of workshop to become Mentor dt. Pate"
+    workshopMentor: Date
+    "Date of last Erste Hilfe Kurs?"
+    workshopAmbulance: Date
+
+    reserve: String
+}
+
+
+type Engagement {
+    id: ID!
+    from: Date!
+    to: Date
+    participant: Participant
+    cargoBike: CargoBike
+    roleCoordinator: Boolean!
+    roleEmployeADFC: Boolean!
+    """
+    Wahr, wenn die Person Pate ist.
+    """
+    roleMentor: Boolean!
+    roleAmbulance: Boolean!
+    roleBringer: Boolean!
+}
+
+input EngagementCreateInput {
+    from: Date!
+    to: Date
+    participantId: ID!
+    cargoBikeId: ID!
+    roleCoordinator: Boolean!
+    roleEmployeADFC: Boolean!
+    """
+    Wahr, wenn die Person Pate ist.
+    """
+    roleMentor: Boolean!
+    roleAmbulance: Boolean!
+    roleBringer: Boolean!
 }
 
 type Taxes {
@@ -449,7 +501,7 @@ type Provider {
     id: ID!
     name: String!
     formularName: String
-    address: Address
+    
     
     providerContactPerson: [ContactInformation]
     isPrivatePerson: Boolean!
@@ -472,8 +524,8 @@ type ContactInformation {
 }
 
 input ContactInformationCreateInput {
-    name: String
-    firstName: String
+    name: String!
+    firstName: String!
     retiredAt: Date
     phoneExtern: String
     phone2Extern: String
@@ -498,8 +550,28 @@ input ContactInformationUpdateInput {
     note: String
 }
 
+type contactPerson {
+    id: ID!
+    intern: Boolean!
+    contactInformation: ContactInformation!
+}
+
+input contactPersonCreateInput {
+    intern: Boolean!
+    contactInformationCreate: ContactInformationCreateInput
+    contactInformationExisting: ContactInformationUpdateInput
+}
+
+input contactPersonUpdateInput {
+    id: ID!
+    intern: Boolean
+    contactInformationCreate: ContactInformationCreateInput
+    contactInformationExisting: ContactInformationUpdateInput
+}
+
 type Organisation {
     id: ID!
+    address: Address
     "(dt. Ausleihstation)"
     lendingStations: [LendingStation]
     "registration number of association"
@@ -518,6 +590,9 @@ type LendingStation {
     address: Address!
     loanTimes: LoanTimes
     loanPeriods: [LoanPeriod]!
+    cargoBikes: [CargoBike]
+    "Totola Amount of cargoBikes currently assigned to the lending station"
+    numCargoBikes: Int!
 }
 
 input LendingStationCreateInput {
@@ -535,6 +610,7 @@ input LendingStationUpdateInput {
     address: AddressUpdateInput
     loanTimes: LoanTimesInput
     loanPeriods: [LoanPeriodUpdateInput]
+    
 }
 
 """
@@ -623,8 +699,10 @@ type Query {
     "equipment by id, will return null if id not found"
     equipmentById(id: ID!): Equipment
     providers: [Provider]!
+    "particcipant by id"
     participantById(id:ID!):  Participant
-    participants: [ Participant]!
+    "p"
+    participants(offset: Int!, limit: Int!): [ Participant]!
     lendingStationById(id:ID!): LendingStation
     lendingStations: [LendingStation]!
     contactInformation: [ContactInformation]!
@@ -647,6 +725,12 @@ type Mutation {
     updateLendingStation(lendingstation: LendingStationUpdateInput!): LendingStation!
     "creates new BikeEvent"
     createBikeEvent(bikeEvent: BikeEventCreateInput): BikeEvent!
+    "create participant"
+    createParticipant(participant: ParticipantCreateInput!): Participant!
+    "create new contactInfo"
+    createContactInformation(contactInformation: ContactInformationCreateInput!): ContactInformation!
+    "create Engagement"
+    createEngagement(engagement: EngagementCreateInput): Engagement!
 }
 
 `;

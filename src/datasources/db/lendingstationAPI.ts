@@ -24,9 +24,8 @@ export class LendingStationAPI extends DataSource {
      */
     async getLendingStations () {
         return await this.connection.manager
-            .createQueryBuilder()
-            .select('lendingStation')
-            .from(LendingStation, 'lendingStation')
+            .createQueryBuilder(LendingStation, 'lendingStation')
+            .leftJoinAndSelect('CargoBike', 'cargoBike', 'cargoBike.lendingStation = lendingStation.id')// ('lendingStation.cargoBikes', 'cargoBike.lendingStation', 'cargoBike', 'cargoBike.lendingStationId = lendingStation.id')
             .getMany() || new GraphQLError('Internal Server Error: could not query data from table lendingStation');
     }
 
@@ -35,7 +34,6 @@ export class LendingStationAPI extends DataSource {
      * @param param0 new lendingStation
      */
     async createLendingStation ({ lendingStation }:{ lendingStation: any }) {
-        console.log(lendingStation);
         const inserts = await this.connection.manager
             .createQueryBuilder()
             .insert()

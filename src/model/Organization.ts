@@ -1,6 +1,6 @@
 import { PrimaryGeneratedColumn, OneToOne, OneToMany, Column, Entity } from 'typeorm';
 import { LendingStation } from './LendingStation';
-import { Provider } from './Provider';
+import { Address, Provider } from './Provider';
 
 @Entity()
 export class Organization {
@@ -25,4 +25,7 @@ export class Organization {
         nullable: true
     })
     registerNo: string;
+
+    @Column(type => Address)
+    address: Address;
 }

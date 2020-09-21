@@ -1,5 +1,4 @@
-import { PrimaryGeneratedColumn, Column, ManyToOne, Entity } from 'typeorm';
-import { Provider } from './Provider';
+import { PrimaryGeneratedColumn, Column, Entity } from 'typeorm';
 
 @Entity()
 export class ContactInformation {
@@ -48,9 +47,8 @@ export class ContactInformation {
     })
     emailIntern: string;
 
-    @Column()
+    @Column({
+        nullable: true
+    })
     note: string;
-
-    @ManyToOne(type => Provider, provider => provider.contactInformation)
-    provider: Provider;
 }
