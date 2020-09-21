@@ -193,16 +193,16 @@ type BikeModel {
     technicalEquipment: TechnicalEquipment!
 }
 
-type  Participant {
+type Participant {
     id: ID!
     start: Date!
-    end: Date!
-    mentor: ContactInformation!
+    end: Date
+    contactInformation: ContactInformation!
     usernamefLotte: String
     usernameSlack: String
     memberADFC: Boolean!
     locationZIPs: [String]
-    roleCoreTeam: Boolean!
+    memberCoreTeam: Boolean!
     roleCoordinator: Boolean!
     roleEmployeADFC: Boolean!
     """
@@ -223,13 +223,58 @@ type  Participant {
     """
     distributedActiveBikeParte: Boolean!
     reserve: String
-    engagement: Engagement
+    engagement: [Engagement]
 }
+
+input ParticipantCreateInput {
+    start: Date!
+    end: Date
+    "must create contactinformation first, if you want to use new"
+    contactInformationId: ID!
+    usernamefLotte: String
+    usernameSlack: String
+    memberADFC: Boolean!
+    locationZIPs: [String]
+    memberCoreTeam: Boolean!
+    
+    "Date of workshop to become Mentor dt. Pate"
+    workshopMentor: Date
+    "Date of last Erste Hilfe Kurs?"
+    workshopAmbulance: Date
+
+    reserve: String
+}
+
 
 type Engagement {
     id: ID!
+    from: Date!
+    to: Date
     participant: Participant
-    cargobike: CargoBike
+    cargoBike: CargoBike
+    roleCoordinator: Boolean!
+    roleEmployeADFC: Boolean!
+    """
+    Wahr, wenn die Person Pate ist.
+    """
+    roleMentor: Boolean!
+    roleAmbulance: Boolean!
+    roleBringer: Boolean!
+}
+
+input EngagementCreateInput {
+    from: Date!
+    to: Date
+    participantId: ID!
+    cargoBikeId: ID!
+    roleCoordinator: Boolean!
+    roleEmployeADFC: Boolean!
+    """
+    Wahr, wenn die Person Pate ist.
+    """
+    roleMentor: Boolean!
+    roleAmbulance: Boolean!
+    roleBringer: Boolean!
 }
 
 type Taxes {
@@ -479,8 +524,8 @@ type ContactInformation {
 }
 
 input ContactInformationCreateInput {
-    name: String
-    firstName: String
+    name: String!
+    firstName: String!
     retiredAt: Date
     phoneExtern: String
     phone2Extern: String
@@ -654,8 +699,10 @@ type Query {
     "equipment by id, will return null if id not found"
     equipmentById(id: ID!): Equipment
     providers: [Provider]!
+    "particcipant by id"
     participantById(id:ID!):  Participant
-    participants: [ Participant]!
+    "p"
+    participants(offset: Int!, limit: Int!): [ Participant]!
     lendingStationById(id:ID!): LendingStation
     lendingStations: [LendingStation]!
     contactInformation: [ContactInformation]!
@@ -678,6 +725,12 @@ type Mutation {
     updateLendingStation(lendingstation: LendingStationUpdateInput!): LendingStation!
     "creates new BikeEvent"
     createBikeEvent(bikeEvent: BikeEventCreateInput): BikeEvent!
+    "create participant"
+    createParticipant(participant: ParticipantCreateInput!): Participant!
+    "create new contactInfo"
+    createContactInformation(contactInformation: ContactInformationCreateInput!): ContactInformation!
+    "create Engagement"
+    createEngagement(engagement: EngagementCreateInput): Engagement!
 }
 
 `;

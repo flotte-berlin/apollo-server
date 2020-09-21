@@ -47,6 +47,8 @@ export class ContactInformation {
     })
     emailIntern: string;
 
-    @Column()
+    @Column({
+        nullable: true
+    })
     note: string;
 }

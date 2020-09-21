@@ -4,6 +4,7 @@ import { CargoBike } from '../../model/CargoBike';
 import { GraphQLError } from 'graphql';
 import { BikeEvent } from '../../model/BikeEvent';
 import { Equipment } from '../../model/Equipment';
+import { Engagement } from '../../model/Engagement';
 
 /**
  * extended datasource to feed resolvers with data about cargoBikes
@@ -29,13 +30,22 @@ export class CargoBikeAPI extends DataSource {
      * Finds cargo bike by id, retuns null if id was not found
      * @param param0 id of bike
      */
-    async findCargoBikeById ({ id }:{id: any}) {
+    async findCargoBikeById (id: number) {
         return (await this.connection.manager.getRepository(CargoBike).findByIds([id], { relations: ['lendingStation'] }))[0];
         /* .createQueryBuilder()
             .select('cargoBike')
             .from(CargoBike, 'cargoBike')
             .where('cargoBike.id = :id', { id })
             .getOne() || new GraphQLError('ID not found'); */
+    }
+
+    async findCargoBikeByEngagementId (id: number) {
+        return (await this.connection.getRepository(Engagement)
+            .createQueryBuilder('engagement')
+            .leftJoinAndSelect('engagement.cargoBike', 'cargoBike')
+            .where('engagement."cargoBikeId" = "cargoBike".id')
+            .andWhere('engagement.id = :id', { id: id })
+            .getOne())?.cargoBike;
     }
 
     /**
@@ -64,7 +74,7 @@ export class CargoBikeAPI extends DataSource {
                     .of(cargoBike.id)
                     .set(lendingStationId);
             }
-            return await this.findCargoBikeById({ id: bike.id });
+            return await this.findCargoBikeById(bike.id);
         } else {
             return new GraphQLError('ID not in database');
         }
@@ -91,7 +101,7 @@ export class CargoBikeAPI extends DataSource {
     async createBikeEvent ({ bikeEvent }: { bikeEvent: any }) {
         const event = new BikeEvent();
         event.setValues(bikeEvent);
-        event.cargoBike = await this.findCargoBikeById({ id: bikeEvent.cargoBikeId }) as unknown as CargoBike;
+        event.cargoBike = await this.findCargoBikeById(bikeEvent.cargoBikeId) as unknown as CargoBike;
         if (event.cargoBike instanceof GraphQLError) {
             return event.cargoBike;
         }

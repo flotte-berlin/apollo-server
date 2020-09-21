@@ -5,7 +5,7 @@ export default {
     Query: {
         cargoBikeById: (_: any, { id }:{id: any}, { dataSources, req }:{dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.ReadBike)) {
-                return dataSources.cargoBikeAPI.findCargoBikeById({ id });
+                return dataSources.cargoBikeAPI.findCargoBikeById(id);
             } else {
                 return new GraphQLError('Insufficient Permissions');
             }

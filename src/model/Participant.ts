@@ -20,14 +20,20 @@ export class Participant {
     })
     end: Date;
 
-    @OneToOne(type => ContactInformation)
+    @OneToOne(type => ContactInformation, {
+        nullable: true
+    })
     @JoinColumn()
     contactInformation: ContactInformation;
 
-    @Column()
+    @Column({
+        nullable: true
+    })
     usernameflotte: string;
 
-    @Column()
+    @Column({
+        nullable: true
+    })
     usernameSlack: string;
 
     @Column()
@@ -53,12 +59,14 @@ export class Participant {
     memberCoreTeam: boolean;
 
     @Column({
-        type: 'date'
+        type: 'date',
+        nullable: true
     })
     workshopMentor: Date;
 
     @Column({
-        type: 'date'
+        type: 'date',
+        nullable: true
     })
     workshopAmbulance: Date;
 
