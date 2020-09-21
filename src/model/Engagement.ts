@@ -23,4 +23,19 @@ export class Engagement {
         nullable: true
     })
     to: Date;
+
+    @Column()
+    roleCoordinator: boolean;
+
+    @Column()
+    roleEmployeADFC: boolean;
+
+    @Column()
+    roleMentor: boolean;
+
+    @Column()
+    roleAmbulance: boolean;
+
+    @Column()
+    roleBringer: boolean;
 }

@@ -10,7 +10,6 @@ import { requiredPermissions } from './datasources/userserver/permission';
 import { CargoBike } from './model/CargoBike';
 import { BikeEvent } from './model/BikeEvent';
 import { BikeModel } from './model/BikeModel';
-import { ChainSwap } from './model/ChainSwap';
 import { ContactInformation } from './model/ContactInformation';
 import { Equipment } from './model/Equipment';
 import { LendingStation } from './model/LendingStation';
@@ -22,6 +21,9 @@ import { Engagement } from './model/Engagement';
 import { Workshop } from './model/Workshop';
 import { LendingStationAPI } from './datasources/db/lendingstationAPI';
 import lendingstationResolvers from './resolvers/lendingstationResolvers';
+import { ParticipantAPI } from './datasources/db/participantAPI';
+import participantResolvers from './resolvers/participantResolvers';
+import { ContactPerson } from './model/ContactPerson';
 
 require('dotenv').config();
 
@@ -59,7 +61,6 @@ createConnection({
         CargoBike,
         BikeEvent,
         BikeModel,
-        ChainSwap,
         ContactInformation,
         Equipment,
         LendingStation,
@@ -68,7 +69,8 @@ createConnection({
         Participant,
         Provider,
         Engagement,
-        Workshop
+        Workshop,
+        ContactPerson
     ],
     synchronize: true,
     logging: false
@@ -81,12 +83,14 @@ const userAPI = new UserServerAPI(process.env.RPC_HOST);
 const server = new ApolloServer({
     resolvers: [
         bikeresolver,
-        lendingstationResolvers
+        lendingstationResolvers,
+        participantResolvers
     ],
     typeDefs,
     dataSources: () => ({
         cargoBikeAPI: new CargoBikeAPI(),
         lendingStationAPI: new LendingStationAPI(),
+        participantAPI: new ParticipantAPI(),
         userAPI
     }),
     context: (req: any) => {

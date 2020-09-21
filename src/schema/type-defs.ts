@@ -31,7 +31,7 @@ type CargoBike {
     bikeEvents: [BikeEvent]
     equipment: [Equipment]
     "Refers to equipment that is not unique. See kommentierte info tabelle -> Fragen -> Frage 2"
-    otherEquipment: [String]
+    miscellaneousEquipment: [String]
     chainSwaps: [ChainSwap]
     "Sticker State"
     stickerBikeNameState: StickerBikeNameState
@@ -69,7 +69,7 @@ input CargoBikeCreateInput {
     """
     dimensionsAndLoad: DimensionsAndLoadCreateInput!
     "Refers to equipment that is not unique. See kommentierte info tabelle -> Fragen -> Frage 2"
-    otherEquipment: [String]
+    miscellaneousEquipment: [String]
 
     "Sticker State"
     stickerBikeNameState: StickerBikeNameState
@@ -103,7 +103,7 @@ input CargoBikeUpdateInput {
     """
     dimensionsAndLoad: DimensionsAndLoadUpdateInput
     "Refers to equipment that is not unique. See kommentierte info tabelle -> Fragen -> Frage 2"
-    otherEquipment: [String]
+    miscellaneousEquipment: [String]
     lendingStationId: ID
     "Sticker State"
     stickerBikeNameState: StickerBikeNameState
@@ -223,6 +223,13 @@ type  Participant {
     """
     distributedActiveBikeParte: Boolean!
     reserve: String
+    engagement: Engagement
+}
+
+type Engagement {
+    id: ID!
+    participant: Participant
+    cargobike: CargoBike
 }
 
 type Taxes {
@@ -449,7 +456,7 @@ type Provider {
     id: ID!
     name: String!
     formularName: String
-    address: Address
+    
     
     providerContactPerson: [ContactInformation]
     isPrivatePerson: Boolean!
@@ -498,8 +505,28 @@ input ContactInformationUpdateInput {
     note: String
 }
 
+type contactPerson {
+    id: ID!
+    intern: Boolean!
+    contactInformation: ContactInformation!
+}
+
+input contactPersonCreateInput {
+    intern: Boolean!
+    contactInformationCreate: ContactInformationCreateInput
+    contactInformationExisting: ContactInformationUpdateInput
+}
+
+input contactPersonUpdateInput {
+    id: ID!
+    intern: Boolean
+    contactInformationCreate: ContactInformationCreateInput
+    contactInformationExisting: ContactInformationUpdateInput
+}
+
 type Organisation {
     id: ID!
+    address: Address
     "(dt. Ausleihstation)"
     lendingStations: [LendingStation]
     "registration number of association"

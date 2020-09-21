@@ -1,7 +1,6 @@
 import { DataSource } from 'apollo-datasource';
 import { GraphQLError } from 'graphql';
 import { Connection, getConnection } from 'typeorm';
-import { CargoBike } from '../../model/CargoBike';
 import { LendingStation } from '../../model/LendingStation';
 
 export class LendingStationAPI extends DataSource {

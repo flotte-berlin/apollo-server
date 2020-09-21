@@ -7,7 +7,13 @@ export class Workshop {
     id: number;
 
     @Column()
-    name: string;
+    type: string;
+
+    @Column()
+    title: string;
+
+    @Column()
+    description: string;
 
     @Column({
         type: 'date'
