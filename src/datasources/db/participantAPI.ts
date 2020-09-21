@@ -1,5 +1,5 @@
 import { DataSource } from 'apollo-datasource';
-import { GraphQLBoolean, GraphQLError } from 'graphql';
+import { GraphQLError } from 'graphql';
 import { Connection, getConnection } from 'typeorm';
 import { CargoBike } from '../../model/CargoBike';
 import { ContactInformation } from '../../model/ContactInformation';
@@ -38,12 +38,36 @@ export class ParticipantAPI extends DataSource {
             .andWhere('engagement."participantId" = participant.id')
             .getOne()).participant;
     }
+
+    async participantByCargoBikeId (id:number) {
+        return await this.connection.getRepository(Participant)
+            .createQueryBuilder('participant')
+            .leftJoinAndSelect('participant.cargoBike', 'cargoBike')
+            .where('"cargoBike".id = :id', { id: id })
+            .andWhere('"cargoBike"."participantId" = participant.id')
+            .getOne();
+    }
+
     async engagementByParticipantId (id: number) {
         return await this.connection.getRepository(Engagement)
             .createQueryBuilder('engagement')
             .select()
             .where('engagement."participantId" = :id', { id: id })
             .getOne();
+    }
+
+    async engagementByCargoBikeId (offset: number, limit: number, id: number) {
+        return await this.connection.getRepository(Engagement)
+            .createQueryBuilder('engagement')
+            .select()
+            .where('engagement."cargoBikeId" = :id', {
+                id: id
+            })
+            .offset(offset)
+            .limit(limit)
+            .orderBy('engagement.from', 'DESC')
+            .addOrderBy('engagement.to', 'DESC', 'NULLS FIRST')
+            .getMany();
     }
 
     async engagementById (id: number) {
@@ -108,7 +132,7 @@ export class ParticipantAPI extends DataSource {
             .relation(Participant, 'contactInformation')
             .of(inserts.identifiers[0].id)
             .set(participant.contactInformationId);
-        return this.getParticipantById((await inserts).identifiers[0].id);
+        return this.getParticipantById(inserts.identifiers[0].id);
     }
 
     async createContactInformation (contactInformation: any) {
@@ -152,7 +176,6 @@ export class ParticipantAPI extends DataSource {
             .relation(Engagement, 'participant')
             .of(inserts.identifiers[0].id)
             .set(engagement.participantId);
-        console.log(inserts);
         return this.engagementById(inserts.identifiers[0].id);
     }
 }

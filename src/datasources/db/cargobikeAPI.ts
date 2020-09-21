@@ -128,12 +128,21 @@ export class CargoBikeAPI extends DataSource {
             .getOne();
     }
 
+    // think this can go
     async findEquipmentJoinBikeById (id: number) {
         return await this.connection.getRepository(Equipment)
             .createQueryBuilder('equipment')
             .leftJoinAndSelect('equipment.cargoBike', 'cargoBike')
             .where('equipment.id = :id', { id: id })
             .getOne();
+    }
+
+    async equipmentByCargoBikeId (offset: number, limit: number, id: number) {
+        return await this.connection.getRepository(Equipment)
+            .createQueryBuilder('equipment')
+            .select()
+            .where('equipment."cargoBikeId" = :id', { id: id })
+            .getMany();
     }
 
     async createEquipment ({ equipment }: { equipment: any }) {
@@ -150,9 +159,17 @@ export class CargoBikeAPI extends DataSource {
                 .relation(Equipment, 'cargoBike')
                 .of(equipment.id)
                 .set(equipment.cargoBikeId);
-            return this.findEquipmentJoinBikeById(inserts.identifiers[0].id);
+            // return this.findEquipmentJoinBikeById(inserts.identifiers[0].id);
         }
         return this.findEquipmentById(inserts.identifiers[0].id);
+    }
+
+    async cargoBikeByEquipmentId (id: number) {
+        return (await this.connection.getRepository(Equipment)
+            .createQueryBuilder('equipment')
+            .leftJoinAndSelect('equipment.cargoBike', 'cargoBike')
+            .where('equipment.id = :id', { id: id })
+            .getOne())?.cargoBike;
     }
 
     /**
@@ -161,18 +178,15 @@ export class CargoBikeAPI extends DataSource {
      * @param param0 struct with equipment properites
      */
     async updateEquipment ({ equipment }: { equipment: any }) {
-        console.log(equipment);
         const cargoBikeId = equipment.cargoBikeId;
         delete equipment.cargoBikeId;
-        console.log(equipment);
-        const inserts = await this.connection.getRepository(Equipment)
+        await this.connection.getRepository(Equipment)
             .createQueryBuilder('equipment')
             .update()
             .set({ ...equipment })
             .where('id = :id', { id: equipment.id })
             .returning('*')
             .execute();
-        console.log(inserts.raw[0]);
         if (cargoBikeId || cargoBikeId === null) {
             await this.connection.getRepository(Equipment)
                 .createQueryBuilder()

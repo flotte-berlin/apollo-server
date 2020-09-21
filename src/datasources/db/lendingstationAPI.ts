@@ -34,7 +34,6 @@ export class LendingStationAPI extends DataSource {
      * @param param0 new lendingStation
      */
     async createLendingStation ({ lendingStation }:{ lendingStation: any }) {
-        console.log(lendingStation);
         const inserts = await this.connection.manager
             .createQueryBuilder()
             .insert()

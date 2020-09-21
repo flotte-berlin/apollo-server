@@ -29,10 +29,9 @@ type CargoBike {
     """
     dimensionsAndLoad: DimensionsAndLoad!
     bikeEvents: [BikeEvent]
-    equipment: [Equipment]
+    equipment(offset: Int!, limit: Int!): [Equipment]
     "Refers to equipment that is not unique. See kommentierte info tabelle -> Fragen -> Frage 2"
     miscellaneousEquipment: [String]
-    chainSwaps: [ChainSwap]
     "Sticker State"
     stickerBikeNameState: StickerBikeNameState
     note: String
@@ -41,6 +40,7 @@ type CargoBike {
     insuranceData: InsuranceData!
     lendingStation: LendingStation
     taxes: Taxes
+    engagement(offset: Int!, limit: Int!): [Engagement]
     "null if not locked by other user"
     lockedBy: ID
     lockedUntil: Date
