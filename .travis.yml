@@ -6,7 +6,7 @@ services:
   - docker
 
 script:
-  - docker login -u="$registryuser" -p="$registrypw"
+  - docker login -u="$DOCKER_USER" -p="$DOCKER_PW" https://flotte-docker-registry.spdns.org/
   - docker build -t apollo-server .
   - docker tag apollo-server flotte-docker-registry.spdns.org/flotte_user-managment
   - docker push apollo-server:latest
