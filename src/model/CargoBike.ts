@@ -142,7 +142,7 @@ export class CargoBike extends Bike {
     lockedBy: number;
 
     @Column({
-        type: 'date',
+        type: 'timestamp',
         nullable: true
     })
     lockedUntil: Date;
