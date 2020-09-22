@@ -48,6 +48,9 @@ export default {
         },
         equipment (parent: any, { offset, limit }: { offset: number, limit: number }, { dataSources, req }: { dataSources: any, req: any }) {
             return dataSources.cargoBikeAPI.equipmentByCargoBikeId(offset, limit, parent.id);
+        },
+        lendingStation (parent: any, __: any, { dataSources, req }: { dataSources: any, req: any }) {
+            return dataSources.lendingStationAPI.lendingStationByCargoBikeId(parent.id);
         }
     },
     Equipment: {

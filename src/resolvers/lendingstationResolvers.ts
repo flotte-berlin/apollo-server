@@ -11,12 +11,26 @@ export default {
                 return new GraphQLError('Insufficient Permissions');
             }
         },
-        lendingStations: (_: any, __: any, { dataSources, req }: { dataSources: any, req: any }) => {
+        lendingStations: (_: any, { offset, limit }: { offset: number, limit: number }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.ReadBike)) {
-                return dataSources.lendingStationAPI.getLendingStations();
+                return dataSources.lendingStationAPI.lendingStations(offset, limit);
             } else {
                 return new GraphQLError('Insufficient Permissions');
             }
+        }
+    },
+    LendingStation: {
+        contactPersons (parent: any, __: any, { dataSources, req }: { dataSources: any, req: any }) {
+            return dataSources.contactInformationAPI.contactPersonByLendingStationId(parent.id);
+        },
+        timeFrames (parent: any, __: any, { dataSources, req }: { dataSources: any, req: any }) {
+            return dataSources.lendingStationAPI.timeFramesByLendingStationId(parent.id);
+        },
+        numCargoBikes (parent: any, __: any, { dataSources, req }: { dataSources: any, req: any }) {
+            return dataSources.lendingStationAPI.numCargoBikesByLendingStationId(parent.id);
+        },
+        cargoBikes (parent: any, __: any, { dataSources, req }: { dataSources: any, req: any }) {
+            return dataSources.lendingStationAPI.cargoBikesByLendingStationId(parent.id);
         }
     },
     Mutation: {
