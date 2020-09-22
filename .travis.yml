@@ -1,0 +1,12 @@
+dist: bionic
+
+language: bash
+
+services:
+  - docker
+
+script:
+  - docker login -u="$DOCKER_USER" -p="$DOCKER_PW" https://flotte-docker-registry.spdns.org/
+  - docker build -t apollo-server .
+  - docker tag apollo-server flotte-docker-registry.spdns.org/apollo-server
+  - docker push flotte-docker-registry.spdns.org/apollo-server:latest
