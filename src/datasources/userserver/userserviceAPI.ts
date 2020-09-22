@@ -84,6 +84,15 @@ export class UserServerAPI extends DataSource {
     }
 
     /**
+     * Returns userId
+     * @param token
+     */
+    async getUserId (token: String): Promise<number> {
+        const response = await this.send<any>(new RPCMessage(Method.GetUserID, { token }));
+        return response.data;
+    }
+
+    /**
      * Returns all permissions of the user
      * @param token
      */

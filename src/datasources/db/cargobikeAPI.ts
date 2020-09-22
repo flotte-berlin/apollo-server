@@ -48,6 +48,27 @@ export class CargoBikeAPI extends DataSource {
             .getOne())?.cargoBike;
     }
 
+    async lockCargoBike (id: number, req: any, dataSources: any) {
+        console.log("token:");
+        console.log(req.headers.authorization);
+        const token = req.headers.authorization?.replace('Bearer ', '');
+        console.log(token);
+        console.log(await dataSources.userAPI.getUserId(token));
+        const lock = await this.connection.getRepository(CargoBike)
+            .createQueryBuilder('cargoBike')
+            .select([
+                'cargoBike.lockedUntil',
+                'cargoBike.lockedBy'
+            ])
+            .where('id = :id', {
+                id: id
+            })
+            .getOne();
+        //console.log(req);
+        console.log(lock);
+        return false;
+    }
+
     /**
      * Updates CargoBike and return updated cargoBike
      * @param param0 cargoBike to be updated

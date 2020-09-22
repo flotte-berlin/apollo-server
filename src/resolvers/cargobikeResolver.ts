@@ -66,6 +66,14 @@ export default {
                 return new GraphQLError('Insufficient Permissions');
             }
         },
+        lockCargoBikeById: (_: any, { id }: { id: number }, { dataSources, req }:{dataSources: any, req: any }) => {
+            if (req.permissions.includes(Permission.WriteBike)) {
+               
+                return dataSources.cargoBikeAPI.lockCargoBike(id, req, dataSources);
+            } else {
+                return new GraphQLError('Insufficient Permissions');
+            }
+        },
         updateCargoBike: (_: any, { cargoBike }: { cargoBike: any }, { dataSources, req }:{dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.WriteBike)) {
                 return dataSources.cargoBikeAPI.updateCargoBike({ cargoBike });
