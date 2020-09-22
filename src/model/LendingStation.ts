@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToMany, JoinTable, OneToMany, ManyToOne } from 'typeorm';
-import { LoanPeriod } from './LoanPeriod';
+import { TimeFrame } from './TimeFrame';
 import { CargoBike } from './CargoBike';
 import { Organization } from './Organization';
 import { Address } from './Provider';
@@ -20,8 +20,26 @@ export class LendingStation {
     @Column(type => Address)
     address: Address;
 
-    @OneToMany(type => LoanPeriod, loanPeriod => loanPeriod.lendingStation)
-    loanPeriods: LoanPeriod[];
+    /**
+     * validity for loanPeriods
+     */
+    @Column({
+        nullable: true,
+        type: 'date'
+    })
+    from: Date;
+
+    /**
+     * validity for loanPeriods
+     */
+    @Column({
+        nullable: true,
+        type: 'date'
+    })
+    to: Date;
+
+    @OneToMany(type => TimeFrame, loanPeriod => loanPeriod.lendingStation)
+    loanPeriods: TimeFrame[];
 
     @OneToMany(type => CargoBike, cargoBike => cargoBike.lendingStation, {
         eager: false

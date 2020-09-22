@@ -58,7 +58,7 @@ export class CargoBikeAPI extends DataSource {
             .from(CargoBike, 'cargoBike')
             .where('cargoBike.id = :id', { id: cargoBike.id })
             .getOne();
-        if (bike) {
+        if (bike.id) {
             const lendingStationId = cargoBike.lendingStationId;
             delete cargoBike.lendingStationId;
             await this.connection.manager

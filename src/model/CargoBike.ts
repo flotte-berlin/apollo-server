@@ -4,7 +4,7 @@ import { Bike } from './BikeFeatures';
 import { Provider } from './Provider';
 import { Participant } from './Participant';
 import { InsuranceData } from './InsuranceData';
-import { LoanPeriod } from './LoanPeriod';
+import { TimeFrame } from './TimeFrame';
 import { LendingStation } from './LendingStation';
 import { Taxes } from './Taxes';
 import { Equipment } from './Equipment';
@@ -118,10 +118,10 @@ export class CargoBike extends Bike {
     @Column(type => InsuranceData)
     insuranceData: InsuranceData;
 
-    @OneToMany(type => LoanPeriod, loanPeriod => loanPeriod.cargoBike, {
+    @OneToMany(type => TimeFrame, loanPeriod => loanPeriod.cargoBike, {
         nullable: true
     })
-    loanPeriods: LoanPeriod[];
+    loanPeriods: TimeFrame[];
 
     // This relation is a little redundant because one could also check all LoanPeriods for current station
     @ManyToOne(type => LendingStation, lendingStation => lendingStation.cargoBikes, {

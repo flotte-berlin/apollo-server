@@ -1,7 +1,9 @@
 import { DataSource } from 'apollo-datasource';
 import { GraphQLError } from 'graphql';
 import { Connection, getConnection } from 'typeorm';
+import { CargoBike } from '../../model/CargoBike';
 import { LendingStation } from '../../model/LendingStation';
+import { TimeFrame } from '../../model/TimeFrame';
 
 export class LendingStationAPI extends DataSource {
     connection : Connection
@@ -22,11 +24,46 @@ export class LendingStationAPI extends DataSource {
     /**
      * get all lendingStations
      */
-    async getLendingStations () {
-        return await this.connection.manager
-            .createQueryBuilder(LendingStation, 'lendingStation')
-            .leftJoinAndSelect('CargoBike', 'cargoBike', 'cargoBike.lendingStation = lendingStation.id')// ('lendingStation.cargoBikes', 'cargoBike.lendingStation', 'cargoBike', 'cargoBike.lendingStationId = lendingStation.id')
+    async lendingStations (offset: number, limit: number) {
+        return await this.connection.getRepository(LendingStation)
+            .createQueryBuilder('lendingStation')
+            .select()
+            .offset(offset)
+            .limit(limit)
+            .orderBy('name', 'ASC')
             .getMany() || new GraphQLError('Internal Server Error: could not query data from table lendingStation');
+    }
+
+    async lendingStationByCargoBikeId (id: number) {
+        return await this.connection.getRepository(LendingStation)
+            .createQueryBuilder('lendingStation')
+            .leftJoinAndSelect('lendingStation.cargoBikes', 'cargoBikes')
+            .where('"cargoBikes"."lendingStationId" = :id', { id: id })
+            .getOne().catch(() => { return null; });
+    }
+
+    async timeFramesByLendingStationId (id: number) {
+        return await this.connection.getRepository(TimeFrame)
+            .createQueryBuilder('timeFrame')
+            .select()
+            .where('"timeFrame"."lendingStationId" = :id', { id: id })
+            .getMany().catch(() => { return []; });
+    }
+
+    async numCargoBikesByLendingStationId (id: number) {
+        return await this.connection.getRepository(CargoBike)
+            .createQueryBuilder('cargoBike')
+            .select()
+            .where('"cargoBike"."lendingStationId" = :id', { id: id })
+            .getCount();
+    }
+
+    async cargoBikesByLendingStationId (id: number) {
+        return await this.connection.getRepository(CargoBike)
+            .createQueryBuilder('cargoBike')
+            .select()
+            .where('"cargoBike"."lendingStationId" = :id', { id: id })
+            .getMany().catch(() => { return []; });
     }
 
     /**

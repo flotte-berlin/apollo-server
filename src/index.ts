@@ -13,7 +13,7 @@ import { BikeModel } from './model/BikeModel';
 import { ContactInformation } from './model/ContactInformation';
 import { Equipment } from './model/Equipment';
 import { LendingStation } from './model/LendingStation';
-import { LoanPeriod } from './model/LoanPeriod';
+import { TimeFrame } from './model/TimeFrame';
 import { Participant } from './model/Participant';
 import { Organization } from './model/Organization';
 import { Provider } from './model/Provider';
@@ -24,6 +24,10 @@ import lendingstationResolvers from './resolvers/lendingstationResolvers';
 import { ParticipantAPI } from './datasources/db/participantAPI';
 import participantResolvers from './resolvers/participantResolvers';
 import { ContactPerson } from './model/ContactPerson';
+import { ContactInformationAPI } from './datasources/db/contactinformationAPI';
+import providerResolvers from './resolvers/providerResolvers';
+import { ProviderAPI } from './datasources/db/providerAPI';
+import contactinformationResolvers from './resolvers/contactinformationResolvers';
 
 require('dotenv').config();
 
@@ -64,7 +68,7 @@ createConnection({
         ContactInformation,
         Equipment,
         LendingStation,
-        LoanPeriod,
+        TimeFrame,
         Organization,
         Participant,
         Provider,
@@ -84,13 +88,17 @@ const server = new ApolloServer({
     resolvers: [
         bikeresolver,
         lendingstationResolvers,
-        participantResolvers
+        participantResolvers,
+        providerResolvers,
+        contactinformationResolvers
     ],
     typeDefs,
     dataSources: () => ({
         cargoBikeAPI: new CargoBikeAPI(),
         lendingStationAPI: new LendingStationAPI(),
         participantAPI: new ParticipantAPI(),
+        contactInformationAPI: new ContactInformationAPI(),
+        providerAPI: new ProviderAPI(),
         userAPI
     }),
     context: (req: any) => {

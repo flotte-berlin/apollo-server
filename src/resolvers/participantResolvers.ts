@@ -23,7 +23,7 @@ export default {
             return dataSources.participantAPI.engagementByParticipantId(parent.id);
         },
         contactInformation (parent: any, _: any, { dataSources, req }: { dataSources: any, req: any }) {
-            return (dataSources.participantAPI.contactInformationByParticipantId(parent.id));
+            return (dataSources.contactInformationAPI.contactInformationByParticipantId(parent.id));
         }
     },
     Engagement: {

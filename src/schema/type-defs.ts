@@ -550,23 +550,21 @@ input ContactInformationUpdateInput {
     note: String
 }
 
-type contactPerson {
+type ContactPerson {
     id: ID!
     intern: Boolean!
     contactInformation: ContactInformation!
 }
 
-input contactPersonCreateInput {
+input ContactPersonCreateInput {
     intern: Boolean!
-    contactInformationCreate: ContactInformationCreateInput
-    contactInformationExisting: ContactInformationUpdateInput
+    contactInformationId: ID!
 }
 
-input contactPersonUpdateInput {
+input ContactPersonUpdateInput {
     id: ID!
     intern: Boolean
-    contactInformationCreate: ContactInformationCreateInput
-    contactInformationExisting: ContactInformationUpdateInput
+    contactInformationId: ID
 }
 
 type Organisation {
@@ -586,10 +584,10 @@ type Organisation {
 type LendingStation {
     id: ID!
     name: String!
-    contactInformation: [ContactInformation]!
+    contactPersons: [ContactPerson]!
     address: Address!
-    loanTimes: LoanTimes
-    loanPeriods: [LoanPeriod]!
+    timeFrames: [TimeFrame]!
+    loanPeriods: LoanPeriods
     cargoBikes: [CargoBike]
     "Totola Amount of cargoBikes currently assigned to the lending station"
     numCargoBikes: Int!
@@ -599,8 +597,8 @@ input LendingStationCreateInput {
     name: String!
     contactInformation: [ContactInformationCreateInput]!
     address: AddressCreateInput!
-    loanTimes: LoanTimesInput
-    loanPeriods: [LoanPeriodCreateInput]!
+    loanPeriods: LoanPeriodsInput
+    timeFrames: [TimeFrameCreateInput]!
 }
 
 input LendingStationUpdateInput {
@@ -608,15 +606,15 @@ input LendingStationUpdateInput {
     name: String
     contactInformation: [ContactInformationUpdateInput]
     address: AddressUpdateInput
-    loanTimes: LoanTimesInput
-    loanPeriods: [LoanPeriodUpdateInput]
+    loanPeriods: LoanPeriodsInput
+    timeFrames: [TimeFrameUpdateInput]
     
 }
 
 """
-(dt. Ausleihzeiten)
+(dt. Ausleihzeiten) not implemented
 """
-type LoanTimes {
+type LoanPeriods {
     generalRemark: String
     "notes for each day of the week, starting on Monday"
     notes: [String]
@@ -630,7 +628,7 @@ type LoanTimes {
 """
 (dt. Ausleihzeiten)
 """
-input LoanTimesInput {
+input LoanPeriodsInput {
     generalRemark: String
     "notes for each day of the week, starting on Monday"
     notes: [String]
@@ -640,10 +638,9 @@ input LoanTimesInput {
     """
     times: [String]
 }
-
 
 "(dt. Zeitscheibe)"
-type LoanPeriod {
+type TimeFrame {
     id: ID!
     from: Date!
     to: Date
@@ -652,7 +649,7 @@ type LoanPeriod {
     cargoBike: CargoBike!
 }
 
-input LoanPeriodCreateInput {
+input TimeFrameCreateInput {
     from: Date
     to: Date
     note: String
@@ -660,7 +657,7 @@ input LoanPeriodCreateInput {
     cargoBikeID: CargoBikeCreateInput
 }
 
-input LoanPeriodUpdateInput {
+input TimeFrameUpdateInput {
     id: ID!
     from: Date
     to: Date
@@ -692,7 +689,7 @@ type Query {
     cargoBikeById(id:ID!): CargoBike
     "returns cargoBikes ordered by name ascending, relations are not loaded, use cargoBikeById instead"
     cargoBikes(offset: Int!, limit: Int!): [CargoBike]!
-    "not important, you can just use providerById {cargoBikes}"
+    "return null if id not found"
     providerById(id:ID!): Provider
     "unique equipment with pagination, contains relation to bike (with no further joins), so if you wanna know more about the bike, use cargoBikeById"
     equipment(offset: Int!, limit: Int!): [Equipment]!
@@ -704,7 +701,7 @@ type Query {
     "p"
     participants(offset: Int!, limit: Int!): [ Participant]!
     lendingStationById(id:ID!): LendingStation
-    lendingStations: [LendingStation]!
+    lendingStations(offset: Int!, limit: Int!): [LendingStation]!
     contactInformation: [ContactInformation]!
     "returns BikeEvent with CargoBike"
     bikeEventById(id:ID!): BikeEvent!
@@ -715,7 +712,7 @@ type Mutation {
     createCargoBike(cargoBike: CargoBikeCreateInput!): CargoBike!
     "updates cargoBike of given ID with supplied fields and returns updated cargoBike"
     updateCargoBike(cargoBike: CargoBikeUpdateInput!): CargoBike!
-    "creates new peace of unique Equipment, the returned Equipment will contain a cargoBike, but that cargoBike will not contain equipment"
+    "creates new peace of unique Equipment"
     createEquipment(equipment: EquipmentCreateInput!): Equipment!
     "update Equipment, returns updated equipment. CargoBike will be null, if cargoBikeId is not set. Pass null for cargoBikeIs to delete the relation"
     updateEquipment(equipment: EquipmentUpdateInput!): Equipment!
@@ -731,6 +728,10 @@ type Mutation {
     createContactInformation(contactInformation: ContactInformationCreateInput!): ContactInformation!
     "create Engagement"
     createEngagement(engagement: EngagementCreateInput): Engagement!
+    "createContacPerson ,return null if contactInformationId does not exist"
+    createContactPerson(contactPerson: ContactPersonCreateInput): ContactPerson
+    updateContactPerson(contactPerson: ContactPersonUpdateInput): ContactPerson
+    
 }
 
 `;
