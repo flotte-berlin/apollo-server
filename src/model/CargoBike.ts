@@ -38,12 +38,12 @@ export class Security {
     @Column({
         nullable: true
     })
-    keyNoFrameLock: string;
+    keyNumberFrameLock: string;
 
     @Column({
         nullable: true
     })
-    keyNoAXAChain: string;
+    keyNumberAXAChain: string;
 
     @Column({
         nullable: true

@@ -716,6 +716,8 @@ type Mutation {
     updateCargoBike(cargoBike: CargoBikeUpdateInput!): CargoBike!
     "creates new peace of unique Equipment"
     createEquipment(equipment: EquipmentCreateInput!): Equipment!
+    "lock equipment returns true if bike is not locked or if it doesnt exist"
+    lockEquipmentById(id: ID!): Boolean!
     "update Equipment, returns updated equipment. CargoBike will be null, if cargoBikeId is not set. Pass null for cargoBikeIs to delete the relation"
     updateEquipment(equipment: EquipmentUpdateInput!): Equipment!
     "creates new lendingStation and returns lendingStation with new ID"

@@ -1,5 +1,5 @@
 import { DataSource } from 'apollo-datasource';
-import { getConnection, Connection } from 'typeorm';
+import { getConnection, Connection, ObjectType } from 'typeorm';
 import { CargoBike } from '../../model/CargoBike';
 import { GraphQLError } from 'graphql';
 import { BikeEvent } from '../../model/BikeEvent';
@@ -31,12 +31,11 @@ export class CargoBikeAPI extends DataSource {
      * @param param0 id of bike
      */
     async findCargoBikeById (id: number) {
-        return (await this.connection.manager.getRepository(CargoBike).findByIds([id], { relations: ['lendingStation'] }))[0];
-        /* .createQueryBuilder()
-            .select('cargoBike')
-            .from(CargoBike, 'cargoBike')
-            .where('cargoBike.id = :id', { id })
-            .getOne() || new GraphQLError('ID not found'); */
+        return await this.connection.getRepository(CargoBike)
+            .createQueryBuilder('cargobike')
+            .select()
+            .where('cargobike.id = :id', { id })
+            .getOne();
     }
 
     async findCargoBikeByEngagementId (id: number) {
@@ -50,8 +49,6 @@ export class CargoBikeAPI extends DataSource {
 
     async lockCargoBike (id: number, req: any, dataSources: any) {
         const token = req.headers.authorization?.replace('Bearer ', '');
-        console.log(token);
-        console.log(Date.now().toString());
         const userId = await dataSources.userAPI.getUserId(token);
         const lock = await this.connection.getRepository(CargoBike)
             .createQueryBuilder('cargobike')
@@ -67,7 +64,39 @@ export class CargoBikeAPI extends DataSource {
         // eslint-disable-next-line eqeqeq
         if (!lock?.lockedUntil || lock?.lockedBy == userId) {
             // no lock -> set lock
-            console.log("no lock")
+            await this.connection.getRepository(CargoBike)
+                .createQueryBuilder('cargoBike')
+                .update()
+                .set({
+                    lockedUntil: () => 'CURRENT_TIMESTAMP + INTERVAL \'10 MINUTE\'',
+                    lockedBy: userId
+                })
+                .where('id = :id', { id: id })
+                .execute();
+            return true;
+        } else {
+            // lock was set
+            return false;
+        }
+    }
+
+    async lockEntity<MyEntity> (target: ObjectType<MyEntity>, alias: string, id: number, req: any, dataSources: any) {
+        const token = req.headers.authorization?.replace('Bearer ', '');
+        const userId = await dataSources.userAPI.getUserId(token);
+        const lock = await this.connection.getRepository(target)
+            .createQueryBuilder(alias)
+            .select([
+                alias + '.lockedUntil',
+                alias + '.lockedBy'
+            ])
+            .where('id = :id', {
+                id: id
+            })
+            .andWhere(alias + '.lockedUntil > CURRENT_TIMESTAMP')
+            .getOne();
+        // eslint-disable-next-line eqeqeq
+        if (!lock?.lockedUntil || lock?.lockedBy == userId) {
+            // no lock -> set lock
             await this.connection.getRepository(CargoBike)
                 .createQueryBuilder('cargoBike')
                 .update()
@@ -209,6 +238,10 @@ export class CargoBikeAPI extends DataSource {
             .leftJoinAndSelect('equipment.cargoBike', 'cargoBike')
             .where('equipment.id = :id', { id: id })
             .getOne())?.cargoBike;
+    }
+
+    async lockEquipment (id: number, req: any, dataSources: any) {
+
     }
 
     /**
