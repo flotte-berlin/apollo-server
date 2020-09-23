@@ -163,7 +163,7 @@ input InsuranceDataUpdateInput {
     maintananceResponsible: String
     maintananceBenefactor: String
     maintananceAgreement: String
-    hasFixedRate: Boolean!
+    hasFixedRate: Boolean
     fixedRate: Float
     "Projektzuschuss"
     projectAllowance: Float
