@@ -51,8 +51,12 @@ export class CargoBikeAPI extends DataSource {
         return this.lockEntity(CargoBike, 'cargobike', id, req, dataSources);
     }
 
+    async unlockCargoBike (id: number, req: any, dataSources: any) {
+        return this.unlockEntity(CargoBike, 'cargobike', id, req, dataSources);
+    }
+
     /**
-     * lock any entity that implemts Lockable
+     * locks any entity that implemts Lockable
      */
     async lockEntity (target: ObjectType<Lockable>, alias: string, id: number, req: any, dataSources: any) {
         const token = req.headers.authorization?.replace('Bearer ', '');
@@ -83,6 +87,42 @@ export class CargoBikeAPI extends DataSource {
             return true;
         } else {
             // lock was set
+            return false;
+        }
+    }
+
+    async unlockEntity (target: ObjectType<Lockable>, alias: string, id: number, req: any, dataSources: any) {
+        const token = req.headers.authorization?.replace('Bearer ', '');
+        const userId = await dataSources.userAPI.getUserId(token);
+        const lock = await this.connection.getRepository(target)
+            .createQueryBuilder(alias)
+            .select([
+                alias + '.lockedUntil',
+                alias + '.lockedBy'
+            ])
+            .where('id = :id', {
+                id: id
+            })
+            .andWhere(alias + '.lockedUntil > CURRENT_TIMESTAMP')
+            .getOne();
+        if (!lock?.lockedUntil) {
+            // no lock
+            return true;
+        // eslint-disable-next-line eqeqeq
+        } else if (lock?.lockedBy == userId) {
+            // user can unlock
+            await this.connection.getRepository(target)
+                .createQueryBuilder(alias)
+                .update()
+                .set({
+                    lockedUntil: null,
+                    lockedBy: null
+                })
+                .where('id = :id', { id: id })
+                .execute();
+            return true;
+        } else {
+            // enity is locked by other user
             return false;
         }
     }
@@ -215,7 +255,7 @@ export class CargoBikeAPI extends DataSource {
     }
 
     async lockEquipment (id: number, req: any, dataSources: any) {
-
+        return this.lockEntity(Equipment, 'equipment', id, req, dataSources);
     }
 
     /**
@@ -223,7 +263,10 @@ export class CargoBikeAPI extends DataSource {
      * Will return updated Equipment joined with CargoBike only if cargoBike is was set in param0
      * @param param0 struct with equipment properites
      */
-    async updateEquipment ({ equipment }: { equipment: any }) {
+    async updateEquipment (equipment: any, req: any, dataSources: any) {
+        if (!await this.lockEntity(Equipment, 'equipment', equipment.id, req, dataSources)) {
+            return new GraphQLError('Equipment locked by other user');
+        }
         const cargoBikeId = equipment.cargoBikeId;
         delete equipment.cargoBikeId;
         await this.connection.getRepository(Equipment)

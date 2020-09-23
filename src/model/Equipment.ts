@@ -1,8 +1,8 @@
 import { Entity, PrimaryGeneratedColumn, Column, JoinColumn, ManyToOne } from 'typeorm';
-import { CargoBike } from './CargoBike';
+import { CargoBike, Lockable } from './CargoBike';
 
 @Entity()
-export class Equipment {
+export class Equipment implements Lockable {
     setValues ({ id, serialNo, title, description, cargoBike }: {
         id: number,
         serialNo: string,
@@ -38,6 +38,17 @@ export class Equipment {
         name: 'cargoBikeId', referencedColumnName: 'id'
     })
     cargoBike: CargoBike;
+
+    @Column({
+        type: 'timestamp',
+        nullable: true
+    })
+    lockedUntil: Date;
+
+    @Column({
+        nullable: true
+    })
+    lockedBy: number;
 
     cargoBikeId: number;
 }

@@ -73,6 +73,13 @@ export default {
                 return new GraphQLError('Insufficient Permissions');
             }
         },
+        unlockCargoBikeById: (_: any, { id }: { id: number }, { dataSources, req }:{dataSources: any, req: any }) => {
+            if (req.permissions.includes(Permission.WriteBike)) {
+                return dataSources.cargoBikeAPI.unlockCargoBike(id, req, dataSources);
+            } else {
+                return new GraphQLError('Insufficient Permissions');
+            }
+        },
         updateCargoBike: (_: any, { cargoBike }: { cargoBike: any }, { dataSources, req }:{dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.WriteBike)) {
                 return dataSources.cargoBikeAPI.updateCargoBike(cargoBike, req, dataSources);
@@ -94,16 +101,16 @@ export default {
                 return new GraphQLError('Insufficient Permissions');
             }
         },
-        lockEquipmentById: (_: any, { equipment }: { equipment: any }, { dataSources, req }: { dataSources: any, req: any }) => {
+        lockEquipmentById: (_: any, { id }: { id: number }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.WriteBike)) {
-                return dataSources.cargoBikeAPI.lockEquipment(equipment.id, req, dataSources);
+                return dataSources.cargoBikeAPI.lockEquipment(id, req, dataSources);
             } else {
                 return new GraphQLError('Insufficient Permissions');
             }
         },
         updateEquipment: (_: any, { equipment }: { equipment: any }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.WriteBike)) {
-                return dataSources.cargoBikeAPI.updateEquipment({ equipment });
+                return dataSources.cargoBikeAPI.updateEquipment(equipment, req, dataSources);
             } else {
                 return new GraphQLError('Insufficient Permissions');
             }

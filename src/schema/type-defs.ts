@@ -712,6 +712,8 @@ type Mutation {
     createCargoBike(cargoBike: CargoBikeCreateInput!): CargoBike!
     "lock cargoBike returns true if bike is not locked or if it doesnt exist"
     lockCargoBikeById(id: ID!): Boolean!
+    "unlock cargoBike"
+    unlockCargoBikeById(id: ID!): Boolean!
     "updates cargoBike of given ID with supplied fields and returns updated cargoBike"
     updateCargoBike(cargoBike: CargoBikeUpdateInput!): CargoBike!
     "creates new peace of unique Equipment"
