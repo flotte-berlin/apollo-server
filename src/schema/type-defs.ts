@@ -710,7 +710,7 @@ type Query {
 type Mutation {
     "creates new cargoBike and returns cargobike with new ID"
     createCargoBike(cargoBike: CargoBikeCreateInput!): CargoBike!
-    "lock cargoBike - not implemented"
+    "lock cargoBike returns true if bike is not locked or if it doesnt exist"
     lockCargoBikeById(id: ID!): Boolean!
     "updates cargoBike of given ID with supplied fields and returns updated cargoBike"
     updateCargoBike(cargoBike: CargoBikeUpdateInput!): CargoBike!

@@ -49,31 +49,49 @@ export class CargoBikeAPI extends DataSource {
     }
 
     async lockCargoBike (id: number, req: any, dataSources: any) {
-        console.log("token:");
-        console.log(req.headers.authorization);
         const token = req.headers.authorization?.replace('Bearer ', '');
         console.log(token);
-        console.log(await dataSources.userAPI.getUserId(token));
+        console.log(Date.now().toString());
+        const userId = await dataSources.userAPI.getUserId(token);
         const lock = await this.connection.getRepository(CargoBike)
-            .createQueryBuilder('cargoBike')
+            .createQueryBuilder('cargobike')
             .select([
-                'cargoBike.lockedUntil',
-                'cargoBike.lockedBy'
+                'cargobike.lockedUntil',
+                'cargobike.lockedBy'
             ])
             .where('id = :id', {
                 id: id
             })
+            .andWhere('cargobike.lockedUntil > CURRENT_TIMESTAMP')
             .getOne();
-        //console.log(req);
-        console.log(lock);
-        return false;
+        // eslint-disable-next-line eqeqeq
+        if (!lock?.lockedUntil || lock?.lockedBy == userId) {
+            // no lock -> set lock
+            console.log("no lock")
+            await this.connection.getRepository(CargoBike)
+                .createQueryBuilder('cargoBike')
+                .update()
+                .set({
+                    lockedUntil: () => 'CURRENT_TIMESTAMP + INTERVAL \'10 MINUTE\'',
+                    lockedBy: userId
+                })
+                .where('id = :id', { id: id })
+                .execute();
+            return true;
+        } else {
+            // lock was set
+            return false;
+        }
     }
 
     /**
      * Updates CargoBike and return updated cargoBike
      * @param param0 cargoBike to be updated
      */
-    async updateCargoBike ({ cargoBike }:{ cargoBike: any }) {
+    async updateCargoBike (cargoBike: any, req: any, dataSources: any) {
+        if (!await this.lockCargoBike(cargoBike.id, req, dataSources)) {
+            return new GraphQLError('Bike locked by other user');
+        }
         const bike = await this.connection.manager.createQueryBuilder()
             .select('cargoBike')
             .from(CargoBike, 'cargoBike')

@@ -88,6 +88,9 @@ export class UserServerAPI extends DataSource {
      * @param token
      */
     async getUserId (token: String): Promise<number> {
+        if (process.env.NODE_ENV === 'develop') {
+            return 0;
+        }
         const response = await this.send<any>(new RPCMessage(Method.GetUserID, { token }));
         return response.data;
     }

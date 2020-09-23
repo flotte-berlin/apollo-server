@@ -68,7 +68,6 @@ export default {
         },
         lockCargoBikeById: (_: any, { id }: { id: number }, { dataSources, req }:{dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.WriteBike)) {
-               
                 return dataSources.cargoBikeAPI.lockCargoBike(id, req, dataSources);
             } else {
                 return new GraphQLError('Insufficient Permissions');
@@ -76,7 +75,7 @@ export default {
         },
         updateCargoBike: (_: any, { cargoBike }: { cargoBike: any }, { dataSources, req }:{dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.WriteBike)) {
-                return dataSources.cargoBikeAPI.updateCargoBike({ cargoBike });
+                return dataSources.cargoBikeAPI.updateCargoBike(cargoBike, req, dataSources);
             } else {
                 return new GraphQLError('Insufficient Permissions');
             }
