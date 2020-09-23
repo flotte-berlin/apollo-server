@@ -58,7 +58,7 @@ export class Security {
     @Column({
         nullable: true
     })
-    adfsCoding: string;
+    adfcCoding: string;
 }
 
 @Entity()
