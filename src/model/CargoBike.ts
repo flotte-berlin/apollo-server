@@ -31,6 +31,11 @@ export enum StickerBikeNameState {
     UNKNOWN
 }
 
+export interface Lockable {
+    lockedBy: number,
+    lockedUntil: Date
+}
+
 export class Security {
     @Column()
     frameNumber: string;
@@ -57,7 +62,7 @@ export class Security {
 }
 
 @Entity()
-export class CargoBike extends Bike {
+export class CargoBike extends Bike implements Lockable {
     @PrimaryGeneratedColumn()
     id: number;
 

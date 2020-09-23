@@ -1,6 +1,6 @@
 import { DataSource } from 'apollo-datasource';
 import { getConnection, Connection, ObjectType } from 'typeorm';
-import { CargoBike } from '../../model/CargoBike';
+import { CargoBike, Lockable } from '../../model/CargoBike';
 import { GraphQLError } from 'graphql';
 import { BikeEvent } from '../../model/BikeEvent';
 import { Equipment } from '../../model/Equipment';
@@ -80,7 +80,7 @@ export class CargoBikeAPI extends DataSource {
         }
     }
 
-    async lockEntity<MyEntity> (target: ObjectType<MyEntity>, alias: string, id: number, req: any, dataSources: any) {
+    async lockEntity (target: ObjectType<Lockable>, alias: string, id: number, req: any, dataSources: any) {
         const token = req.headers.authorization?.replace('Bearer ', '');
         const userId = await dataSources.userAPI.getUserId(token);
         const lock = await this.connection.getRepository(target)
@@ -97,8 +97,8 @@ export class CargoBikeAPI extends DataSource {
         // eslint-disable-next-line eqeqeq
         if (!lock?.lockedUntil || lock?.lockedBy == userId) {
             // no lock -> set lock
-            await this.connection.getRepository(CargoBike)
-                .createQueryBuilder('cargoBike')
+            await this.connection.getRepository(target)
+                .createQueryBuilder(alias)
                 .update()
                 .set({
                     lockedUntil: () => 'CURRENT_TIMESTAMP + INTERVAL \'10 MINUTE\'',
