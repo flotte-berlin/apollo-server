@@ -53,7 +53,7 @@ export class Security {
     @Column({
         nullable: true
     })
-    policeCodeing: string;
+    policeCoding: string;
 
     @Column({
         nullable: true

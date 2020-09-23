@@ -48,38 +48,12 @@ export class CargoBikeAPI extends DataSource {
     }
 
     async lockCargoBike (id: number, req: any, dataSources: any) {
-        const token = req.headers.authorization?.replace('Bearer ', '');
-        const userId = await dataSources.userAPI.getUserId(token);
-        const lock = await this.connection.getRepository(CargoBike)
-            .createQueryBuilder('cargobike')
-            .select([
-                'cargobike.lockedUntil',
-                'cargobike.lockedBy'
-            ])
-            .where('id = :id', {
-                id: id
-            })
-            .andWhere('cargobike.lockedUntil > CURRENT_TIMESTAMP')
-            .getOne();
-        // eslint-disable-next-line eqeqeq
-        if (!lock?.lockedUntil || lock?.lockedBy == userId) {
-            // no lock -> set lock
-            await this.connection.getRepository(CargoBike)
-                .createQueryBuilder('cargoBike')
-                .update()
-                .set({
-                    lockedUntil: () => 'CURRENT_TIMESTAMP + INTERVAL \'10 MINUTE\'',
-                    lockedBy: userId
-                })
-                .where('id = :id', { id: id })
-                .execute();
-            return true;
-        } else {
-            // lock was set
-            return false;
-        }
+        return this.lockEntity(CargoBike, 'cargobike', id, req, dataSources);
     }
 
+    /**
+     * lock any entity that implemts Lockable
+     */
     async lockEntity (target: ObjectType<Lockable>, alias: string, id: number, req: any, dataSources: any) {
         const token = req.headers.authorization?.replace('Bearer ', '');
         const userId = await dataSources.userAPI.getUserId(token);
