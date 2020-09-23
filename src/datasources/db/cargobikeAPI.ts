@@ -48,7 +48,11 @@ export class CargoBikeAPI extends DataSource {
     }
 
     async lockCargoBike (id: number, req: any, dataSources: any) {
-        return this.lockEntity(CargoBike, 'cargobike', id, req, dataSources);
+        if (await this.lockEntity(CargoBike, 'cargobike', id, req, dataSources)) {
+            return this.findCargoBikeById(id);
+        } else {
+            return new GraphQLError('CargoBike is locked by other user');
+        }
     }
 
     async unlockCargoBike (id: number, req: any, dataSources: any) {
@@ -162,6 +166,8 @@ export class CargoBikeAPI extends DataSource {
         if (!await this.lockCargoBike(cargoBike.id, req, dataSources)) {
             return new GraphQLError('Bike locked by other user');
         }
+        const keepLock = cargoBike?.keepLock;
+        delete cargoBike.keepLock;
         const bike = await this.connection.manager.createQueryBuilder()
             .select('cargoBike')
             .from(CargoBike, 'cargoBike')
@@ -183,6 +189,7 @@ export class CargoBikeAPI extends DataSource {
                     .of(cargoBike.id)
                     .set(lendingStationId);
             }
+            !keepLock && this.unlockCargoBike(cargoBike.id, req, dataSources);
             return await this.findCargoBikeById(bike.id);
         } else {
             return new GraphQLError('ID not in database');

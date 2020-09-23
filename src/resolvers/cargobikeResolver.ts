@@ -54,6 +54,9 @@ export default {
         },
         isLocked (parent: any, __: any, { dataSources, req }: { dataSources: any, req: any }) {
             return dataSources.cargoBikeAPI.isLocked(parent.id, req, dataSources);
+        },
+        lockedBy (): any {
+            return null;
         }
     },
     Equipment: {
