@@ -49,6 +49,4 @@ export class Equipment implements Lockable {
         nullable: true
     })
     lockedBy: number;
-
-    cargoBikeId: number;
 }

@@ -51,6 +51,9 @@ export default {
         },
         lendingStation (parent: any, __: any, { dataSources, req }: { dataSources: any, req: any }) {
             return dataSources.lendingStationAPI.lendingStationByCargoBikeId(parent.id);
+        },
+        isLocked (parent: any, __: any, { dataSources, req }: { dataSources: any, req: any }) {
+            return dataSources.cargoBikeAPI.isLocked(parent.id, req, dataSources);
         }
     },
     Equipment: {

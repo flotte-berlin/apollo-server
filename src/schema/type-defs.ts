@@ -41,6 +41,7 @@ type CargoBike {
     lendingStation: LendingStation
     taxes: Taxes
     engagement(offset: Int!, limit: Int!): [Engagement]
+    isLocked: Boolean!
     "null if not locked by other user"
     lockedBy: ID
     lockedUntil: Date

@@ -127,6 +127,33 @@ export class CargoBikeAPI extends DataSource {
         }
     }
 
+    async isLocked (id: number, req: any, dataSources: any) {
+        const token = req.headers.authorization?.replace('Bearer ', '');
+        const userId = await dataSources.userAPI.getUserId(token);
+        const lock = await this.connection.getRepository(CargoBike)
+            .createQueryBuilder('cargobike')
+            .select([
+                'cargobike' + '.lockedUntil',
+                'cargobike' + '.lockedBy'
+            ])
+            .where('id = :id', {
+                id: id
+            })
+            .andWhere('cargobike' + '.lockedUntil > CURRENT_TIMESTAMP')
+            .getOne();
+        if (!lock?.lockedUntil) {
+            // no lock
+            return false;
+        // eslint-disable-next-line eqeqeq
+        } else if (lock?.lockedBy == userId) {
+            // user has locked
+            return false;
+        } else {
+            // enity is locked by other user
+            return true;
+        }
+    }
+
     /**
      * Updates CargoBike and return updated cargoBike
      * @param param0 cargoBike to be updated
