@@ -80,7 +80,7 @@ input CargoBikeCreateInput {
 }
 
 input CargoBikeUpdateInput {
-    id: Int!
+    id: ID!
     "see column A in info tabelle"
     group: Group
     name: String
