@@ -659,7 +659,9 @@ input LoanPeriodsInput {
 "(dt. Zeitscheibe) When was a bike where"
 type TimeFrame {
     id: ID!
+    "format YYYY-MM-dd"
     from: Date!
+    "formmat YYYY-MM-dd"
     to: Date
     note: String
     lendingStation: LendingStation!
@@ -670,8 +672,8 @@ input TimeFrameCreateInput {
     from: Date!
     to: Date
     note: String
-    lendingStationID: ID!
-    cargoBikeID: ID!
+    lendingStationId: ID!
+    cargoBikeId: ID!
 }
 
 input TimeFrameUpdateInput {

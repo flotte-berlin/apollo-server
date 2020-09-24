@@ -6,6 +6,7 @@ import { BikeEvent } from '../../model/BikeEvent';
 import { Equipment } from '../../model/Equipment';
 import { Engagement } from '../../model/Engagement';
 import { Provider } from '../../model/Provider';
+import { TimeFrame } from '../../model/TimeFrame';
 
 /**
  * extended datasource to feed resolvers with data about cargoBikes
@@ -54,6 +55,14 @@ export class CargoBikeAPI extends DataSource {
             .relation(Provider, 'cargoBikes')
             .of(id)
             .loadMany();
+    }
+
+    async cargoBikeByTimeFrameId (id: number) {
+        return await this.connection.getRepository(TimeFrame)
+            .createQueryBuilder('timeframe')
+            .relation(TimeFrame, 'cargoBike')
+            .of(id)
+            .loadOne();
     }
 
     async lockCargoBike (id: number, req: any, dataSources: any) {

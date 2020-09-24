@@ -42,6 +42,14 @@ export class LendingStationAPI extends DataSource {
             .getOne().catch(() => { return null; });
     }
 
+    async lendingStationByTimeFrameId (id: number) {
+        await this.connection.getRepository(TimeFrame)
+            .createQueryBuilder('timeframe')
+            .relation(TimeFrame, 'lendingStation')
+            .of(id)
+            .loadOne();
+    }
+
     async timeFrames (offset: number, limit: number) {
         return await this.connection.getRepository(TimeFrame)
             .createQueryBuilder('timeframe')
@@ -127,28 +135,32 @@ export class LendingStationAPI extends DataSource {
 
     async createTimeFrame (timeFrame: any) {
         let inserts: any;
-        await this.connection.transaction(async (entityManager: EntityManager) => {
-            if (timeFrame.to === undefined) {
-                timeFrame.to = '';
-            }
-            timeFrame.dateRange = '[' + timeFrame.from + ',' + timeFrame.to + ')';
-            inserts = await entityManager.getRepository(TimeFrame)
-                .createQueryBuilder('timeframe')
-                .insert()
-                .returning('*')
-                .values([timeFrame])
-                .execute();
-            await entityManager.getRepository(TimeFrame)
-                .createQueryBuilder()
-                .relation(TimeFrame, 'cargoBike')
-                .of(inserts.identifiers[0].id)
-                .set(timeFrame.cargoBikeId);
-            await entityManager.getRepository(TimeFrame)
-                .createQueryBuilder()
-                .relation(TimeFrame, 'lendingStation')
-                .of(inserts.identifiers[0].id)
-                .set(timeFrame.lendingStationId);
-        });
+        try {
+            await this.connection.transaction(async (entityManager: EntityManager) => {
+                if (timeFrame.to === undefined) {
+                    timeFrame.to = '';
+                }
+                timeFrame.dateRange = '[' + timeFrame.from + ',' + timeFrame.to + ')';
+                inserts = await entityManager.getRepository(TimeFrame)
+                    .createQueryBuilder('timeframe')
+                    .insert()
+                    .returning('*')
+                    .values([timeFrame])
+                    .execute();
+                await entityManager.getRepository(TimeFrame)
+                    .createQueryBuilder()
+                    .relation(TimeFrame, 'cargoBike')
+                    .of(inserts.identifiers[0].id)
+                    .set(timeFrame.cargoBikeId);
+                await entityManager.getRepository(TimeFrame)
+                    .createQueryBuilder()
+                    .relation(TimeFrame, 'lendingStation')
+                    .of(inserts.identifiers[0].id)
+                    .set(timeFrame.lendingStationId);
+            });
+        } catch (e) {
+            return new GraphQLError('Transaction could not be completed');
+        }
         inserts.generatedMaps[0].id = inserts.identifiers[0].id;
         return inserts.generatedMaps[0];
     }

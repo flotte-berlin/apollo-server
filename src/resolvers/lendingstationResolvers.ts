@@ -45,7 +45,14 @@ export default {
             return (parent.dateRange as string).split(',')[0].replace('[', '');
         },
         to (parent: any, __: any, { dataSources, req }: { dataSources: any, req: any }) {
-            return (parent.dateRange as string).split(',')[1].replace(')', '');
+            const str = (parent.dateRange as string).split(',')[1].replace(')', '');
+            return (str.length > 0) ? str : null;
+        },
+        cargoBike (parent: any, __: any, { dataSources, req }: { dataSources: any, req: any }) {
+            return dataSources.cargoBikeAPI.cargoBikeByTimeFrameId(parent.id);
+        },
+        lendingStation (parent: any, __: any, { dataSources, req }: { dataSources: any, req: any }) {
+            return dataSources.lendingStationAPI.lendingStationByTimeFrameId(parent.id);
         }
     },
     Mutation: {
