@@ -17,6 +17,13 @@ export default {
             } else {
                 return new GraphQLError('Insufficient Permissions');
             }
+        },
+        timeframes: (_: any, { offset, limit }: { offset: number, limit: number }, { dataSources, req }: { dataSources: any, req: any }) => {
+            if (req.permissions.includes(Permission.ReadBike)) {
+                return dataSources.lendingStationAPI.timeFrames(offset, limit);
+            } else {
+                return new GraphQLError('Insufficient Permissions');
+            }
         }
     },
     LendingStation: {
@@ -33,6 +40,14 @@ export default {
             return dataSources.lendingStationAPI.cargoBikesByLendingStationId(parent.id);
         }
     },
+    TimeFrame: {
+        from (parent: any, __: any, { dataSources, req }: { dataSources: any, req: any }) {
+            return (parent.dateRange as string).split(',')[0].replace('[', '');
+        },
+        to (parent: any, __: any, { dataSources, req }: { dataSources: any, req: any }) {
+            return (parent.dateRange as string).split(',')[1].replace(')', '');
+        }
+    },
     Mutation: {
         createLendingStation: (_: any, { lendingStation }:{ lendingStation: LendingStation }, { dataSources, req }:{dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.WriteBike)) {
@@ -44,6 +59,13 @@ export default {
         updateLendingStation: (_: any, { lendingStation }:{ lendingStation: LendingStation }, { dataSources, req }:{dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.WriteBike)) {
                 return dataSources.lendingStationAPI.updateLendingStation({ lendingStation });
+            } else {
+                return new GraphQLError('Insufficient Permissions');
+            }
+        },
+        createTimeFrame: (_: any, { timeFrame }:{ timeFrame: LendingStation }, { dataSources, req }:{dataSources: any, req: any }) => {
+            if (req.permissions.includes(Permission.WriteBike)) {
+                return dataSources.lendingStationAPI.createTimeFrame(timeFrame);
             } else {
                 return new GraphQLError('Insufficient Permissions');
             }

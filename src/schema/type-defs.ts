@@ -656,7 +656,7 @@ input LoanPeriodsInput {
     times: [String]
 }
 
-"(dt. Zeitscheibe)"
+"(dt. Zeitscheibe) When was a bike where"
 type TimeFrame {
     id: ID!
     from: Date!
@@ -667,11 +667,11 @@ type TimeFrame {
 }
 
 input TimeFrameCreateInput {
-    from: Date
+    from: Date!
     to: Date
     note: String
-    lendingStationID: LendingStationCreateInput
-    cargoBikeID: CargoBikeCreateInput
+    lendingStationID: ID!
+    cargoBikeID: ID!
 }
 
 input TimeFrameUpdateInput {
@@ -679,8 +679,9 @@ input TimeFrameUpdateInput {
     from: Date
     to: Date
     note: String
-    lendingStation: LendingStationUpdateInput
-    cargoBike: CargoBikeUpdateInput
+    lendingStation: ID
+    cargoBike: ID
+    keepLock: Boolean
 }
 
 type Address {
@@ -719,6 +720,7 @@ type Query {
     participants(offset: Int!, limit: Int!): [ Participant]!
     lendingStationById(id:ID!): LendingStation
     lendingStations(offset: Int!, limit: Int!): [LendingStation]!
+    timeframes(offset: Int!, limit: Int!): [TimeFrame]!
     contactInformation(offset: Int!, limit: Int!): [ContactInformation]!
     "returns BikeEvent with CargoBike"
     bikeEventById(id:ID!): BikeEvent!
@@ -745,6 +747,7 @@ type Mutation {
     createLendingStation(lendingStation: LendingStationCreateInput): LendingStation!
     "updates lendingStation of given ID with supplied fields and returns updated lendingStation"
     updateLendingStation(lendingstation: LendingStationUpdateInput!): LendingStation!
+    createTimeFrame(timeFrame: TimeFrameCreateInput!): TimeFrame!
     "creates new BikeEvent"
     createBikeEvent(bikeEvent: BikeEventCreateInput): BikeEvent!
     "create participant"

@@ -1,6 +1,6 @@
 import { DataSource } from 'apollo-datasource';
 import { GraphQLError } from 'graphql';
-import { Connection, getConnection } from 'typeorm';
+import { Connection, EntityManager, getConnection } from 'typeorm';
 import { CargoBike } from '../../model/CargoBike';
 import { LendingStation } from '../../model/LendingStation';
 import { TimeFrame } from '../../model/TimeFrame';
@@ -40,6 +40,15 @@ export class LendingStationAPI extends DataSource {
             .leftJoinAndSelect('lendingStation.cargoBikes', 'cargoBikes')
             .where('"cargoBikes".id = :id', { id: id })
             .getOne().catch(() => { return null; });
+    }
+
+    async timeFrames (offset: number, limit: number) {
+        return await this.connection.getRepository(TimeFrame)
+            .createQueryBuilder('timeframe')
+            .select()
+            .offset(offset)
+            .limit(limit)
+            .getMany() || [];
     }
 
     async timeFramesByLendingStationId (id: number) {
@@ -114,5 +123,33 @@ export class LendingStationAPI extends DataSource {
         } else {
             return new GraphQLError('ID not in database');
         }
+    }
+
+    async createTimeFrame (timeFrame: any) {
+        let inserts: any;
+        await this.connection.transaction(async (entityManager: EntityManager) => {
+            if (timeFrame.to === undefined) {
+                timeFrame.to = '';
+            }
+            timeFrame.dateRange = '[' + timeFrame.from + ',' + timeFrame.to + ')';
+            inserts = await entityManager.getRepository(TimeFrame)
+                .createQueryBuilder('timeframe')
+                .insert()
+                .returning('*')
+                .values([timeFrame])
+                .execute();
+            await entityManager.getRepository(TimeFrame)
+                .createQueryBuilder()
+                .relation(TimeFrame, 'cargoBike')
+                .of(inserts.identifiers[0].id)
+                .set(timeFrame.cargoBikeId);
+            await entityManager.getRepository(TimeFrame)
+                .createQueryBuilder()
+                .relation(TimeFrame, 'lendingStation')
+                .of(inserts.identifiers[0].id)
+                .set(timeFrame.lendingStationId);
+        });
+        inserts.generatedMaps[0].id = inserts.identifiers[0].id;
+        return inserts.generatedMaps[0];
     }
 }
