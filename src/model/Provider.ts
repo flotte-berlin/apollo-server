@@ -1,6 +1,7 @@
 /* eslint no-unused-vars: "off" */
 
 import { PrimaryGeneratedColumn, Column, OneToMany, Entity, OneToOne, ChildEntity } from 'typeorm';
+import { CargoBike } from './CargoBike';
 import { ContactInformation } from './ContactInformation';
 import { ContactPerson } from './ContactPerson';
 import { LendingStation } from './LendingStation';
@@ -36,6 +37,9 @@ export class Provider {
         nullable: true
     })
     contactPersons: ContactPerson[];
+
+    @OneToMany(type => CargoBike, cargoBike => cargoBike.provider)
+    cargoBikes: CargoBike[];
 
     @Column()
     isPrivatePerson: boolean;

@@ -5,6 +5,7 @@ import { GraphQLError } from 'graphql';
 import { BikeEvent } from '../../model/BikeEvent';
 import { Equipment } from '../../model/Equipment';
 import { Engagement } from '../../model/Engagement';
+import { Provider } from '../../model/Provider';
 
 /**
  * extended datasource to feed resolvers with data about cargoBikes
@@ -45,6 +46,14 @@ export class CargoBikeAPI extends DataSource {
             .where('engagement."cargoBikeId" = "cargoBike".id')
             .andWhere('engagement.id = :id', { id: id })
             .getOne())?.cargoBike;
+    }
+
+    async cargoBikesByProviderId (id: number) {
+        return await this.connection
+            .createQueryBuilder()
+            .relation(Provider, 'cargoBikes')
+            .of(id)
+            .loadMany();
     }
 
     async lockCargoBike (id: number, req: any, dataSources: any) {
@@ -206,13 +215,29 @@ export class CargoBikeAPI extends DataSource {
      * @param param0 cargoBike to be created
      */
     async createCargoBike ({ cargoBike }: { cargoBike: any }) {
-        const inserts = await this.connection.manager
-            .createQueryBuilder()
-            .insert()
-            .into(CargoBike)
-            .values([cargoBike])
-            .returning('*')
-            .execute();
+        let inserts: any;
+        try {
+            await this.connection.transaction(async (entityManager:any) => {
+                inserts = await entityManager.getRepository(CargoBike)
+                    .createQueryBuilder('cargobike')
+                    .insert()
+                    .values([cargoBike])
+                    .returning('*')
+                    .execute();
+                await entityManager.getRepository(CargoBike)
+                    .createQueryBuilder('cargobike')
+                    .relation(CargoBike, 'lendingStation')
+                    .of(inserts.identifiers[0].id)
+                    .set(cargoBike?.lendingStationId);
+                await entityManager.getRepository(CargoBike)
+                    .createQueryBuilder('cargobike')
+                    .relation(CargoBike, 'provider')
+                    .of(inserts.identifiers[0].id)
+                    .set(cargoBike?.providerId);
+            });
+        } catch (e: any) {
+            return new GraphQLError('Transaction could not be completed');
+        }
         const newbike = inserts.generatedMaps[0];
         newbike.id = inserts.identifiers[0].id;
         return newbike;

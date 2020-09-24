@@ -78,8 +78,9 @@ input CargoBikeCreateInput {
     "Sticker State"
     stickerBikeNameState: StickerBikeNameState
     note: String
-    provider: String
+    providerId: ID
     insuranceData: InsuranceDataCreateInput!
+    lendingStationId: ID
     taxes: TaxesCreateInput!
 }
 
@@ -108,12 +109,12 @@ input CargoBikeUpdateInput {
     dimensionsAndLoad: DimensionsAndLoadUpdateInput
     "Refers to equipment that is not unique. See kommentierte info tabelle -> Fragen -> Frage 2"
     miscellaneousEquipment: [String]
-    lendingStationId: ID
     "Sticker State"
     stickerBikeNameState: StickerBikeNameState
     note: String
     provider: String
     insuranceData: InsuranceDataUpdateInput
+    lendingStationId: ID
     taxes: TaxesUpdateInput
     "will keep Bike locked if set to true, default = false"
     keepLock: Boolean
@@ -504,17 +505,24 @@ enum StickerBikeNameState {
     UNKNOWN
 }
 
-"(dt. Anbieter)"
+"(dt. Anbieter) bezieht sich auf die Benziehung einer Person oder Organisation zum Lastenrad"
 type Provider {
     id: ID!
-    name: String!
     formularName: String
-    
-    
-    providerContactPerson: [ContactInformation]
+    contactPersons: [ContactInformation]!
     isPrivatePerson: Boolean!
     organisation: Organisation
     cargoBikes: [CargoBike]!
+}
+
+"(dt. Anbieter)"
+input ProviderCreateInput {
+    formularName: String!
+    "i think it makes more sense to create Provider and then add new ContactPersons"
+    contactPersonIds: [ID]!
+    isPrivatePerson: Boolean!
+    organisationId: ID
+    cargoBikeIds: [ID]!
 }
 
 type ContactInformation {
@@ -558,6 +566,7 @@ input ContactInformationUpdateInput {
     note: String
 }
 
+"describes Relation of Contact to Provider"
 type ContactPerson {
     id: ID!
     intern: Boolean!
@@ -703,7 +712,7 @@ type Query {
     equipment(offset: Int!, limit: Int!): [Equipment]!
     "equipment by id, will return null if id not found"
     equipmentById(id: ID!): Equipment
-    providers: [Provider]!
+    providers(offset: Int!, limit: Int!): [Provider]!
     "particcipant by id"
     participantById(id:ID!):  Participant
     "p"
@@ -747,6 +756,8 @@ type Mutation {
     "createContacPerson ,return null if contactInformationId does not exist"
     createContactPerson(contactPerson: ContactPersonCreateInput): ContactPerson
     updateContactPerson(contactPerson: ContactPersonUpdateInput): ContactPerson
+    "create Provider, if cargoBikeIds or contactPersonIds are not valid, provider will still be created"
+    createProvider(provider: ProviderCreateInput!): Provider!
     
 }
 

@@ -38,7 +38,7 @@ export class LendingStationAPI extends DataSource {
         return await this.connection.getRepository(LendingStation)
             .createQueryBuilder('lendingStation')
             .leftJoinAndSelect('lendingStation.cargoBikes', 'cargoBikes')
-            .where('"cargoBikes"."lendingStationId" = :id', { id: id })
+            .where('"cargoBikes".id = :id', { id: id })
             .getOne().catch(() => { return null; });
     }
 

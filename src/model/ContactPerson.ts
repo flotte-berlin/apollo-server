@@ -16,7 +16,7 @@ export class ContactPerson {
     })
     lendingStations: LendingStation[];
 
-    @ManyToMany(type => Provider, provider => provider.contactPersons, {
+    @ManyToOne(type => Provider, provider => provider.contactPersons, {
         nullable: true
     })
     provider: Provider[];
