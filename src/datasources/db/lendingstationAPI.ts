@@ -1,4 +1,5 @@
 import { DataSource } from 'apollo-datasource';
+import { ApolloError } from 'apollo-server';
 import { GraphQLError } from 'graphql';
 import { Connection, EntityManager, getConnection } from 'typeorm';
 import { CargoBike } from '../../model/CargoBike';
@@ -57,6 +58,14 @@ export class LendingStationAPI extends DataSource {
             .offset(offset)
             .limit(limit)
             .getMany() || [];
+    }
+
+    async timeFramesByCargoBikeId (id: number) {
+        return await this.connection.getRepository(CargoBike)
+            .createQueryBuilder('cargobike')
+            .relation(CargoBike, 'timeFrames')
+            .of(id)
+            .loadMany();
     }
 
     async timeFramesByLendingStationId (id: number) {
@@ -134,6 +143,7 @@ export class LendingStationAPI extends DataSource {
     }
 
     async createTimeFrame (timeFrame: any) {
+        // TODO check overlapping time frames
         let inserts: any;
         try {
             await this.connection.transaction(async (entityManager: EntityManager) => {
@@ -159,7 +169,8 @@ export class LendingStationAPI extends DataSource {
                     .set(timeFrame.lendingStationId);
             });
         } catch (e) {
-            return new GraphQLError('Transaction could not be completed');
+            // TODO: throw diffrent error when date input is wrong
+            return new ApolloError('Transaction could not be completed');
         }
         inserts.generatedMaps[0].id = inserts.identifiers[0].id;
         return inserts.generatedMaps[0];

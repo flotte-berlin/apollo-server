@@ -127,7 +127,7 @@ export class CargoBike extends Bike implements Lockable {
     @OneToMany(type => TimeFrame, loanPeriod => loanPeriod.cargoBike, {
         nullable: true
     })
-    loanPeriods: TimeFrame[];
+    timeFrames: TimeFrame[];
 
     // This relation is a little redundant because one could also check all LoanPeriods for current station
     @ManyToOne(type => LendingStation, lendingStation => lendingStation.cargoBikes, {

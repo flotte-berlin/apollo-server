@@ -57,6 +57,9 @@ export default {
         },
         lockedBy (): any {
             return null;
+        },
+        timeFrames (parent: any, __: any, { dataSources, req }: { dataSources: any, req: any }) {
+            return dataSources.lendingStationAPI.timeFramesByCargoBikeId(parent.id, req, dataSources);
         }
     },
     Equipment: {

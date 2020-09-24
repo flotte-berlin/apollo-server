@@ -24,6 +24,6 @@ export class TimeFrame {
     })
     note: string;
 
-    @ManyToOne(type => CargoBike, cargoBike => cargoBike.loanPeriods)
+    @ManyToOne(type => CargoBike, cargoBike => cargoBike.timeFrames)
     cargoBike: CargoBike;
 }
