@@ -21,7 +21,7 @@ export default {
     },
     LendingStation: {
         contactPersons (parent: any, __: any, { dataSources, req }: { dataSources: any, req: any }) {
-            return dataSources.contactInformationAPI.contactPersonByLendingStationId(parent.id);
+            return dataSources.contactInformationAPI.contactPersonsByLendingStationId(parent.id);
         },
         timeFrames (parent: any, __: any, { dataSources, req }: { dataSources: any, req: any }) {
             return dataSources.lendingStationAPI.timeFramesByLendingStationId(parent.id);
@@ -36,7 +36,7 @@ export default {
     Mutation: {
         createLendingStation: (_: any, { lendingStation }:{ lendingStation: LendingStation }, { dataSources, req }:{dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.WriteBike)) {
-                return dataSources.lendingStationAPI.createLendingStation({ lendingStation });
+                return dataSources.lendingStationAPI.createLendingStation(lendingStation);
             } else {
                 return new GraphQLError('Insufficient Permissions');
             }

@@ -70,14 +70,24 @@ export class LendingStationAPI extends DataSource {
      * creates new lendingStation and returns new lendingStation with its new id
      * @param param0 new lendingStation
      */
-    async createLendingStation ({ lendingStation }:{ lendingStation: any }) {
-        const inserts = await this.connection.manager
-            .createQueryBuilder()
-            .insert()
-            .into(LendingStation)
-            .values([lendingStation])
-            .returning('*')
-            .execute();
+    async createLendingStation (lendingStation: any) {
+        let inserts: any;
+        try {
+            await this.connection.transaction(async entiyManager => {
+                inserts = await entiyManager.createQueryBuilder(LendingStation, 'lendingstation')
+                    .insert()
+                    .values([lendingStation])
+                    .returning('*')
+                    .execute();
+                await entiyManager.getRepository(LendingStation)
+                    .createQueryBuilder('lendingstation')
+                    .relation(LendingStation, 'contactPersons')
+                    .of(lendingStation.id)
+                    .add(lendingStation?.contactPersonIds.map((e: any) => { return Number(e); }));
+            });
+        } catch (e :any) {
+            return new GraphQLError('Transaction could not be completed');
+        }
         const newLendingStaion = inserts.generatedMaps[0];
         newLendingStaion.id = inserts.identifiers[0].id;
         return newLendingStaion;

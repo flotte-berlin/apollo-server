@@ -2,7 +2,10 @@ import { gql } from 'apollo-server';
 
 export default gql`
 
+"timestamp object YYYY-MM-ddThh:mm:ss.sssZ"
 scalar Date
+"only time hh-mm-ss"
+scalar Time
 
 "The CargoBike type is central to the graph. You could call it the root."
 type CargoBike {
@@ -347,6 +350,8 @@ input EquipmentUpdateInput {
     description: String
     investable: Boolean
     cargoBikeId: ID
+    "will keep Bike locked if set to true, default = false"
+    keepLock: Boolean
 }
 
 "An Event is a point in time, when the state of the bike somehow changed."
@@ -598,10 +603,10 @@ type LendingStation {
 
 input LendingStationCreateInput {
     name: String!
-    contactInformation: [ContactInformationCreateInput]!
+    contactPersonIds: [ID]!
     address: AddressCreateInput!
     loanPeriods: LoanPeriodsInput
-    timeFrames: [TimeFrameCreateInput]!
+    timeFrameIds: [ID]!
 }
 
 input LendingStationUpdateInput {
@@ -705,7 +710,7 @@ type Query {
     participants(offset: Int!, limit: Int!): [ Participant]!
     lendingStationById(id:ID!): LendingStation
     lendingStations(offset: Int!, limit: Int!): [LendingStation]!
-    contactInformation: [ContactInformation]!
+    contactInformation(offset: Int!, limit: Int!): [ContactInformation]!
     "returns BikeEvent with CargoBike"
     bikeEventById(id:ID!): BikeEvent!
 }
@@ -713,16 +718,18 @@ type Query {
 type Mutation {
     "creates new cargoBike and returns cargobike with new ID"
     createCargoBike(cargoBike: CargoBikeCreateInput!): CargoBike!
-    "lock cargoBike returns bike if bike is not locked or Error"
+    "lock cargoBike returns bike if bike is not locked and locks bike or Error if bike cannot be locked"
     lockCargoBikeById(id: ID!): CargoBike!
-    "unlock cargoBike"
+    "unlock cargoBike, returns true if Bike does not exist"
     unlockCargoBikeById(id: ID!): Boolean!
     "updates cargoBike of given ID with supplied fields and returns updated cargoBike"
     updateCargoBike(cargoBike: CargoBikeUpdateInput!): CargoBike!
     "creates new peace of unique Equipment"
     createEquipment(equipment: EquipmentCreateInput!): Equipment!
     "lock equipment returns true if bike is not locked or if it doesnt exist"
-    lockEquipmentById(id: ID!): Boolean!
+    lockEquipmentById(id: ID!): Equipment!
+    "unlock Equopment, returns true if Bike does not exist"
+    unlockEquipment(id: ID!): Boolean!
     "update Equipment, returns updated equipment. CargoBike will be null, if cargoBikeId is not set. Pass null for cargoBikeIs to delete the relation"
     updateEquipment(equipment: EquipmentUpdateInput!): Equipment!
     "creates new lendingStation and returns lendingStation with new ID"

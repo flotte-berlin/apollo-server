@@ -32,6 +32,7 @@ export enum StickerBikeNameState {
 }
 
 export interface Lockable {
+    id: number,
     lockedBy: number,
     lockedUntil: Date
 }
