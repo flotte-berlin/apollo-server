@@ -1,6 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToMany, JoinTable, OneToMany, ManyToOne } from 'typeorm';
 import { TimeFrame } from './TimeFrame';
-import { CargoBike } from './CargoBike';
 import { Organisation } from './Organisation';
 import { Address } from './Provider';
 import { ContactPerson } from './ContactPerson';
@@ -40,11 +39,6 @@ export class LendingStation {
 
     @OneToMany(type => TimeFrame, loanPeriod => loanPeriod.lendingStation)
     loanPeriods: TimeFrame[];
-
-    @OneToMany(type => CargoBike, cargoBike => cargoBike.lendingStation, {
-        eager: false
-    })
-    cargoBikes: CargoBike[];
 
     @ManyToOne(type => Organisation, organization => organization.lendingStations)
     organization: Organisation;

@@ -181,7 +181,7 @@ export class CargoBikeAPI extends DataSource {
      * @param param0 cargoBike to be updated
      */
     async updateCargoBike (cargoBike: any, req: any, dataSources: any) {
-        // TODO let lock cargoBike can return error to save one sql query, this will be a complex sql query
+        // TODO lock cargoBike can return error to save one sql query, this will be a complex sql query
         if (!await this.checkId(CargoBike, 'cargobike', cargoBike.id)) {
             return new GraphQLError('ID not found');
         }
@@ -196,7 +196,6 @@ export class CargoBikeAPI extends DataSource {
             .where('cargoBike.id = :id', { id: cargoBike.id })
             .getOne();
         if (bike.id) {
-            const lendingStationId = cargoBike.lendingStationId;
             delete cargoBike.lendingStationId;
             await this.connection.manager
                 .createQueryBuilder()
@@ -204,14 +203,7 @@ export class CargoBikeAPI extends DataSource {
                 .set({ ...cargoBike })
                 .where('id = :id', { id: bike.id })
                 .execute();
-            if (lendingStationId || lendingStationId === null) {
-                await this.connection.getRepository(CargoBike)
-                    .createQueryBuilder()
-                    .relation(CargoBike, 'lendingStation')
-                    .of(cargoBike.id)
-                    .set(lendingStationId);
-            }
-            !keepLock && this.unlockCargoBike(cargoBike.id, req, dataSources);
+            !keepLock && await this.unlockCargoBike(cargoBike.id, req, dataSources);
             return await this.findCargoBikeById(bike.id);
         } else {
             return new GraphQLError('ID not in database');
@@ -233,11 +225,6 @@ export class CargoBikeAPI extends DataSource {
                     .values([cargoBike])
                     .returning('*')
                     .execute();
-                await entityManager.getRepository(CargoBike)
-                    .createQueryBuilder('cargobike')
-                    .relation(CargoBike, 'lendingStation')
-                    .of(inserts.identifiers[0].id)
-                    .set(cargoBike?.lendingStationId);
                 await entityManager.getRepository(CargoBike)
                     .createQueryBuilder('cargobike')
                     .relation(CargoBike, 'provider')
@@ -293,15 +280,6 @@ export class CargoBikeAPI extends DataSource {
         return result === 1;
     }
 
-    // think this can go
-    async findEquipmentJoinBikeById (id: number) {
-        return await this.connection.getRepository(Equipment)
-            .createQueryBuilder('equipment')
-            .leftJoinAndSelect('equipment.cargoBike', 'cargoBike')
-            .where('equipment.id = :id', { id: id })
-            .getOne();
-    }
-
     async equipmentByCargoBikeId (offset: number, limit: number, id: number) {
         return await this.connection.getRepository(Equipment)
             .createQueryBuilder('equipment')
@@ -324,7 +302,6 @@ export class CargoBikeAPI extends DataSource {
                 .relation(Equipment, 'cargoBike')
                 .of(equipment.id)
                 .set(equipment.cargoBikeId);
-            // return this.findEquipmentJoinBikeById(inserts.identifiers[0].id);
         }
         return this.findEquipmentById(inserts.identifiers[0].id);
     }

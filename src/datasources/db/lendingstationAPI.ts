@@ -1,7 +1,7 @@
 import { DataSource } from 'apollo-datasource';
 import { ApolloError, UserInputError } from 'apollo-server';
 import { GraphQLError } from 'graphql';
-import {Connection, EntityManager, getConnection, QueryFailedError} from 'typeorm';
+import { Connection, EntityManager, getConnection, QueryFailedError } from 'typeorm';
 import { CargoBike } from '../../model/CargoBike';
 import { LendingStation } from '../../model/LendingStation';
 import { TimeFrame } from '../../model/TimeFrame';
@@ -35,17 +35,22 @@ export class LendingStationAPI extends DataSource {
             .getMany() || new GraphQLError('Internal Server Error: could not query data from table lendingStation');
     }
 
+    /**
+     * Finds LendingStation of a cargoBike. It will check timeFrames that overlap with today and return these records
+     * @param id of cargoBike
+     */
     async lendingStationByCargoBikeId (id: number) {
-        return await this.connection.getRepository(LendingStation)
-            .createQueryBuilder('lendingStation')
-            .leftJoinAndSelect('lendingStation.cargoBikes', 'cargoBikes')
-            .where('"cargoBikes".id = :id', { id: id })
-            .getOne().catch(() => { return null; });
+        return (await this.connection.getRepository(TimeFrame)
+            .createQueryBuilder('timeframe')
+            .leftJoinAndSelect('timeframe.lendingStation', 'lendingStation')
+            .where('timeframe."cargoBikeId" = :id', { id: id })
+            .andWhere('timeframe."dateRange" && daterange(CURRENT_DATE,CURRENT_DATE,\'[]\')')
+            .getOne())?.lendingStation;
     }
 
     async lendingStationByTimeFrameId (id: number) {
-        await this.connection.getRepository(TimeFrame)
-            .createQueryBuilder('timeframe')
+        return await this.connection.getRepository(LendingStation)
+            .createQueryBuilder('lendingStation')
             .relation(TimeFrame, 'lendingStation')
             .of(id)
             .loadOne();
@@ -76,20 +81,32 @@ export class LendingStationAPI extends DataSource {
             .getMany().catch(() => { return []; });
     }
 
+    /**
+     * Counts all timeframes with one lendingStation that overlap with today's date
+     * @param id of lendingStation
+     */
     async numCargoBikesByLendingStationId (id: number) {
-        return await this.connection.getRepository(CargoBike)
-            .createQueryBuilder('cargoBike')
+        return await this.connection.getRepository(TimeFrame)
+            .createQueryBuilder('timeframe')
             .select()
-            .where('"cargoBike"."lendingStationId" = :id', { id: id })
+            .where('"timeframe"."lendingStationId" = :id', { id: id })
+            .andWhere('"timeframe"."dateRange" && daterange(CURRENT_DATE,CURRENT_DATE,\'[]\')')
             .getCount();
     }
 
+    /**
+     * Finds cargoBikes that are currently at the lendingStation specified by id.
+     * It checks all timeFrames for that bike and checks whether today is within its timeRange.
+     * @param id of lendingStation
+     */
     async cargoBikesByLendingStationId (id: number) {
         return await this.connection.getRepository(CargoBike)
-            .createQueryBuilder('cargoBike')
-            .select()
-            .where('"cargoBike"."lendingStationId" = :id', { id: id })
-            .getMany().catch(() => { return []; });
+            .createQueryBuilder('cargoBike') // .addFrom(TimeFrame, 'timeframe')
+            .leftJoinAndSelect('cargoBike.timeFrames', 'timeframes')
+            .where('timeframes."lendingStationId" = :id', { id: id })
+            .andWhere('timeframes."dateRange" && daterange(CURRENT_DATE,CURRENT_DATE,\'[]\')')
+            .printSql()
+            .getMany(); // .catch(() => { return []; });
     }
 
     /**

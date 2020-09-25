@@ -51,6 +51,9 @@ type CargoBike {
     lockedUntil: Date
 }
 
+"""
+if you want to add bike to a lending station, create a new timeFrame with to: Date = null
+"""
 input CargoBikeCreateInput {
     "see column A in info tabelle"
     group: Group!
@@ -81,10 +84,12 @@ input CargoBikeCreateInput {
     note: String
     providerId: ID
     insuranceData: InsuranceDataCreateInput!
-    lendingStationId: ID
     taxes: TaxesCreateInput!
 }
 
+"""
+if you want to add bike to a lending station, create a new timeFrame with to: Date = null
+"""
 input CargoBikeUpdateInput {
     id: ID!
     "see column A in info tabelle"
@@ -115,7 +120,6 @@ input CargoBikeUpdateInput {
     note: String
     provider: String
     insuranceData: InsuranceDataUpdateInput
-    lendingStationId: ID
     taxes: TaxesUpdateInput
     "will keep Bike locked if set to true, default = false"
     keepLock: Boolean
@@ -604,22 +608,25 @@ type LendingStation {
     numCargoBikes: Int!
 }
 
+"""
+If you want to create LendingStation with cargoBikes, use createTimeFrame and set to: Date = null
+"""
 input LendingStationCreateInput {
     name: String!
     contactPersonIds: [ID]!
     address: AddressCreateInput!
     loanPeriods: LoanPeriodsInput
-    timeFrameIds: [ID]!
 }
 
+"""
+If you want to create LendingStation with cargoBikes, use createTimeFrame and set to: Date = null
+"""
 input LendingStationUpdateInput {
     id: ID!
     name: String
     contactInformation: [ContactInformationUpdateInput]
     address: AddressUpdateInput
     loanPeriods: LoanPeriodsInput
-    timeFrames: [TimeFrameUpdateInput]
-    
 }
 
 """

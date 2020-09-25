@@ -5,7 +5,6 @@ import { Provider } from './Provider';
 import { Participant } from './Participant';
 import { InsuranceData } from './InsuranceData';
 import { TimeFrame } from './TimeFrame';
-import { LendingStation } from './LendingStation';
 import { Taxes } from './Taxes';
 import { Equipment } from './Equipment';
 import { Engagement } from './Engagement';
@@ -128,13 +127,6 @@ export class CargoBike extends Bike implements Lockable {
         nullable: true
     })
     timeFrames: TimeFrame[];
-
-    // This relation is a little redundant because one could also check all LoanPeriods for current station
-    @ManyToOne(type => LendingStation, lendingStation => lendingStation.cargoBikes, {
-        nullable: true,
-        eager: true
-    })
-    lendingStation: LendingStation;
 
     @OneToMany(type => Engagement, engagement => engagement.cargoBike)
     engagement: Engagement[];
