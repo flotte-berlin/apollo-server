@@ -1,7 +1,7 @@
 import { DataSource } from 'apollo-datasource';
-import { ApolloError } from 'apollo-server';
+import { ApolloError, UserInputError } from 'apollo-server';
 import { GraphQLError } from 'graphql';
-import { Connection, EntityManager, getConnection } from 'typeorm';
+import {Connection, EntityManager, getConnection, QueryFailedError} from 'typeorm';
 import { CargoBike } from '../../model/CargoBike';
 import { LendingStation } from '../../model/LendingStation';
 import { TimeFrame } from '../../model/TimeFrame';
@@ -143,7 +143,6 @@ export class LendingStationAPI extends DataSource {
     }
 
     async createTimeFrame (timeFrame: any) {
-        // TODO check overlapping time frames
         let inserts: any;
         try {
             await this.connection.transaction(async (entityManager: EntityManager) => {
@@ -151,6 +150,19 @@ export class LendingStationAPI extends DataSource {
                     timeFrame.to = '';
                 }
                 timeFrame.dateRange = '[' + timeFrame.from + ',' + timeFrame.to + ')';
+                // checking for overlapping time frames
+                const overlapping = await entityManager.getRepository(TimeFrame)
+                    .createQueryBuilder('timeframe')
+                    .select([
+                        'timeframe.id'
+                    ])
+                    .where('timeframe."cargoBikeId" = :id', { id: timeFrame.cargoBikeId })
+                    .andWhere('timeframe."dateRange" && :tr', { tr: timeFrame.dateRange })
+                    .getMany();
+                console.log(overlapping);
+                if (overlapping.length !== 0) {
+                    throw new UserInputError('TimeFrames with ids: ' + overlapping.map((e) => { return e.id + ', '; }) + 'are overlapping');
+                }
                 inserts = await entityManager.getRepository(TimeFrame)
                     .createQueryBuilder('timeframe')
                     .insert()
@@ -169,7 +181,12 @@ export class LendingStationAPI extends DataSource {
                     .set(timeFrame.lendingStationId);
             });
         } catch (e) {
-            // TODO: throw diffrent error when date input is wrong
+            console.log(e);
+            if (e instanceof UserInputError) {
+                return e;
+            } else if (e instanceof QueryFailedError) {
+                return e;
+            }
             return new ApolloError('Transaction could not be completed');
         }
         inserts.generatedMaps[0].id = inserts.identifiers[0].id;
