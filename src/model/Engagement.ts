@@ -32,7 +32,7 @@ export class Engagement {
     roleCoordinator: boolean;
 
     @Column()
-    roleEmployeADFC: boolean;
+    roleEmployeeADFC: boolean;
 
     @Column()
     roleMentor: boolean;

@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToMany, JoinTable, OneToMany, ManyToOne } from 'typeorm';
 import { TimeFrame } from './TimeFrame';
 import { CargoBike } from './CargoBike';
-import { Organization } from './Organization';
+import { Organisation } from './Organisation';
 import { Address } from './Provider';
 import { ContactPerson } from './ContactPerson';
 
@@ -46,6 +46,6 @@ export class LendingStation {
     })
     cargoBikes: CargoBike[];
 
-    @ManyToOne(type => Organization, organization => organization.lendingStations)
-    organization: Organization;
+    @ManyToOne(type => Organisation, organization => organization.lendingStations)
+    organization: Organisation;
 }

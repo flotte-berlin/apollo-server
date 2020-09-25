@@ -5,7 +5,7 @@ import { CargoBike } from './CargoBike';
 import { ContactInformation } from './ContactInformation';
 import { ContactPerson } from './ContactPerson';
 import { LendingStation } from './LendingStation';
-import { Organization } from './Organization';
+import { Organisation } from './Organisation';
 
 export class Address {
     @Column()
@@ -31,7 +31,7 @@ export class Provider {
     @Column({
         nullable: false
     })
-    formularName: String;
+    formName: String;
 
     @OneToMany(type => ContactPerson, contactPerson => contactPerson.provider, {
         nullable: true
@@ -44,8 +44,8 @@ export class Provider {
     @Column()
     isPrivatePerson: boolean;
 
-    @OneToOne(type => Organization, organization => organization.provider, {
+    @OneToOne(type => Organisation, organization => organization.provider, {
         nullable: true
     })
-    organization: Organization;
+    organization: Organisation;
 }

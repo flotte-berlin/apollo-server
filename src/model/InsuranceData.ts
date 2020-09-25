@@ -14,15 +14,15 @@ export class InsuranceData {
     noPnP: string;
 
     @Column()
-    maintananceResponsible: string;
+    maintenanceResponsible: string;
 
     @Column()
-    maintananceBenefactor: string;
+    maintenanceBenefactor: string;
 
     @Column({
         nullable: true
     })
-    maintananceAgreement: string;
+    maintenanceAgreement: string;
 
     @Column({
         nullable: true

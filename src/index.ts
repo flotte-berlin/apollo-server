@@ -15,7 +15,7 @@ import { Equipment } from './model/Equipment';
 import { LendingStation } from './model/LendingStation';
 import { TimeFrame } from './model/TimeFrame';
 import { Participant } from './model/Participant';
-import { Organization } from './model/Organization';
+import { Organisation } from './model/Organisation';
 import { Provider } from './model/Provider';
 import { Engagement } from './model/Engagement';
 import { Workshop } from './model/Workshop';
@@ -69,7 +69,7 @@ createConnection({
         Equipment,
         LendingStation,
         TimeFrame,
-        Organization,
+        Organisation,
         Participant,
         Provider,
         Engagement,

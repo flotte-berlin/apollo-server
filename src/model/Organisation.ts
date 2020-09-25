@@ -3,7 +3,7 @@ import { LendingStation } from './LendingStation';
 import { Address, Provider } from './Provider';
 
 @Entity()
-export class Organization {
+export class Organisation {
     @PrimaryGeneratedColumn()
     id: number;
 
@@ -19,7 +19,7 @@ export class Organization {
     @Column({
         nullable: true
     })
-    registerdAt: string;
+    registeredAt: string;
 
     @Column({
         nullable: true
