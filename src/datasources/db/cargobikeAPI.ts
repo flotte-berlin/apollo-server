@@ -7,6 +7,7 @@ import { Equipment } from '../../model/Equipment';
 import { Engagement } from '../../model/Engagement';
 import { Provider } from '../../model/Provider';
 import { TimeFrame } from '../../model/TimeFrame';
+import { LockUtils } from './utils';
 
 /**
  * extended datasource to feed resolvers with data about cargoBikes
@@ -66,7 +67,7 @@ export class CargoBikeAPI extends DataSource {
     }
 
     async lockCargoBike (id: number, req: any, dataSources: any) {
-        if (await this.lockEntity(CargoBike, 'cargobike', id, req, dataSources)) {
+        if (await LockUtils.lockEntity(this.connection, CargoBike, 'cargobike', id, req, dataSources)) {
             return this.findCargoBikeById(id);
         } else {
             return new GraphQLError('CargoBike is locked by other user');
@@ -77,103 +78,16 @@ export class CargoBikeAPI extends DataSource {
         return this.unlockEntity(CargoBike, 'cargobike', id, req, dataSources);
     }
 
-    /**
-     * locks any entity that implemts Lockable
-     */
     async lockEntity (target: ObjectType<Lockable>, alias: string, id: number, req: any, dataSources: any) {
-        const token = req.headers.authorization?.replace('Bearer ', '');
-        const userId = await dataSources.userAPI.getUserId(token);
-        const lock = await this.connection.getRepository(target)
-            .createQueryBuilder(alias)
-            .select([
-                alias + '.lockedUntil',
-                alias + '.lockedBy'
-            ])
-            .where('id = :id', {
-                id: id
-            })
-            .andWhere(alias + '.lockedUntil > CURRENT_TIMESTAMP')
-            .getOne();
-        // eslint-disable-next-line eqeqeq
-        if (!lock?.lockedUntil || lock?.lockedBy == userId) {
-            // no lock -> set lock
-            await this.connection.getRepository(target)
-                .createQueryBuilder(alias)
-                .update()
-                .set({
-                    lockedUntil: () => 'CURRENT_TIMESTAMP + INTERVAL \'10 MINUTE\'',
-                    lockedBy: userId
-                })
-                .where('id = :id', { id: id })
-                .execute();
-            return true;
-        } else {
-            // lock was set
-            return false;
-        }
+        return LockUtils.lockEntity(this.connection, target, alias, id, req, dataSources);
     }
 
     async unlockEntity (target: ObjectType<Lockable>, alias: string, id: number, req: any, dataSources: any) {
-        const token = req.headers.authorization?.replace('Bearer ', '');
-        const userId = await dataSources.userAPI.getUserId(token);
-        const lock = await this.connection.getRepository(target)
-            .createQueryBuilder(alias)
-            .select([
-                alias + '.lockedUntil',
-                alias + '.lockedBy'
-            ])
-            .where('id = :id', {
-                id: id
-            })
-            .andWhere(alias + '.lockedUntil > CURRENT_TIMESTAMP')
-            .getOne();
-        if (!lock?.lockedUntil) {
-            // no lock
-            return true;
-        // eslint-disable-next-line eqeqeq
-        } else if (lock?.lockedBy == userId) {
-            // user can unlock
-            await this.connection.getRepository(target)
-                .createQueryBuilder(alias)
-                .update()
-                .set({
-                    lockedUntil: null,
-                    lockedBy: null
-                })
-                .where('id = :id', { id: id })
-                .execute();
-            return true;
-        } else {
-            // enity is locked by other user
-            return false;
-        }
+        return LockUtils.unlockEntity(this.connection, target, alias, id, req, dataSources);
     }
 
     async isLocked (id: number, req: any, dataSources: any) {
-        const token = req.headers.authorization?.replace('Bearer ', '');
-        const userId = await dataSources.userAPI.getUserId(token);
-        const lock = await this.connection.getRepository(CargoBike)
-            .createQueryBuilder('cargobike')
-            .select([
-                'cargobike' + '.lockedUntil',
-                'cargobike' + '.lockedBy'
-            ])
-            .where('id = :id', {
-                id: id
-            })
-            .andWhere('cargobike' + '.lockedUntil > CURRENT_TIMESTAMP')
-            .getOne();
-        if (!lock?.lockedUntil) {
-            // no lock
-            return false;
-        // eslint-disable-next-line eqeqeq
-        } else if (lock?.lockedBy == userId) {
-            // user has locked
-            return false;
-        } else {
-            // enity is locked by other user
-            return true;
-        }
+        return LockUtils.isLocked(this.connection, CargoBike, 'cargobike', id, req, dataSources);
     }
 
     /**

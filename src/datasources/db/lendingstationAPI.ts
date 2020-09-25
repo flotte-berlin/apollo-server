@@ -209,4 +209,56 @@ export class LendingStationAPI extends DataSource {
         inserts.generatedMaps[0].id = inserts.identifiers[0].id;
         return inserts.generatedMaps[0];
     }
+
+   /* async updateTimeFrame (timeFrame: any) {
+        try {
+            await this.connection.transaction(async (entityManager: EntityManager) => {
+                if (timeFrame.to === undefined) {
+                    timeFrame.to = '';
+                }
+                timeFrame.dateRange = '[' + timeFrame.from + ',' + timeFrame.to + ')';
+                // checking for overlapping time frames
+                const overlapping = await entityManager.getRepository(TimeFrame)
+                    .createQueryBuilder('timeframe')
+                    .update()
+                    values([])
+                    .select([
+                        'timeframe.id'
+                    ])
+                    .where('timeframe."cargoBikeId" = :id', { id: timeFrame.cargoBikeId })
+                    .andWhere('timeframe."dateRange" && :tr', { tr: timeFrame.dateRange })
+                    .getMany();
+                console.log(overlapping);
+                if (overlapping.length !== 0) {
+                    throw new UserInputError('TimeFrames with ids: ' + overlapping.map((e) => { return e.id + ', '; }) + 'are overlapping');
+                }
+                inserts = await entityManager.getRepository(TimeFrame)
+                    .createQueryBuilder('timeframe')
+                    .insert()
+                    .returning('*')
+                    .values([timeFrame])
+                    .execute();
+                await entityManager.getRepository(TimeFrame)
+                    .createQueryBuilder()
+                    .relation(TimeFrame, 'cargoBike')
+                    .of(inserts.identifiers[0].id)
+                    .set(timeFrame.cargoBikeId);
+                await entityManager.getRepository(TimeFrame)
+                    .createQueryBuilder()
+                    .relation(TimeFrame, 'lendingStation')
+                    .of(inserts.identifiers[0].id)
+                    .set(timeFrame.lendingStationId);
+            });
+        } catch (e) {
+            console.log(e);
+            if (e instanceof UserInputError) {
+                return e;
+            } else if (e instanceof QueryFailedError) {
+                return e;
+            }
+            return new ApolloError('Transaction could not be completed');
+        }
+        inserts.generatedMaps[0].id = inserts.identifiers[0].id;
+        return inserts.generatedMaps[0];
+    }*/
 }
