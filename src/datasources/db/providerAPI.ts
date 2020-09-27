@@ -29,29 +29,25 @@ export class ProviderAPI extends DataSource {
 
     async createProvider (provider: any) {
         let inserts: any;
-        try {
-            await this.connection.transaction(async (entityManager: any) => {
-                inserts = await entityManager.getRepository(Provider)
-                    .createQueryBuilder('provider')
-                    .insert()
-                    .values([provider])
-                    .returning('*')
-                    .execute();
-                await entityManager.getRepository(Provider)
-                    .createQueryBuilder('provider')
-                    .relation(Provider, 'cargoBikes')
-                    .of(inserts.identifiers[0].id)
-                    .add(provider.cargoBikeIds);
-                await entityManager.getRepository(Provider)
-                    .createQueryBuilder('provider')
-                    .relation(Provider, 'contactPersons')
-                    .of(inserts.identifiers[0].id)
-                    .add(provider.contactPersonIds);
-            });
-        } catch (e: any) {
-            console.log(e);
-            return new GraphQLError('Transaction could not be completed');
-        }
+        await this.connection.transaction(async (entityManager: any) => {
+            inserts = await entityManager.getRepository(Provider)
+                .createQueryBuilder('provider')
+                .insert()
+                .values([provider])
+                .returning('*')
+                .execute();
+            await entityManager.getRepository(Provider)
+                .createQueryBuilder('provider')
+                .relation(Provider, 'cargoBikes')
+                .of(inserts.identifiers[0].id)
+                .add(provider.cargoBikeIds);
+            await entityManager.getRepository(Provider)
+                .createQueryBuilder('provider')
+                .relation(Provider, 'contactPersons')
+                .of(inserts.identifiers[0].id)
+                .add(provider.contactPersonIds);
+        });
+
         const ret = inserts.generatedMaps[0];
         ret.id = inserts.identifiers[0].id;
         return ret;

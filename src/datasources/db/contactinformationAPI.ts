@@ -105,7 +105,6 @@ export class ContactInformationAPI extends DataSource {
             .select()
             .where('ci."personId" = :id', { id: id })
             .getMany();
-        console.log(res);
         return res;
     }
 

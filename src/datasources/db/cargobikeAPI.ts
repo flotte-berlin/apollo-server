@@ -134,29 +134,24 @@ export class CargoBikeAPI extends DataSource {
      */
     async createCargoBike ({ cargoBike }: { cargoBike: any }) {
         let inserts: any;
-        try {
-            await this.connection.transaction(async (entityManager:any) => {
-                inserts = await entityManager.getRepository(CargoBike)
-                    .createQueryBuilder('cargobike')
-                    .insert()
-                    .values([cargoBike])
-                    .returning('*')
-                    .execute();
-                await entityManager.getRepository(CargoBike)
-                    .createQueryBuilder('cargobike')
-                    .relation(CargoBike, 'provider')
-                    .of(inserts.identifiers[0].id)
-                    .set(cargoBike?.providerId);
-                cargoBike?.equipmentTypeIds && await entityManager.getRepository(CargoBike)
-                    .createQueryBuilder('cargobike')
-                    .relation(CargoBike, 'equipmentTypeIds')
-                    .of(inserts.identifiers[0].id)
-                    .add(cargoBike.equipmentTypeIds);
-            });
-        } catch (e: any) {
-            console.log(e);
-            return new GraphQLError('Transaction could not be completed');
-        }
+        await this.connection.transaction(async (entityManager:any) => {
+            inserts = await entityManager.getRepository(CargoBike)
+                .createQueryBuilder('cargobike')
+                .insert()
+                .values([cargoBike])
+                .returning('*')
+                .execute();
+            await entityManager.getRepository(CargoBike)
+                .createQueryBuilder('cargobike')
+                .relation(CargoBike, 'provider')
+                .of(inserts.identifiers[0].id)
+                .set(cargoBike?.providerId);
+            cargoBike?.equipmentTypeIds && await entityManager.getRepository(CargoBike)
+                .createQueryBuilder('cargobike')
+                .relation(CargoBike, 'equipmentTypeIds')
+                .of(inserts.identifiers[0].id)
+                .add(cargoBike.equipmentTypeIds);
+        });
         const newbike = inserts.generatedMaps[0];
         newbike.id = inserts.identifiers[0].id;
         return newbike;

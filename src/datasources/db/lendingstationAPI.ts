@@ -176,7 +176,6 @@ export class LendingStationAPI extends DataSource {
                     .where('timeframe."cargoBikeId" = :id', { id: timeFrame.cargoBikeId })
                     .andWhere('timeframe."dateRange" && :tr', { tr: timeFrame.dateRange })
                     .getMany();
-                console.log(overlapping);
                 if (overlapping.length !== 0) {
                     throw new UserInputError('TimeFrames with ids: ' + overlapping.map((e) => { return e.id + ', '; }) + 'are overlapping');
                 }
@@ -198,7 +197,6 @@ export class LendingStationAPI extends DataSource {
                     .set(timeFrame.lendingStationId);
             });
         } catch (e) {
-            console.log(e);
             if (e instanceof UserInputError) {
                 return e;
             } else if (e instanceof QueryFailedError) {
@@ -210,7 +208,7 @@ export class LendingStationAPI extends DataSource {
         return inserts.generatedMaps[0];
     }
 
-   /* async updateTimeFrame (timeFrame: any) {
+    /* async updateTimeFrame (timeFrame: any) {
         try {
             await this.connection.transaction(async (entityManager: EntityManager) => {
                 if (timeFrame.to === undefined) {
@@ -260,5 +258,5 @@ export class LendingStationAPI extends DataSource {
         }
         inserts.generatedMaps[0].id = inserts.identifiers[0].id;
         return inserts.generatedMaps[0];
-    }*/
+    } */
 }

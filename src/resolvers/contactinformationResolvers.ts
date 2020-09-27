@@ -40,7 +40,6 @@ export default {
     ContactInformation: {
         person: (parent: any, __: any, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.ReadPerson)) {
-                console.log(parent);
                 return dataSources.contactInformationAPI.personByContactInformationId(parent.id);
             } else {
                 return new GraphQLError('Insufficient Permissions');
