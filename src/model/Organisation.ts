@@ -1,21 +1,31 @@
-import { PrimaryGeneratedColumn, OneToOne, OneToMany, Column, Entity } from 'typeorm';
+import { PrimaryGeneratedColumn, OneToOne, OneToMany, Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { LendingStation } from './LendingStation';
 import { Address, Provider } from './Provider';
+import { ContactInformation } from './ContactInformation';
 
 @Entity()
 export class Organisation {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @OneToMany(type => LendingStation, lendingStation => lendingStation.organization)
+    @Column()
+    name: string;
+
+    @OneToMany(type => LendingStation, lendingStation => lendingStation.organisationId)
     lendingStations: LendingStation[];
 
-    @OneToOne(type => Provider, provider => provider.organization, {
+    @OneToOne(type => Provider, provider => provider.organisationId, {
         nullable: true
     })
-    provider: Provider;
+    providerId: number;
 
-    // Court where association was registerd
+    @ManyToOne(type => ContactInformation)
+    @JoinColumn({
+        name: 'contactInformationId'
+    })
+    contactInformationId: number;
+
+    // Court where association was registered
     @Column({
         nullable: true
     })

@@ -27,9 +27,6 @@ export default {
         }
     },
     LendingStation: {
-        contactPersons (parent: any, __: any, { dataSources, req }: { dataSources: any, req: any }) {
-            return dataSources.contactInformationAPI.contactPersonsByLendingStationId(parent.id);
-        },
         timeFrames (parent: any, __: any, { dataSources, req }: { dataSources: any, req: any }) {
             return dataSources.lendingStationAPI.timeFramesByLendingStationId(parent.id);
         },

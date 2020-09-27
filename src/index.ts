@@ -31,6 +31,8 @@ import { WorkshopType } from './model/WorkshopType';
 import { EngagementType } from './model/EngagementType';
 import { EquipmentType } from './model/EquipmentType';
 import { BikeEventType } from './model/BikeEventType';
+import { WorkshopAPI } from './datasources/db/workshopAPI';
+import workshopResolvers from './resolvers/workshopResolvers';
 
 require('dotenv').config();
 
@@ -96,7 +98,8 @@ const server = new ApolloServer({
         lendingstationResolvers,
         participantResolvers,
         providerResolvers,
-        contactinformationResolvers
+        contactinformationResolvers,
+        workshopResolvers
     ],
     typeDefs,
     dataSources: () => ({
@@ -105,6 +108,7 @@ const server = new ApolloServer({
         participantAPI: new ParticipantAPI(),
         contactInformationAPI: new ContactInformationAPI(),
         providerAPI: new ProviderAPI(),
+        workshopAPI: new WorkshopAPI(),
         userAPI
     }),
     context: (req: any) => {

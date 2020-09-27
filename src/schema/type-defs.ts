@@ -242,6 +242,34 @@ input ParticipantCreateInput {
     memberCoreTeam: Boolean
 }
 
+type Workshop {
+    id: ID!
+    title: String!
+    description: String!
+    date: Date!
+    workshopType: WorkshopType!
+    trainer1: Participant!
+    trainer2: Participant
+}
+
+input WorkshopCreateInput {
+    title: String!
+    description: String
+    date: Date!
+    workshopTypeId: ID!
+    trainer1Id: ID!
+    trainer2Id: ID
+}
+
+type WorkshopType {
+    id: ID!
+    name: String!
+}
+
+input WorkshopTypeCreateInput {
+    name: String!
+}
+
 type EngagementType {
     id: ID!
     name: String!
@@ -295,20 +323,20 @@ input EngagementCreateInput {
 
 type Taxes {
     costCenter: String!
-    organizationArea: OrganizationArea
+    organisationArea: OrganisationArea
 }
 
 input TaxesCreateInput {
     costCenter: String!
-    organizationArea: OrganizationArea
+    organisationArea: OrganisationArea
 }
 
 input TaxesUpdateInput {
     costCenter: String
-    organizationArea: OrganizationArea
+    organisationArea: OrganisationArea
 }
 
-enum OrganizationArea {
+enum OrganisationArea {
     IB
     ZB
 }
@@ -535,20 +563,17 @@ enum StickerBikeNameState {
 type Provider {
     id: ID!
     formName: String
-    contactPersons: [ContactInformation]!
-    isPrivatePerson: Boolean!
+    privatePerson: ContactInformation
     organisation: Organisation
-    cargoBikes: [CargoBike]!
+    cargoBikes: [CargoBike]
 }
 
 "(dt. Anbieter)"
 input ProviderCreateInput {
     formName: String!
-    "i think it makes more sense to create Provider and then add new ContactPersons"
-    contactPersonIds: [ID]!
-    isPrivatePerson: Boolean!
+    privatePersonId: ID
     organisationId: ID
-    cargoBikeIds: [ID]!
+    cargoBikeIds: [ID]
 }
 
 """
@@ -616,6 +641,7 @@ input ContactPersonUpdateInput {
 
 type Organisation {
     id: ID!
+    name: String!
     address: Address
     "(dt. Ausleihstation)"
     lendingStations: [LendingStation]
@@ -624,6 +650,21 @@ type Organisation {
     "If Club, at what court registered"
     registeredAt: String
     provider: Provider
+    contactInformation: ContactInformation
+    otherData: String
+}
+
+input OrganisationCreateInput {
+    address: AddressCreateInput!
+    name: String!
+    "(dt. Ausleihstation)"
+    lendingStationIds: [ID]
+    "registration number of association"
+    associationNo: String!
+    "If Club, at what court registered"
+    registeredAt: String
+    providerId: ID
+    contactInformationId: ID
     otherData: String
 }
 
@@ -631,10 +672,11 @@ type Organisation {
 type LendingStation {
     id: ID!
     name: String!
-    contactPersons: [ContactPerson]!
+    contactInformationIntern: ContactInformation
+    contactInformationExtern: ContactInformation
     address: Address!
     timeFrames: [TimeFrame]!
-    loanPeriods: LoanPeriods
+    loanPeriod: LoanPeriod
     cargoBikes: [CargoBike]
     "Total amount of cargoBikes currently assigned to the lending station"
     numCargoBikes: Int!
@@ -645,9 +687,10 @@ If you want to create LendingStation with cargoBikes, use createTimeFrame and se
 """
 input LendingStationCreateInput {
     name: String!
-    contactPersonIds: [ID]!
+    contactInformationInternId: ID
+    contactInformationExternId: ID
     address: AddressCreateInput!
-    loanPeriods: LoanPeriodsInput
+    loanPeriod: LoanPeriodInput
 }
 
 """
@@ -658,13 +701,13 @@ input LendingStationUpdateInput {
     name: String
     contactInformation: [ContactInformationUpdateInput]
     address: AddressUpdateInput
-    loanPeriods: LoanPeriodsInput
+    loanPeriod: LoanPeriodInput
 }
 
 """
 (dt. Ausleihzeiten) not implemented
 """
-type LoanPeriods {
+type LoanPeriod {
     generalRemark: String
     "notes for each day of the week, starting on Monday"
     notes: [String]
@@ -678,7 +721,7 @@ type LoanPeriods {
 """
 (dt. Ausleihzeiten)
 """
-input LoanPeriodsInput {
+input LoanPeriodInput {
     generalRemark: String
     "notes for each day of the week, starting on Monday"
     notes: [String]
@@ -753,6 +796,8 @@ type Query {
     participantById(id:ID!):  Participant
     "p"
     participants(offset: Int!, limit: Int!): [ Participant]!
+    workshopTypes(offset: Int!, limit: Int!): [WorkshopType]
+    workshops(offset: Int!, limit: Int!): [Workshop]
     lendingStationById(id:ID!): LendingStation
     lendingStations(offset: Int!, limit: Int!): [LendingStation]!
     timeframes(offset: Int!, limit: Int!): [TimeFrame]!
@@ -789,6 +834,8 @@ type Mutation {
     createBikeEvent(bikeEvent: BikeEventCreateInput): BikeEvent!
     "create participant"
     createParticipant(participant: ParticipantCreateInput!): Participant!
+    createWorkshopType(workshopType: WorkshopTypeCreateInput!): WorkshopType!
+    createWorkshop(workshop: WorkshopCreateInput!): Workshop!
     "create new contactInfo"
     createContactInformation(contactInformation: ContactInformationCreateInput!): ContactInformation!
     createPerson(person: PersonCreateInput!): Person!
@@ -800,6 +847,7 @@ type Mutation {
     updateContactPerson(contactPerson: ContactPersonUpdateInput): ContactPerson
     "create Provider, if cargoBikeIds or contactPersonIds are not valid, provider will still be created"
     createProvider(provider: ProviderCreateInput!): Provider!
+    createOrganisation(organisation: OrganisationCreateInput!): Organisation!
     
 }
 

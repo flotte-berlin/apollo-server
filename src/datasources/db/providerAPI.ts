@@ -1,6 +1,7 @@
 import { DataSource } from 'apollo-datasource';
-import { Connection, getConnection } from 'typeorm';
+import { Connection, EntityManager, getConnection } from 'typeorm';
 import { Provider } from '../../model/Provider';
+import { Organisation } from '../../model/Organisation';
 
 export class ProviderAPI extends DataSource {
     connection : Connection
@@ -26,6 +27,30 @@ export class ProviderAPI extends DataSource {
             .getMany();
     }
 
+    async providerByOrganisationId (id: number) {
+        return await this.connection.getRepository(Provider)
+            .createQueryBuilder('p')
+            .select()
+            .where('p."organisationId" = :id', { id: id })
+            .getOne();
+    }
+
+    async organisationByProviderId (id: number) {
+        return await this.connection.getRepository(Provider)
+            .createQueryBuilder()
+            .relation(Provider, 'organisationId')
+            .of(id)
+            .loadOne();
+    }
+
+    async contactInformationByOrganisationId (id: number) {
+        return await this.connection.getRepository(Organisation)
+            .createQueryBuilder('o')
+            .relation(Organisation, 'contactInformationId')
+            .of(id)
+            .loadOne();
+    }
+
     async createProvider (provider: any) {
         let inserts: any = null;
         await this.connection.transaction(async (entityManager: any) => {
@@ -40,15 +65,25 @@ export class ProviderAPI extends DataSource {
                 .relation(Provider, 'cargoBikes')
                 .of(inserts.identifiers[0].id)
                 .add(provider.cargoBikeIds);
-            await entityManager.getRepository(Provider)
-                .createQueryBuilder('provider')
-                .relation(Provider, 'contactPersons')
-                .of(inserts.identifiers[0].id)
-                .add(provider.contactPersonIds);
         });
-
         const ret = inserts.generatedMaps[0];
         ret.id = inserts.identifiers[0].id;
         return ret;
+    }
+
+    async createOrganisation (organisation: any) {
+        let inserts: any = null;
+        await this.connection.transaction(async (entityManager: EntityManager) => {
+            inserts = await entityManager.getRepository(Organisation)
+                .createQueryBuilder('o')
+                .insert()
+                .values([organisation])
+                .execute();
+            await entityManager.getRepository(Organisation).createQueryBuilder()
+                .relation(Organisation, 'providerId')
+                .of(inserts.identifiers[0].id)
+                .set(organisation.providerId);
+        });
+        return inserts.generatedMaps[0];
     }
 }

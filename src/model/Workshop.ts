@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToMany, ManyToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToMany, ManyToOne, JoinColumn } from 'typeorm';
 import { Participant } from './Participant';
 import { WorkshopType } from './WorkshopType';
 import { Lockable } from './CargoBike';
@@ -30,10 +30,16 @@ export class Workshop implements Lockable {
     @ManyToOne(type => Participant, {
         nullable: false
     })
+    @JoinColumn({
+        name: 'trainer1Id'
+    })
     trainer1Id: number;
 
     @ManyToOne(type => Participant, {
         nullable: true
+    })
+    @JoinColumn({
+        name: 'trainer2Id'
     })
     trainer2: Participant;
 

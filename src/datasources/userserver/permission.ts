@@ -4,7 +4,9 @@ export enum Permission {
     WriteBike = 'BIKE_WRITE',
     WriteEquipmentType = 'EQUIPMENT_TYPE_WRITE',
     WritePerson = 'PERSON_WRITE',
-    ReadPerson = 'PERSON_READ'
+    ReadPerson = 'PERSON_READ',
+    WriteProvider = 'PROVIDER_WRITE',
+    WriteWorkshopType = 'WORKSHOP_TYPE_WRITE'
 }
 
 // Permissions where the creation will be requested on startup
@@ -28,5 +30,13 @@ export const requiredPermissions = [
     {
         name: Permission.ReadPerson,
         description: 'Allows reading of contact information'
+    },
+    {
+        name: Permission.WriteProvider,
+        description: 'Allows to modify providers and organisations'
+    },
+    {
+        name: Permission.WriteWorkshopType,
+        description: 'Allows to create and modify workshop types'
     }
 ];

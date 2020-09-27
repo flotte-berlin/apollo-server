@@ -1,26 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne, JoinColumn } from 'typeorm';
 import { TimeFrame } from './TimeFrame';
 import { Organisation } from './Organisation';
 import { Address } from './Provider';
 import { ContactInformation } from './ContactInformation';
 
-@Entity()
-export class LendingStation {
-    @PrimaryGeneratedColumn()
-    id: number;
-
-    @Column()
-    name: string;
-
-    @ManyToOne(type => ContactInformation)
-    contactInformationIntern: ContactInformation;
-
-    @ManyToOne(type => ContactInformation)
-    contactInformationExtern: ContactInformation;
-
-    @Column(type => Address)
-    address: Address;
-
+export class LoanPeriod {
     /**
      * validity for loanPeriods
      */
@@ -39,9 +23,44 @@ export class LendingStation {
     })
     to: Date;
 
-    @OneToMany(type => TimeFrame, loanPeriod => loanPeriod.lendingStation)
-    loanPeriods: TimeFrame[];
+    @Column({
+        type: 'simple-array'
+    })
+    loanTimes: string[];
+}
+
+@Entity()
+export class LendingStation {
+    @PrimaryGeneratedColumn()
+    id: number;
+
+    @Column()
+    name: string;
+
+    @ManyToOne(type => ContactInformation)
+    @JoinColumn({
+        name: 'contactInformationInternId'
+    })
+    contactInformationInternId: number;
+
+    @ManyToOne(type => ContactInformation)
+    @JoinColumn({
+        name: 'contactInformationExternId'
+    })
+    contactInformationExternId: number;
+
+    @Column(type => Address)
+    address: Address;
+
+    @Column(type => LoanPeriod)
+    loanPeriod: LoanPeriod;
+
+    @OneToMany(type => TimeFrame, timeFrame => timeFrame.lendingStation)
+    timeFrames: TimeFrame[];
 
     @ManyToOne(type => Organisation, organization => organization.lendingStations)
-    organization: Organisation;
+    @JoinColumn({
+        name: 'organisationId'
+    })
+    organisationId: number;
 }

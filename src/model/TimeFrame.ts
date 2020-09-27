@@ -10,13 +10,12 @@ export class TimeFrame {
     @PrimaryGeneratedColumn()
     id: number;
 
-    // I have to find out how typorm will map the datetange data type.
     @Column({
         type: 'daterange'
     })
     dateRange: Date[];
 
-    @ManyToOne(type => LendingStation, lendingStation => lendingStation.loanPeriods)
+    @ManyToOne(type => LendingStation, lendingStation => lendingStation.timeFrames)
     lendingStation: LendingStation;
 
     @Column({
