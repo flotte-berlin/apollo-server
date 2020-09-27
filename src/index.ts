@@ -9,7 +9,6 @@ import express from 'express';
 import { requiredPermissions } from './datasources/userserver/permission';
 import { CargoBike } from './model/CargoBike';
 import { BikeEvent } from './model/BikeEvent';
-import { BikeModel } from './model/BikeModel';
 import { ContactInformation } from './model/ContactInformation';
 import { Equipment } from './model/Equipment';
 import { LendingStation } from './model/LendingStation';
@@ -69,7 +68,6 @@ createConnection({
         CargoBike,
         BikeEvent,
         BikeEventType,
-        BikeModel,
         ContactInformation,
         Equipment,
         EquipmentType,

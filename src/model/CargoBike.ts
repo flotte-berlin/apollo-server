@@ -1,6 +1,5 @@
 /* eslint no-unused-vars: "off" */
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany, ManyToOne, JoinColumn, ManyToMany } from 'typeorm';
-import { Bike } from './BikeFeatures';
 import { Provider } from './Provider';
 import { Participant } from './Participant';
 import { InsuranceData } from './InsuranceData';
@@ -61,9 +60,88 @@ export class Security {
     })
     adfcCoding: string;
 }
+export class TechnicalEquipment {
+    @Column()
+    bicycleShift: string;
+
+    @Column()
+    isEBike: boolean;
+
+    @Column()
+    hasLightSystem: boolean;
+
+    @Column({
+        nullable: true
+    })
+    specialFeatures: string;
+}
+
+export class DimensionsAndLoad {
+    @Column()
+    hasCoverBox: boolean;
+
+    @Column()
+    lockable:boolean;
+
+    @Column({
+        type: 'decimal'
+    })
+    boxLength: number;
+
+    @Column({
+        type: 'decimal'
+    })
+    boxWidth: number;
+
+    @Column({
+        type: 'decimal'
+    })
+    boxHeight: number;
+
+    @Column({
+        type: 'decimal'
+    })
+    maxWeightBox: number;
+
+    @Column({
+        type: 'decimal'
+    })
+    maxWeightLuggageRack: number;
+
+    @Column({
+        type: 'decimal'
+    })
+    maxWeightTotal: number;
+
+    @Column({
+        type: 'decimal'
+    })
+    bikeLength: number;
+
+    @Column({
+        nullable: true,
+        type: 'decimal'
+
+    })
+    bikeWidth: number;
+
+    @Column({
+        nullable: true,
+        type: 'decimal'
+
+    })
+    bikeHeight: number;
+
+    @Column({
+        nullable: true,
+        type: 'decimal'
+
+    })
+    bikeWeight: number;
+}
 
 @Entity()
-export class CargoBike extends Bike implements Lockable {
+export class CargoBike implements Lockable {
     @PrimaryGeneratedColumn()
     id: number;
 
@@ -132,6 +210,32 @@ export class CargoBike extends Bike implements Lockable {
 
     @Column(type => Taxes)
     taxes: Taxes;
+
+    @Column({
+        nullable: true
+    })
+    description: string;
+
+    @Column()
+    modelName: string;
+
+    @Column()
+    numberOfWheels: number;
+
+    @Column()
+    forCargo: boolean;
+
+    @Column()
+    forChildren: boolean;
+
+    @Column()
+    numberOfChildren: number;
+
+    @Column(type => TechnicalEquipment)
+    technicalEquipment: TechnicalEquipment;
+
+    @Column(type => DimensionsAndLoad)
+    dimensionsAndLoad: DimensionsAndLoad;
 
     @Column({
         nullable: true
