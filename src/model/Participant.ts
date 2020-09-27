@@ -20,7 +20,7 @@ export class Participant {
     })
     end: Date;
 
-    @OneToOne(type => ContactInformation, {
+    @OneToOne(type => ContactInformation, contactInformation => contactInformation.participant, {
         nullable: true
     })
     @JoinColumn()
@@ -36,14 +36,12 @@ export class Participant {
     })
     usernameSlack: string;
 
-    @Column()
-    memberADFC: boolean;
-
     @Column({
         type: 'simple-array'
     })
     locationZIPs: string[];
 
+    // this should go, we dont need it
     @OneToMany(type => CargoBike, cargoBike => cargoBike.coordinator)
     cargoBikes: CargoBike[];
 
@@ -55,23 +53,18 @@ export class Participant {
     })
     workshops: Workshop[];
 
-    @Column()
+    @Column({
+        nullable: false,
+        default: false
+    })
     memberCoreTeam: boolean;
 
     @Column({
-        type: 'date',
-        nullable: true
+        nullable: false,
+        default: false
     })
-    workshopMentor: Date;
+    employeeADFC: boolean;
 
-    @Column({
-        type: 'date',
-        nullable: true
-    })
-    workshopAmbulance: Date;
-
-    @Column({
-        nullable: true
-    })
-    reserve: string;
+    @Column()
+    memberADFC: boolean;
 }

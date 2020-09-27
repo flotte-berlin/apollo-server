@@ -1,30 +1,34 @@
 /* eslint no-unused-vars: "off" */
 
-import { PrimaryGeneratedColumn, Column, OneToMany, Entity, OneToOne, ChildEntity } from 'typeorm';
-import { CargoBike } from './CargoBike';
+import { PrimaryGeneratedColumn, Column, OneToMany, Entity, OneToOne, ChildEntity, ManyToOne, JoinColumn } from 'typeorm';
+import { CargoBike, Lockable } from './CargoBike';
 import { ContactInformation } from './ContactInformation';
-import { ContactPerson } from './ContactPerson';
-import { LendingStation } from './LendingStation';
 import { Organisation } from './Organisation';
 
 export class Address {
-    @Column()
+    @Column({
+        default: ''
+    })
     street: string;
 
-    @Column()
+    @Column({
+        default: ''
+    })
     number: string;
 
-    @Column()
+    @Column({
+        default: ''
+    })
     zip: string;
 
     @Column({
-        nullable: true
+        default: ''
     })
     city: string;
 }
 
 @Entity()
-export class Provider {
+export class Provider implements Lockable {
     @PrimaryGeneratedColumn()
     id: number;
 
@@ -33,19 +37,31 @@ export class Provider {
     })
     formName: String;
 
-    @OneToMany(type => ContactPerson, contactPerson => contactPerson.provider, {
+    // is null when Provider is an organisation
+    @OneToOne(type => ContactInformation, {
         nullable: true
     })
-    contactPersons: ContactPerson[];
+    @JoinColumn()
+    contactInformationId: number;
+
+    // is null when Provider is a private Person
+    @OneToOne(type => Organisation, organization => organization.provider, {
+        nullable: true
+    })
+    @JoinColumn()
+    organization: Organisation;
 
     @OneToMany(type => CargoBike, cargoBike => cargoBike.provider)
     cargoBikes: CargoBike[];
 
-    @Column()
-    isPrivatePerson: boolean;
+    @Column({
+        nullable: true,
+        type: 'timestamp'
+    })
+    lockedUntil: Date;
 
-    @OneToOne(type => Organisation, organization => organization.provider, {
+    @Column({
         nullable: true
     })
-    organization: Organisation;
+    lockedBy: number;
 }

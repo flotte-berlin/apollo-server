@@ -23,11 +23,15 @@ import { LendingStationAPI } from './datasources/db/lendingstationAPI';
 import lendingstationResolvers from './resolvers/lendingstationResolvers';
 import { ParticipantAPI } from './datasources/db/participantAPI';
 import participantResolvers from './resolvers/participantResolvers';
-import { ContactPerson } from './model/ContactPerson';
 import { ContactInformationAPI } from './datasources/db/contactinformationAPI';
 import providerResolvers from './resolvers/providerResolvers';
 import { ProviderAPI } from './datasources/db/providerAPI';
 import contactinformationResolvers from './resolvers/contactinformationResolvers';
+import { Person } from './model/Person';
+import { WorkshopType } from './model/WorkshopType';
+import { EngagementType } from './model/EngagementType';
+import { EquipmentType } from './model/EquipmentType';
+import { BikeEventType } from './model/BikeEventType';
 
 require('dotenv').config();
 
@@ -64,17 +68,21 @@ createConnection({
     entities: [
         CargoBike,
         BikeEvent,
+        BikeEventType,
         BikeModel,
         ContactInformation,
         Equipment,
+        EquipmentType,
         LendingStation,
         TimeFrame,
         Organisation,
         Participant,
         Provider,
         Engagement,
+        EngagementType,
         Workshop,
-        ContactPerson
+        Person,
+        WorkshopType
     ],
     synchronize: true,
     logging: false

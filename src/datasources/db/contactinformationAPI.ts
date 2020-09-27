@@ -1,8 +1,6 @@
 import { DataSource } from 'apollo-datasource';
-import { GraphQLError } from 'graphql';
 import { Connection, getConnection } from 'typeorm';
 import { ContactInformation } from '../../model/ContactInformation';
-import { ContactPerson } from '../../model/ContactPerson';
 import { LendingStation } from '../../model/LendingStation';
 
 export class ContactInformationAPI extends DataSource {
@@ -13,11 +11,6 @@ export class ContactInformationAPI extends DataSource {
     }
 
     async contactPersonById (id: number) {
-        return await this.connection.getRepository(ContactPerson)
-            .createQueryBuilder('contactPerson')
-            .select()
-            .where('"contactPerson".id = :id', { id: id })
-            .getOne();
     }
 
     async numContactInformationById (id: number) {
@@ -45,6 +38,7 @@ export class ContactInformationAPI extends DataSource {
             .getOne();
     }
 
+    // TODO change to contactinformation
     async contactPersonsByLendingStationId (id: number) {
         return await this.connection
             .createQueryBuilder()
@@ -54,14 +48,16 @@ export class ContactInformationAPI extends DataSource {
     }
 
     async contactInformationByContactPersonId (id: number) {
-        return (await this.connection.getRepository(ContactPerson)
+        /* return (await this.connection.getRepository(ContactPerson)
             .createQueryBuilder('contactPerson')
             .leftJoinAndSelect('contactPerson.contactInformation', 'contactInformation')
             .where('"contactPerson".id = :id', { id: id })
             .getOne())?.contactInformation || new GraphQLError('ContactPerson has no ContactInformtion');
+         */
     }
 
     async createContactPerson (contactPerson: any) {
+        /*
         if (await this.contactInformationById(contactPerson.contactInformationId)) {
             let inserts: any;
             try {
@@ -83,9 +79,11 @@ export class ContactInformationAPI extends DataSource {
         } else {
             return null;
         }
+         */
     }
 
     async updateContactPerson (contactPerson: any) {
+        /*
         if (await this.contactPersonById(contactPerson.id)) {
             const contactInformationId = contactPerson.contactInformationId;
             delete contactPerson.contactInformationId;
@@ -120,5 +118,7 @@ export class ContactInformationAPI extends DataSource {
             // updated bike not found
             return null;
         }
+
+         */
     }
 }

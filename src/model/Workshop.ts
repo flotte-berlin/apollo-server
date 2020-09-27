@@ -1,13 +1,15 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToMany, ManyToOne } from 'typeorm';
 import { Participant } from './Participant';
+import { WorkshopType } from './WorkshopType';
+import { Lockable } from './CargoBike';
 
 @Entity()
-export class Workshop {
+export class Workshop implements Lockable {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column()
-    type: string;
+    @ManyToOne(type => WorkshopType, workshopType => workshopType.workshopIds)
+    workshopTypeId: number;
 
     @Column()
     title: string;
@@ -24,4 +26,25 @@ export class Workshop {
         nullable: true
     })
     participants: Participant[];
+
+    @ManyToOne(type => Participant, {
+        nullable: false
+    })
+    trainer1Id: number;
+
+    @ManyToOne(type => Participant, {
+        nullable: true
+    })
+    trainer2: Participant;
+
+    @Column({
+        nullable: true,
+        type: 'timestamp'
+    })
+    lockedUntil: Date;
+
+    @Column({
+        nullable: true
+    })
+    lockedBy: number;
 }

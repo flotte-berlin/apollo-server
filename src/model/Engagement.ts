@@ -1,6 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, ManyToOne, Column, JoinColumn } from 'typeorm';
 import { Participant } from './Participant';
 import { CargoBike } from './CargoBike';
+import { EngagementType } from './EngagementType';
 
 @Entity()
 export class Engagement {
@@ -17,6 +18,9 @@ export class Engagement {
     @ManyToOne(type => CargoBike, cargoBike => cargoBike.engagement)
     cargoBike: CargoBike;
 
+    @ManyToOne(type => EngagementType, engagementType => engagementType.engagementIds)
+    engagementTypeId: number;
+
     @Column({
         type: 'date'
     })
@@ -30,9 +34,6 @@ export class Engagement {
 
     @Column()
     roleCoordinator: boolean;
-
-    @Column()
-    roleEmployeeADFC: boolean;
 
     @Column()
     roleMentor: boolean;

@@ -1,8 +1,8 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToMany, JoinTable, OneToMany, ManyToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne } from 'typeorm';
 import { TimeFrame } from './TimeFrame';
 import { Organisation } from './Organisation';
 import { Address } from './Provider';
-import { ContactPerson } from './ContactPerson';
+import { ContactInformation } from './ContactInformation';
 
 @Entity()
 export class LendingStation {
@@ -12,9 +12,11 @@ export class LendingStation {
     @Column()
     name: string;
 
-    @ManyToMany(type => ContactPerson)
-    @JoinTable()
-    contactPersons: ContactPerson[];
+    @ManyToOne(type => ContactInformation)
+    contactInformationIntern: ContactInformation;
+
+    @ManyToOne(type => ContactInformation)
+    contactInformationExtern: ContactInformation;
 
     @Column(type => Address)
     address: Address;

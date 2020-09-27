@@ -1,54 +1,60 @@
-import { PrimaryGeneratedColumn, Column, Entity } from 'typeorm';
+import { PrimaryGeneratedColumn, Column, Entity, ManyToOne, OneToOne } from 'typeorm';
+import { Lockable } from './CargoBike';
+import { Person } from './Person';
+import { Address } from './Provider';
+import { Participant } from './Participant';
 
 @Entity()
-export class ContactInformation {
+export class ContactInformation implements Lockable {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column()
-    name: string;
+    @ManyToOne(type => Person, person => person.contactInformation)
+    person: Person;
 
-    @Column()
-    firstName: string;
-
-    @Column({
-        type: 'date',
+    @OneToOne(type => Participant, participant => participant.contactInformation, {
         nullable: true
     })
-    retiredAt: Date;
+    participant: Participant;
 
-    @Column({
-        nullable: true
+    @Column(type => {
+        return Address;
     })
-    phoneExtern: string;
+    address: Address;
 
     @Column({
         nullable: true
     })
-    phone2Extern: string;
+    phone: string;
 
     @Column({
         nullable: true
     })
-    phoneIntern: string;
+    phone2: string;
 
     @Column({
         nullable: true
     })
-    phone2Intern: string;
+    email: string;
 
     @Column({
         nullable: true
     })
-    emailExtern: string;
-
-    @Column({
-        nullable: true
-    })
-    emailIntern: string;
+    email2: string;
 
     @Column({
         nullable: true
     })
     note: string;
+
+    @Column({
+        nullable: true,
+        type: 'timestamp'
+    })
+    lockedUntil: Date;
+
+    @Column({
+        nullable: true
+    })
+    lockedBy: number;
 }

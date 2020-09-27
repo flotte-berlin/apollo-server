@@ -1,5 +1,5 @@
 /* eslint no-unused-vars: "off" */
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany, ManyToOne, JoinColumn, ManyToMany } from 'typeorm';
 import { Bike } from './BikeFeatures';
 import { Provider } from './Provider';
 import { Participant } from './Participant';
@@ -9,6 +9,7 @@ import { Taxes } from './Taxes';
 import { Equipment } from './Equipment';
 import { Engagement } from './Engagement';
 import { BikeEvent } from './BikeEvent';
+import { EquipmentType } from './EquipmentType';
 
 export enum Group {
     KL = 'KL',
@@ -81,11 +82,9 @@ export class CargoBike extends Bike implements Lockable {
     })
     equipment: Equipment[];
 
-    @Column({
-        type: 'simple-array',
-        nullable: true
-    })
-    miscellaneousEquipment: string[];
+    // Equipment that is not unique and is supposed to be selected out of a list e.g. drop down
+    @ManyToMany(type => EquipmentType, equipmentType => equipmentType.cargoBikes)
+    miscellaneousEquipment: EquipmentType[];
 
     // Security information
     @Column(type => Security)

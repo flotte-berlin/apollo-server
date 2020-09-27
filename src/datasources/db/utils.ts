@@ -7,7 +7,13 @@ export class LockUtils {
     }
 
     /**
-     * locks any entity that implements Lockable
+     * Locks any Entity, that
+     * @param connection
+     * @param target
+     * @param alias
+     * @param id
+     * @param req
+     * @param dataSources
      */
     static async lockEntity (connection: Connection, target: ObjectType<Lockable>, alias: string, id: number, req: any, dataSources: any) {
         const token = this.getToken(req);
@@ -42,6 +48,15 @@ export class LockUtils {
         }
     }
 
+    /**
+     * Unlocks any entity that implements Lockable.
+     * @param connection
+     * @param target
+     * @param alias
+     * @param id
+     * @param req
+     * @param dataSources
+     */
     static async unlockEntity (connection: Connection, target: ObjectType<Lockable>, alias: string, id: number, req: any, dataSources: any) {
         const token = this.getToken(req);
         const userId = await dataSources.userAPI.getUserId(token);
@@ -78,6 +93,15 @@ export class LockUtils {
         }
     }
 
+    /**
+     * Returns true if Entity is locked by another user.
+     * @param connection
+     * @param target
+     * @param alias
+     * @param id
+     * @param req
+     * @param dataSources
+     */
     static async isLocked (connection: Connection, target: ObjectType<Lockable>, alias: string, id: number, req: any, dataSources: any) {
         const token = this.getToken(req);
         const userId = await dataSources.userAPI.getUserId(token);
