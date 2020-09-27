@@ -1,5 +1,5 @@
 import { DataSource } from 'apollo-datasource';
-import { getConnection, Connection, ObjectType } from 'typeorm';
+import { getConnection, Connection, ObjectType, EntityManager } from 'typeorm';
 import { CargoBike, Lockable } from '../../model/CargoBike';
 import { GraphQLError } from 'graphql';
 import { BikeEvent } from '../../model/BikeEvent';
@@ -8,6 +8,7 @@ import { Engagement } from '../../model/Engagement';
 import { Provider } from '../../model/Provider';
 import { TimeFrame } from '../../model/TimeFrame';
 import { LockUtils } from './utils';
+import { EquipmentType } from '../../model/EquipmentType';
 
 /**
  * extended datasource to feed resolvers with data about cargoBikes
@@ -104,24 +105,27 @@ export class CargoBikeAPI extends DataSource {
         }
         const keepLock = cargoBike?.keepLock;
         delete cargoBike.keepLock;
-        const bike = await this.connection.manager.createQueryBuilder()
-            .select('cargoBike')
-            .from(CargoBike, 'cargoBike')
-            .where('cargoBike.id = :id', { id: cargoBike.id })
-            .getOne();
-        if (bike.id) {
-            delete cargoBike.lendingStationId;
-            await this.connection.manager
-                .createQueryBuilder()
-                .update(CargoBike)
-                .set({ ...cargoBike })
-                .where('id = :id', { id: bike.id })
-                .execute();
-            !keepLock && await this.unlockCargoBike(cargoBike.id, req, dataSources);
-            return await this.findCargoBikeById(bike.id);
-        } else {
-            return new GraphQLError('ID not in database');
+        delete cargoBike.lendingStationId;
+        let equipmentTypeIds: any = null;
+        if (cargoBike.equipmentTypeIds) {
+            equipmentTypeIds = cargoBike.equipmentTypeIds;
+            delete cargoBike.equipmentTypeIds;
         }
+        await this.connection.transaction(async (entityManager: EntityManager) => {
+            await entityManager.getRepository(CargoBike)
+                .createQueryBuilder('cargobike')
+                .update()
+                .set({ ...cargoBike })
+                .where('id = :id', { id: cargoBike.id })
+                .execute();
+            equipmentTypeIds && await entityManager.getRepository(CargoBike)
+                .createQueryBuilder('cargobike')
+                .relation(CargoBike, 'equipmentTypeIds')
+                .of(cargoBike.id)
+                .addAndRemove(equipmentTypeIds, await this.equipmentTypeByCargoBikeId(cargoBike.id)); // TODO remove all existing relations
+        });
+        !keepLock && await this.unlockCargoBike(cargoBike.id, req, dataSources);
+        return await this.findCargoBikeById(cargoBike.id);
     }
 
     /**
@@ -144,8 +148,14 @@ export class CargoBikeAPI extends DataSource {
                     .relation(CargoBike, 'provider')
                     .of(inserts.identifiers[0].id)
                     .set(cargoBike?.providerId);
+                cargoBike?.equipmentTypeIds && await entityManager.getRepository(CargoBike)
+                    .createQueryBuilder('cargobike')
+                    .relation(CargoBike, 'equipmentTypeIds')
+                    .of(inserts.identifiers[0].id)
+                    .add(cargoBike.equipmentTypeIds);
             });
         } catch (e: any) {
+            console.log(e);
             return new GraphQLError('Transaction could not be completed');
         }
         const newbike = inserts.generatedMaps[0];
@@ -284,5 +294,32 @@ export class CargoBikeAPI extends DataSource {
             .offset(offset)
             .limit(limit)
             .getMany();
+    }
+
+    async createEquipmentType (equipmentType: any) {
+        const inserts = await this.connection.getRepository(EquipmentType)
+            .createQueryBuilder('equipment')
+            .insert()
+            .values([equipmentType])
+            .returning('*')
+            .execute();
+        inserts.generatedMaps[0].id = inserts.identifiers[0].id;
+        return inserts.generatedMaps[0];
+    }
+
+    async equipmentTypeById (id: number) {
+        return await this.connection.getRepository(EquipmentType)
+            .createQueryBuilder('equipmentType')
+            .select()
+            .where('"equipmentType".id = :id', { id: id })
+            .getOne();
+    }
+
+    async equipmentTypeByCargoBikeId (id: number) {
+        return this.connection.getRepository(CargoBike)
+            .createQueryBuilder('cargobike')
+            .relation(CargoBike, 'equipmentTypeIds')
+            .of(id)
+            .loadMany();
     }
 }

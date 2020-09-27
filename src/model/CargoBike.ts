@@ -1,5 +1,5 @@
 /* eslint no-unused-vars: "off" */
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany, ManyToOne, JoinColumn, ManyToMany } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany, ManyToOne, JoinColumn, ManyToMany, JoinTable } from 'typeorm';
 import { Provider } from './Provider';
 import { Participant } from './Participant';
 import { InsuranceData } from './InsuranceData';
@@ -161,8 +161,9 @@ export class CargoBike implements Lockable {
     equipment: Equipment[];
 
     // Equipment that is not unique and is supposed to be selected out of a list e.g. drop down
-    @ManyToMany(type => EquipmentType, equipmentType => equipmentType.cargoBikes)
-    miscellaneousEquipment: EquipmentType[];
+    @ManyToMany(type => EquipmentType, equipmentType => equipmentType.cargoBikeIds)
+    @JoinTable()
+   equipmentTypeIds: number[];
 
     // Security information
     @Column(type => Security)
@@ -184,11 +185,6 @@ export class CargoBike implements Lockable {
         nullable: true
     })
     provider: Provider;
-
-    @ManyToOne(type => Participant, participant => participant.cargoBikes, {
-        nullable: true
-    })
-    coordinator: Participant;
 
     @OneToMany(type => BikeEvent, bikeEvent => bikeEvent.cargoBike, {
         nullable: true,

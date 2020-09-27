@@ -2,6 +2,7 @@
 export enum Permission {
     ReadBike = 'BIKE_READ',
     WriteBike = 'BIKE_WRITE',
+    WriteEquipmentType = 'EQUIPMENT_TYPE_WRITE',
 }
 
 // Permissions where the creation will be requested on startup
@@ -13,5 +14,9 @@ export const requiredPermissions = [
     {
         name: Permission.WriteBike,
         description: 'Allows the modification of bike information'
+    },
+    {
+        name: Permission.WriteEquipmentType,
+        description: 'Allows the modification of EquipmentTypes'
     }
 ];

@@ -41,10 +41,6 @@ export class Participant {
     })
     locationZIPs: string[];
 
-    // this should go, we dont need it
-    @OneToMany(type => CargoBike, cargoBike => cargoBike.coordinator)
-    cargoBikes: CargoBike[];
-
     @OneToMany(type => Engagement, engagement => engagement.participant)
     engagement: Engagement[];
 

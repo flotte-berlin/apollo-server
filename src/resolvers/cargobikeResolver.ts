@@ -60,7 +60,11 @@ export default {
         },
         timeFrames (parent: any, __: any, { dataSources, req }: { dataSources: any, req: any }) {
             return dataSources.lendingStationAPI.timeFramesByCargoBikeId(parent.id, req, dataSources);
+        },
+        equipmentType (parent: any, __: any, { dataSources, req }: { dataSources: any, req: any }) {
+            return dataSources.cargoBikeAPI.equipmentTypeByCargoBikeId(parent.id, req, dataSources);
         }
+
     },
     Equipment: {
         cargoBike (parent: any, __: any, { dataSources, req }: { dataSources: any, req: any }) {
@@ -127,6 +131,13 @@ export default {
         updateEquipment: (_: any, { equipment }: { equipment: any }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.WriteBike)) {
                 return dataSources.cargoBikeAPI.updateEquipment(equipment, req, dataSources);
+            } else {
+                return new GraphQLError('Insufficient Permissions');
+            }
+        },
+        createEquipmentType: (_: any, { equipmentType }: { equipmentType: any }, { dataSources, req }: { dataSources: any, req: any }) => {
+            if (req.permissions.includes(Permission.WriteEquipmentType)) {
+                return dataSources.cargoBikeAPI.createEquipmentType(equipmentType);
             } else {
                 return new GraphQLError('Insufficient Permissions');
             }

@@ -34,7 +34,7 @@ type CargoBike {
     bikeEvents: [BikeEvent]
     equipment(offset: Int!, limit: Int!): [Equipment]
     "Refers to equipment that is not unique. See kommentierte info tabelle -> Fragen -> Frage 2"
-    miscellaneousEquipment: [String]
+    equipmentType: [EquipmentType]
     "Sticker State"
     stickerBikeNameState: StickerBikeNameState
     note: String
@@ -77,8 +77,7 @@ input CargoBikeCreateInput {
     """
     dimensionsAndLoad: DimensionsAndLoadCreateInput!
     "Refers to equipment that is not unique. See kommentierte info tabelle -> Fragen -> Frage 2"
-    miscellaneousEquipment: [String]
-
+    equipmentTypeIds: [ID]
     "Sticker State"
     stickerBikeNameState: StickerBikeNameState
     note: String
@@ -113,8 +112,11 @@ input CargoBikeUpdateInput {
     Does not refer to an extra table in the database.
     """
     dimensionsAndLoad: DimensionsAndLoadUpdateInput
-    "Refers to equipment that is not unique. See kommentierte info tabelle -> Fragen -> Frage 2"
-    miscellaneousEquipment: [String]
+    """
+    Refers to equipment that is not unique. See kommentierte info tabelle -> Fragen -> Frage 2
+    If set, ols realtions will be over written. Set [] to delete all
+    """
+    equipmentTypeIds: [ID]
     "Sticker State"
     stickerBikeNameState: StickerBikeNameState
     note: String
@@ -351,6 +353,23 @@ input EquipmentUpdateInput {
     cargoBikeId: ID
     "will keep Bike locked if set to true, default = false"
     keepLock: Boolean
+}
+
+type EquipmentType {
+    id: ID!
+    name: String!
+    description: String!
+}
+
+input EquipmentTypeCreateInput {
+    name: String
+    description: String
+}
+   
+input EquipmentTypeUpdateInput {
+    id: ID!
+    name: String
+    description: String
 }
 
 "An Event is a point in time, when the state of the bike somehow changed."
@@ -746,6 +765,7 @@ type Mutation {
     unlockEquipment(id: ID!): Boolean!
     "update Equipment, returns updated equipment. CargoBike will be null, if cargoBikeId is not set. Pass null for cargoBikeIs to delete the relation"
     updateEquipment(equipment: EquipmentUpdateInput!): Equipment!
+    createEquipmentType(equipmentType: EquipmentTypeCreateInput!): EquipmentType!
     "creates new lendingStation and returns lendingStation with new ID"
     createLendingStation(lendingStation: LendingStationCreateInput): LendingStation!
     "updates lendingStation of given ID with supplied fields and returns updated lendingStation"

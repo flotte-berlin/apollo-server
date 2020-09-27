@@ -15,8 +15,8 @@ export class EquipmentType implements Lockable {
     })
     description: string;
 
-    @ManyToMany(type => CargoBike, cargoBike => cargoBike.miscellaneousEquipment)
-    cargoBikes: CargoBike[];
+    @ManyToMany(type => CargoBike, cargoBike => cargoBike.equipmentTypeIds)
+    cargoBikeIds: number[];
 
     @Column({
         nullable: true,
