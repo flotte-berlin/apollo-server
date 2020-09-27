@@ -1,5 +1,6 @@
 import { GraphQLError } from 'graphql';
 import { Permission } from '../datasources/userserver/permission';
+import { EngagementType } from '../model/EngagementType';
 
 export default {
     Query: {
@@ -23,7 +24,7 @@ export default {
             return dataSources.participantAPI.engagementByParticipantId(parent.id);
         },
         contactInformation (parent: any, _: any, { dataSources, req }: { dataSources: any, req: any }) {
-            return (dataSources.contactInformationAPI.contactInformationByParticipantId(parent.id));
+            return (dataSources.participantAPI.contactInformationByParticipantId(parent.id));
         }
     },
     Engagement: {
@@ -32,6 +33,17 @@ export default {
         },
         participant (parent: any, _: any, { dataSources, req }: { dataSources: any, req: any }) {
             return dataSources.participantAPI.participantByEngagementId(parent.id);
+        },
+        engagementType (parent: any, _: any, { dataSources, req }: { dataSources: any; req: any }): Promise<EngagementType> {
+            return dataSources.participantAPI.engagementTypeByEngagementId(parent.id);
+        },
+        from (parent: any) {
+            // TODO
+            return parent.dateRange;
+        },
+        to (parent: any) {
+            // TODO
+            return parent.dateRange;
         }
     },
     Mutation: {
@@ -42,16 +54,16 @@ export default {
                 return new GraphQLError('Insufficient Permissions');
             }
         },
-        createContactInformation: (_: any, { contactInformation }: { contactInformation: any }, { dataSources, req }: { dataSources: any, req: any }) => {
+        createEngagement: (_: any, { engagement }: { engagement: any }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.WriteBike)) {
-                return dataSources.participantAPI.createContactInformation(contactInformation);
+                return dataSources.participantAPI.createEngagement(engagement);
             } else {
                 return new GraphQLError('Insufficient Permissions');
             }
         },
-        createEngagement: (_: any, { engagement }: { engagement: any }, { dataSources, req }: { dataSources: any, req: any }) => {
+        createEngagementType: (_: any, { engagementType }: { engagementType: any }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.WriteBike)) {
-                return dataSources.participantAPI.createEngagement(engagement);
+                return dataSources.participantAPI.createEngagementType(engagementType);
             } else {
                 return new GraphQLError('Insufficient Permissions');
             }

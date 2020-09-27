@@ -13,8 +13,8 @@ export class Person implements Lockable {
     @Column()
     name: string;
 
-    @OneToMany(type => ContactInformation, contactInformation => contactInformation.person)
-    contactInformation: ContactInformation;
+    @OneToMany(type => ContactInformation, contactInformation => contactInformation.personId)
+    contactInformationIds: number[];
 
     @Column({
         nullable: true

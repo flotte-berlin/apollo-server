@@ -2,6 +2,7 @@ import { DataSource } from 'apollo-datasource';
 import { Connection, getConnection } from 'typeorm';
 import { ContactInformation } from '../../model/ContactInformation';
 import { LendingStation } from '../../model/LendingStation';
+import { Person } from '../../model/Person';
 
 export class ContactInformationAPI extends DataSource {
     connection : Connection
@@ -45,6 +46,67 @@ export class ContactInformationAPI extends DataSource {
             .relation(LendingStation, 'contactPersons')
             .of(id)
             .loadMany();
+    }
+
+    async createPerson (person: any) {
+        const inserts = await this.connection.getRepository(Person)
+            .createQueryBuilder('person')
+            .insert()
+            .values([person])
+            .returning('*')
+            .execute();
+        inserts.generatedMaps[0].id = inserts.identifiers[0].id;
+        return inserts.generatedMaps[0];
+    }
+
+    /**
+     * Return person by ID
+     * @param id
+     */
+    async personById (id: number) {
+        return await this.connection.getRepository(Person)
+            .createQueryBuilder('person')
+            .select()
+            .where('person.id = :id', { id: id })
+            .getOne();
+    }
+
+    async persons (offset: number, limit: number) {
+        return await this.connection.getRepository(Person)
+            .createQueryBuilder('person')
+            .select()
+            .skip(offset)
+            .take(limit)
+            .execute();
+    }
+
+    async personByContactInformationId (id: number) {
+        return await this.connection.getRepository(ContactInformation)
+            .createQueryBuilder('ci')
+            .relation(ContactInformation, 'personId')
+            .of(id)
+            .loadOne();
+    }
+
+    async createContactInformation (contactInformation: any) {
+        const inserts = await this.connection.getRepository(ContactInformation)
+            .createQueryBuilder('contactInformation')
+            .insert()
+            .into(ContactInformation)
+            .values([contactInformation])
+            .returning('*')
+            .execute();
+        return inserts.generatedMaps[0];
+    }
+
+    async contactInformationByPersonId (id: number) {
+        const res = await this.connection.getRepository(ContactInformation)
+            .createQueryBuilder('ci')
+            .select()
+            .where('ci."personId" = :id', { id: id })
+            .getMany();
+        console.log(res);
+        return res;
     }
 
     async contactInformationByContactPersonId (id: number) {

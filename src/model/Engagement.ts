@@ -21,16 +21,11 @@ export class Engagement {
     @ManyToOne(type => EngagementType, engagementType => engagementType.engagementIds)
     engagementTypeId: number;
 
+    // I have to find out how typorm will map the datetange data type.
     @Column({
-        type: 'date'
+        type: 'daterange'
     })
-    from: Date;
-
-    @Column({
-        type: 'date',
-        nullable: true
-    })
-    to: Date;
+    dateRange: Date[];
 
     @Column()
     roleCoordinator: boolean;

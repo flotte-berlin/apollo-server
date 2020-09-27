@@ -1,4 +1,4 @@
-import { PrimaryGeneratedColumn, Column, Entity, ManyToOne, OneToOne } from 'typeorm';
+import { PrimaryGeneratedColumn, Column, Entity, ManyToOne, OneToOne, JoinColumn } from 'typeorm';
 import { Lockable } from './CargoBike';
 import { Person } from './Person';
 import { Address } from './Provider';
@@ -9,13 +9,19 @@ export class ContactInformation implements Lockable {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @ManyToOne(type => Person, person => person.contactInformation)
-    person: Person;
+    @ManyToOne(type => Person, person => person.contactInformationIds, {
+        nullable: false
 
-    @OneToOne(type => Participant, participant => participant.contactInformation, {
+    })
+    @JoinColumn({
+        name: 'personId'
+    })
+    personId: number;
+
+    @OneToOne(type => Participant, participant => participant.contactInformationId, {
         nullable: true
     })
-    participant: Participant;
+    participantId: number;
 
     @Column(type => {
         return Address;

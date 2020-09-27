@@ -10,7 +10,8 @@ export class Participant {
     id: number;
 
     @Column({
-        type: 'date'
+        type: 'date',
+        default: () => 'CURRENT_DATE'
     })
     start: Date;
 
@@ -20,11 +21,13 @@ export class Participant {
     })
     end: Date;
 
-    @OneToOne(type => ContactInformation, contactInformation => contactInformation.participant, {
-        nullable: true
+    @OneToOne(type => ContactInformation, contactInformation => contactInformation.participantId, {
+        nullable: false
     })
-    @JoinColumn()
-    contactInformation: ContactInformation;
+    @JoinColumn({
+        name: 'contactInformationId'
+    })
+    contactInformationId: number;
 
     @Column({
         nullable: true
@@ -61,6 +64,9 @@ export class Participant {
     })
     employeeADFC: boolean;
 
-    @Column()
+    @Column({
+        nullable: false,
+        default: false
+    })
     memberADFC: boolean;
 }

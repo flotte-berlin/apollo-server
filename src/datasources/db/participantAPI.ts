@@ -1,10 +1,11 @@
 import { DataSource } from 'apollo-datasource';
 import { GraphQLError } from 'graphql';
-import { Connection, getConnection } from 'typeorm';
+import { Connection, EntityManager, getConnection } from 'typeorm';
 import { CargoBike } from '../../model/CargoBike';
 import { ContactInformation } from '../../model/ContactInformation';
 import { Engagement } from '../../model/Engagement';
 import { Participant } from '../../model/Participant';
+import { EngagementType } from '../../model/EngagementType';
 
 export class ParticipantAPI extends DataSource {
     connection : Connection
@@ -78,6 +79,12 @@ export class ParticipantAPI extends DataSource {
             .getOne();
     }
 
+    async engagementTypeByEngagementId (id: number) {
+        return await this.connection.getRepository(Engagement)
+            .createQueryBuilder('engagement')
+            .relation(Engagement, 'engageMent');
+    }
+
     async contactInformationById (id: number) {
         return await this.connection.getRepository(ContactInformation)
             .createQueryBuilder('contactInformation')
@@ -87,14 +94,11 @@ export class ParticipantAPI extends DataSource {
     }
 
     async contactInformationByParticipantId (id: number) {
-        const ret = (await this.connection.getRepository(Participant)
-            .createQueryBuilder('participant')
-            .leftJoinAndSelect('participant.contactInformation', 'contactInformation')
-            .where('participant."contactInformationId" = "contactInformation".id')
-            .andWhere('participant.id = :id', { id: id })
-            .printSql()
-            .getOne());
-        return (ret) ? ret.contactInformation : null;
+        return await this.connection.manager
+            .createQueryBuilder()
+            .relation(Participant, 'contactInformationId')
+            .of(id)
+            .loadOne();
     }
 
     /**
@@ -102,7 +106,7 @@ export class ParticipantAPI extends DataSource {
      * @param participant to be created
      */
     async createParticipant (participant: any) {
-        let count = this.connection.getRepository(ContactInformation)
+        /* let count = this.connection.getRepository(ContactInformation)
             .createQueryBuilder('contactInformation')
             .select()
             .where('contactInformation.id = :id', { id: participant.contactInformationId })
@@ -119,8 +123,24 @@ export class ParticipantAPI extends DataSource {
             .getCount();
         if ((await count) !== 0) {
             return new GraphQLError('contactInformationId already used by other participant.');
-        }
-        const inserts = await this.connection.getRepository(Participant)
+        } */
+        let inserts: any;
+        await this.connection.transaction(async (entityManager: EntityManager) => {
+            inserts = await entityManager.getRepository(Participant)
+                .createQueryBuilder('participant')
+                .insert()
+                .into(Participant)
+                .values([participant])
+                .returning('*')
+                .execute();
+            /* await entityManager.getRepository(Participant)
+                .createQueryBuilder('participant')
+                .relation(Participant, 'contactInformation')
+                .of(inserts.identifiers[0].id)
+                .set(participant.contactInformationId);
+             */
+        });
+        /* const inserts = await this.connection.getRepository(Participant)
             .createQueryBuilder('participant')
             .insert()
             .into(Participant)
@@ -132,18 +152,8 @@ export class ParticipantAPI extends DataSource {
             .relation(Participant, 'contactInformation')
             .of(inserts.identifiers[0].id)
             .set(participant.contactInformationId);
+         */
         return this.getParticipantById(inserts.identifiers[0].id);
-    }
-
-    async createContactInformation (contactInformation: any) {
-        const inserts = await this.connection.getRepository(ContactInformation)
-            .createQueryBuilder('contactInformation')
-            .insert()
-            .into(ContactInformation)
-            .values([contactInformation])
-            .returning('*')
-            .execute();
-        return this.contactInformationById(inserts.identifiers[0].id);
     }
 
     async createEngagement (engagement: any) {
@@ -166,16 +176,27 @@ export class ParticipantAPI extends DataSource {
             .values([engagement])
             .returning('*')
             .execute();
-        this.connection.getRepository(Engagement)
+        await this.connection.getRepository(Engagement)
             .createQueryBuilder('engagement')
             .relation(Engagement, 'cargoBike')
             .of(inserts.identifiers[0].id)
             .set(engagement.cargoBikeId);
-        this.connection.getRepository(Engagement)
+        await this.connection.getRepository(Engagement)
             .createQueryBuilder('engagement')
             .relation(Engagement, 'participant')
             .of(inserts.identifiers[0].id)
             .set(engagement.participantId);
         return this.engagementById(inserts.identifiers[0].id);
+    }
+
+    async createEngagementType (engagementType: any) {
+        const inserts = await this.connection.getRepository(EngagementType)
+            .createQueryBuilder('et')
+            .insert()
+            .values([engagementType])
+            .returning('*')
+            .execute();
+        inserts.generatedMaps[0].id = inserts.identifiers[0].id;
+        return inserts.generatedMaps[0];
     }
 }

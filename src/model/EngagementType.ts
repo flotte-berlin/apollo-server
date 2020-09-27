@@ -12,7 +12,8 @@ export class EngagementType implements Lockable {
 
     @Column({
         type: 'text',
-        nullable: true
+        nullable: false,
+        default: ''
     })
     description: string;
 

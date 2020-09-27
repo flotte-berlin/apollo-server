@@ -215,13 +215,8 @@ type Participant {
     usernamefLotte: String
     usernameSlack: String
     memberADFC: Boolean!
-    locationZIPs: [String]
+    locationZIPs: [String]!
     memberCoreTeam: Boolean!
-    
-    "Date of workshop to become Mentor dt. Pate"
-    workshopMentor: Date
-    "Date of last Erste Hilfe Kurs?"
-    workshopAmbulance: Date
     """
     Note the kommentierte Infodaten Tabelle.
     This value is calculated form other values.
@@ -229,32 +224,38 @@ type Participant {
     and is either Mentor dt. Pate or Partner Mentor dt. Partnerpate for at least one bike.
     """
     distributedActiveBikeParte: Boolean!
-    reserve: String
     engagement: [Engagement]
 }
 
 input ParticipantCreateInput {
-    start: Date!
+    "if not set, CURRENT_DATE will be used"
+    start: Date
     end: Date
     "must create contactinformation first, if you want to use new"
     contactInformationId: ID!
     usernamefLotte: String
     usernameSlack: String
+    "default: false"
     memberADFC: Boolean!
-    locationZIPs: [String]
-    memberCoreTeam: Boolean!
-    
-    "Date of workshop to become Mentor dt. Pate"
-    workshopMentor: Date
-    "Date of last Erste Hilfe Kurs?"
-    workshopAmbulance: Date
-
-    reserve: String
+    locationZIPs: [String]!
+    "default: false"
+    memberCoreTeam: Boolean
 }
 
+type EngagementType {
+    id: ID!
+    name: String!
+    description: String!
+}
+
+input EngagementTypeCreateInput {
+    name: String!
+    description: String
+}
 
 type Engagement {
     id: ID!
+    engagementType: EngagementType!
     from: Date!
     to: Date
     participant: Participant
@@ -270,7 +271,10 @@ type Engagement {
 }
 
 input EngagementCreateInput {
-    from: Date!
+    engagementTypeId: ID!
+    "will use CURRENT_DATE if not set"
+    from: Date
+    "will use infinit if not set"
     to: Date
     participantId: ID!
     cargoBikeId: ID!
@@ -542,44 +546,48 @@ input ProviderCreateInput {
     cargoBikeIds: [ID]!
 }
 
-type ContactInformation {
+"""
+A Person can have several instances of contact information.
+The reason for this is, that some people have info for interns and externals that are different.
+"""
+type Person {
     id: ID!
     name: String!
-    firstName: String
-    retiredAt: Date
-    phoneExtern: String
-    phone2Extern: String
-    phoneIntern: String
-    phone2Intern: String
-    emailExtern: String
-    emailIntern: String
+    firstName: String!
+    contactInformation: [ContactInformation]
+}
+
+input PersonCreateInput {
+    name: String!
+    firstName: String!
+}
+
+type ContactInformation {
+    id: ID!
+    person: Person!
+    phone: String
+    phone2: String
+    email: String
+    email2: String
     note: String
 }
 
 input ContactInformationCreateInput {
-    name: String!
-    firstName: String!
-    retiredAt: Date
-    phoneExtern: String
-    phone2Extern: String
-    phoneIntern: String
-    phone2Intern: String
-    emailExtern: String
-    emailIntern: String
+    personId: ID!
+    phone: String
+    phone2: String
+    email: String
+    email2: String
     note: String
 }
 
 input ContactInformationUpdateInput {
     id: ID!
-    name: String
-    firstName: String
-    retiredAt: Date
-    phoneExtern: String
-    phone2Extern: String
-    phoneIntern: String
-    phone2Intern: String
-    emailExtern: String
-    emailIntern: String
+    personId: ID
+    phone: String
+    phone2: String
+    email: String
+    email2: String
     note: String
 }
 
@@ -744,6 +752,7 @@ type Query {
     lendingStations(offset: Int!, limit: Int!): [LendingStation]!
     timeframes(offset: Int!, limit: Int!): [TimeFrame]!
     contactInformation(offset: Int!, limit: Int!): [ContactInformation]!
+    persons(offset: Int!, limit: Int!): [Person]
     "returns BikeEvent with CargoBike"
     bikeEventById(id:ID!): BikeEvent!
 }
@@ -777,9 +786,11 @@ type Mutation {
     createParticipant(participant: ParticipantCreateInput!): Participant!
     "create new contactInfo"
     createContactInformation(contactInformation: ContactInformationCreateInput!): ContactInformation!
+    createPerson(person: PersonCreateInput!): Person!
+    createEngagementType(engagementType: EngagementTypeCreateInput!): EngagementType!
     "create Engagement"
     createEngagement(engagement: EngagementCreateInput): Engagement!
-    "createContactPerson ,return null if contactInformationId does not exist"
+    "createContactPerson, return null if contactInformationId does not exist"
     createContactPerson(contactPerson: ContactPersonCreateInput): ContactPerson
     updateContactPerson(contactPerson: ContactPersonUpdateInput): ContactPerson
     "create Provider, if cargoBikeIds or contactPersonIds are not valid, provider will still be created"
