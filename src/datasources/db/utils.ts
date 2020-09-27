@@ -1,6 +1,19 @@
 import { Connection, ObjectType } from 'typeorm';
 import { CargoBike, Lockable } from '../../model/CargoBike';
 
+export function genDateRange (struct: any) {
+    if (struct.to === undefined) {
+        struct.to = '';
+    }
+    if (struct.to === undefined) {
+        struct.to = '';
+    }
+    struct.dateRange = '[' + struct.from + ',' + struct.to + ')';
+    if (struct.from === undefined) {
+        delete struct.dateRange;
+    }
+}
+
 export class LockUtils {
     static getToken (req: any) : string {
         return req.headers.authorization?.replace('Bearer ', '');

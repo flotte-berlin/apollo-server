@@ -201,7 +201,7 @@ export class CargoBike implements Lockable {
     })
     timeFrames: TimeFrame[];
 
-    @OneToMany(type => Engagement, engagement => engagement.cargoBike)
+    @OneToMany(type => Engagement, engagement => engagement.cargoBikeId)
     engagement: Engagement[];
 
     @Column(type => Taxes)

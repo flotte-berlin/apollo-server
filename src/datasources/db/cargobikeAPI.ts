@@ -43,12 +43,11 @@ export class CargoBikeAPI extends DataSource {
     }
 
     async findCargoBikeByEngagementId (id: number) {
-        return (await this.connection.getRepository(Engagement)
+        return await this.connection.getRepository(Engagement)
             .createQueryBuilder('engagement')
-            .leftJoinAndSelect('engagement.cargoBike', 'cargoBike')
-            .where('engagement."cargoBikeId" = "cargoBike".id')
-            .andWhere('engagement.id = :id', { id: id })
-            .getOne())?.cargoBike;
+            .relation(Engagement, 'cargoBikeId')
+            .of(id)
+            .loadOne();
     }
 
     async cargoBikesByProviderId (id: number) {

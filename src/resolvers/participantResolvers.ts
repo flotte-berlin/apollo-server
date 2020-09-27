@@ -37,13 +37,12 @@ export default {
         engagementType (parent: any, _: any, { dataSources, req }: { dataSources: any; req: any }): Promise<EngagementType> {
             return dataSources.participantAPI.engagementTypeByEngagementId(parent.id);
         },
-        from (parent: any) {
-            // TODO
-            return parent.dateRange;
+        from (parent: any, __: any, { dataSources, req }: { dataSources: any, req: any }) {
+            return (parent.dateRange as string).split(',')[0].replace('[', '');
         },
-        to (parent: any) {
-            // TODO
-            return parent.dateRange;
+        to (parent: any, __: any, { dataSources, req }: { dataSources: any, req: any }) {
+            const str = (parent.dateRange as string).split(',')[1].replace(')', '');
+            return (str.length > 0) ? str : null;
         }
     },
     Mutation: {

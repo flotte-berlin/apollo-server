@@ -258,8 +258,8 @@ type Engagement {
     engagementType: EngagementType!
     from: Date!
     to: Date
-    participant: Participant
-    cargoBike: CargoBike
+    participant: Participant!
+    cargoBike: CargoBike!
     roleCoordinator: Boolean!
     roleEmployeeADFC: Boolean!
     """
@@ -278,14 +278,19 @@ input EngagementCreateInput {
     to: Date
     participantId: ID!
     cargoBikeId: ID!
-    roleCoordinator: Boolean!
-    roleEmployeeADFC: Boolean!
+    "default: false"
+    roleCoordinator: Boolean
+    "default: false"
+    roleEmployeeADFC: Boolean
     """
     Wahr, wenn die Person Pate ist.
+    default: false
     """
-    roleMentor: Boolean!
-    roleAmbulance: Boolean!
-    roleBringer: Boolean!
+    roleMentor: Boolean
+    "default: false"
+    roleAmbulance: Boolean
+    "default: false"
+    roleBringer: Boolean
 }
 
 type Taxes {

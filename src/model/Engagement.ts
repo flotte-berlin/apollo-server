@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, ManyToOne, Column, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, ManyToOne, Column, JoinColumn, JoinTable } from 'typeorm';
 import { Participant } from './Participant';
 import { CargoBike } from './CargoBike';
 import { EngagementType } from './EngagementType';
@@ -9,33 +9,57 @@ export class Engagement {
     id: number;
 
     @ManyToOne(type => Participant, participant => participant.engagement, {
+        nullable: false
     })
     @JoinColumn({
         name: 'participantId'
     })
-    participant: Participant;
+    participantId: number;
 
-    @ManyToOne(type => CargoBike, cargoBike => cargoBike.engagement)
-    cargoBike: CargoBike;
+    @ManyToOne(type => CargoBike, cargoBike => cargoBike.engagement, {
+        nullable: false
+    })
+    @JoinColumn({
+        name: 'cargoBikeId'
+    })
+    cargoBikeId: number;
 
-    @ManyToOne(type => EngagementType, engagementType => engagementType.engagementIds)
+    @ManyToOne(type => EngagementType, engagementType => engagementType.engagementIds, {
+        nullable: false
+    })
+    @JoinColumn({
+        name: 'engagementTypeId'
+    })
     engagementTypeId: number;
 
     // I have to find out how typorm will map the datetange data type.
     @Column({
-        type: 'daterange'
+        type: 'daterange',
+        default: () => 'daterange(CURRENT_DATE,\'infinity\',\'[)\')'
     })
     dateRange: Date[];
 
-    @Column()
+    @Column({
+        type: 'boolean',
+        default: false
+    })
     roleCoordinator: boolean;
 
-    @Column()
+    @Column({
+        type: 'boolean',
+        default: false
+    })
     roleMentor: boolean;
 
-    @Column()
+    @Column({
+        type: 'boolean',
+        default: false
+    })
     roleAmbulance: boolean;
 
-    @Column()
+    @Column({
+        type: 'boolean',
+        default: false
+    })
     roleBringer: boolean;
 }

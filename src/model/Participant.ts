@@ -1,6 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn, OneToMany, ManyToMany } from 'typeorm';
 import { ContactInformation } from './ContactInformation';
-import { CargoBike } from './CargoBike';
 import { Engagement } from './Engagement';
 import { Workshop } from './Workshop';
 
@@ -44,7 +43,7 @@ export class Participant {
     })
     locationZIPs: string[];
 
-    @OneToMany(type => Engagement, engagement => engagement.participant)
+    @OneToMany(type => Engagement, engagement => engagement.participantId)
     engagement: Engagement[];
 
     @ManyToMany(type => Workshop, workshop => workshop.participants, {

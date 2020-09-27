@@ -1,11 +1,11 @@
 import { DataSource } from 'apollo-datasource';
-import { GraphQLError } from 'graphql';
 import { Connection, EntityManager, getConnection } from 'typeorm';
-import { CargoBike } from '../../model/CargoBike';
 import { ContactInformation } from '../../model/ContactInformation';
 import { Engagement } from '../../model/Engagement';
 import { Participant } from '../../model/Participant';
 import { EngagementType } from '../../model/EngagementType';
+import { genDateRange } from './utils';
+import { UserInputError } from 'apollo-server';
 
 export class ParticipantAPI extends DataSource {
     connection : Connection
@@ -32,12 +32,11 @@ export class ParticipantAPI extends DataSource {
     }
 
     async participantByEngagementId (id: number) {
-        return (await this.connection.getRepository(Engagement)
+        return await this.connection.getRepository(Engagement)
             .createQueryBuilder('engagement')
-            .leftJoinAndSelect('engagement.participant', 'participant')
-            .where('engagement.id = :id', { id: id })
-            .andWhere('engagement."participantId" = participant.id')
-            .getOne()).participant;
+            .relation(Engagement, 'participantId')
+            .of(id)
+            .loadOne();
     }
 
     async participantByCargoBikeId (id:number) {
@@ -54,7 +53,7 @@ export class ParticipantAPI extends DataSource {
             .createQueryBuilder('engagement')
             .select()
             .where('engagement."participantId" = :id', { id: id })
-            .getOne();
+            .getMany();
     }
 
     async engagementByCargoBikeId (offset: number, limit: number, id: number) {
@@ -64,10 +63,9 @@ export class ParticipantAPI extends DataSource {
             .where('engagement."cargoBikeId" = :id', {
                 id: id
             })
-            .offset(offset)
-            .limit(limit)
-            .orderBy('engagement.from', 'DESC')
-            .addOrderBy('engagement.to', 'DESC', 'NULLS FIRST')
+            .skip(offset)
+            .take(limit)
+            .orderBy('engagement."dateRange"', 'DESC')
             .getMany();
     }
 
@@ -82,7 +80,9 @@ export class ParticipantAPI extends DataSource {
     async engagementTypeByEngagementId (id: number) {
         return await this.connection.getRepository(Engagement)
             .createQueryBuilder('engagement')
-            .relation(Engagement, 'engageMent');
+            .relation(Engagement, 'engagementTypeId')
+            .of(id)
+            .loadOne();
     }
 
     async contactInformationById (id: number) {
@@ -106,24 +106,6 @@ export class ParticipantAPI extends DataSource {
      * @param participant to be created
      */
     async createParticipant (participant: any) {
-        /* let count = this.connection.getRepository(ContactInformation)
-            .createQueryBuilder('contactInformation')
-            .select()
-            .where('contactInformation.id = :id', { id: participant.contactInformationId })
-            .getCount();
-        if ((await count) !== 1) {
-            return new GraphQLError('contactInformationId not found.');
-        }
-        count = this.connection.getRepository(Participant)
-            .createQueryBuilder('participant')
-            .select()
-            .where('participant."contactInformationId" = :id', {
-                id: participant.contactInformationId
-            })
-            .getCount();
-        if ((await count) !== 0) {
-            return new GraphQLError('contactInformationId already used by other participant.');
-        } */
         let inserts: any;
         await this.connection.transaction(async (entityManager: EntityManager) => {
             inserts = await entityManager.getRepository(Participant)
@@ -133,59 +115,32 @@ export class ParticipantAPI extends DataSource {
                 .values([participant])
                 .returning('*')
                 .execute();
-            /* await entityManager.getRepository(Participant)
-                .createQueryBuilder('participant')
-                .relation(Participant, 'contactInformation')
-                .of(inserts.identifiers[0].id)
-                .set(participant.contactInformationId);
-             */
         });
-        /* const inserts = await this.connection.getRepository(Participant)
-            .createQueryBuilder('participant')
-            .insert()
-            .into(Participant)
-            .values([participant])
-            .returning('*')
-            .execute();
-        await this.connection.getRepository(Participant)
-            .createQueryBuilder('participant')
-            .relation(Participant, 'contactInformation')
-            .of(inserts.identifiers[0].id)
-            .set(participant.contactInformationId);
-         */
         return this.getParticipantById(inserts.identifiers[0].id);
     }
 
     async createEngagement (engagement: any) {
-        const countB = this.connection.getRepository(CargoBike)
-            .createQueryBuilder('cargoBike')
-            .select()
-            .where('cargoBike.id = :id', { id: engagement.cargoBikeId })
-            .getCount();
-        const countP = this.connection.getRepository(Participant)
-            .createQueryBuilder('participant')
-            .select()
-            .where('participant.id = :id', { id: engagement.participantId })
-            .getCount();
-        if ((await countB) !== 1) { return new GraphQLError('BikeId not found'); }
-        if ((await countP) !== 1) { return new GraphQLError('ParticipantId not found'); }
-        // TODO check whether someone is already engaged with the bike
-        const inserts = await this.connection.getRepository(Engagement)
-            .createQueryBuilder('engagement')
-            .insert()
-            .values([engagement])
-            .returning('*')
-            .execute();
-        await this.connection.getRepository(Engagement)
-            .createQueryBuilder('engagement')
-            .relation(Engagement, 'cargoBike')
-            .of(inserts.identifiers[0].id)
-            .set(engagement.cargoBikeId);
-        await this.connection.getRepository(Engagement)
-            .createQueryBuilder('engagement')
-            .relation(Engagement, 'participant')
-            .of(inserts.identifiers[0].id)
-            .set(engagement.participantId);
+        let inserts: any;
+        genDateRange(engagement);
+        await this.connection.transaction(async (entityManager: EntityManager) => {
+            // check for overlapping engagements
+            const overlapping = await entityManager.getRepository(Engagement)
+                .createQueryBuilder('e')
+                .select()
+                .where('e."cargoBikeId" = :id', { id: engagement.cargoBikeId })
+                .andWhere('e."dateRange" && :dr', { dr: engagement.dateRange })
+                .andWhere('e."engagementTypeId" = :etId', { etId: engagement.engagementTypeId })
+                .getMany();
+            if (overlapping.length > 0) {
+                throw new UserInputError('Engagements with ids: ' + overlapping.map((e) => { return e.id + ', '; }) + 'are overlapping');
+            }
+            inserts = await entityManager.getRepository(Engagement)
+                .createQueryBuilder('engagement')
+                .insert()
+                .values([engagement])
+                .returning('*')
+                .execute();
+        });
         return this.engagementById(inserts.identifiers[0].id);
     }
 
