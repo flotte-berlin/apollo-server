@@ -1,5 +1,4 @@
 import { DataSource } from 'apollo-datasource';
-import { GraphQLError } from 'graphql';
 import { Connection, getConnection } from 'typeorm';
 import { Provider } from '../../model/Provider';
 
@@ -28,7 +27,7 @@ export class ProviderAPI extends DataSource {
     }
 
     async createProvider (provider: any) {
-        let inserts: any;
+        let inserts: any = null;
         await this.connection.transaction(async (entityManager: any) => {
             inserts = await entityManager.getRepository(Provider)
                 .createQueryBuilder('provider')

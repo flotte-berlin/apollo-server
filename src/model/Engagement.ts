@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, ManyToOne, Column, JoinColumn, JoinTable } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, ManyToOne, Column, JoinColumn } from 'typeorm';
 import { Participant } from './Participant';
 import { CargoBike } from './CargoBike';
 import { EngagementType } from './EngagementType';
