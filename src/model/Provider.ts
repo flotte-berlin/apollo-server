@@ -41,8 +41,10 @@ export class Provider implements Lockable {
     @OneToOne(type => ContactInformation, {
         nullable: true
     })
-    @JoinColumn()
-    contactInformationId: number;
+    @JoinColumn({
+        name: 'privatePersonId'
+    })
+    privatePersonId: number;
 
     // is null when Provider is a private Person
     @OneToOne(type => Organisation, organization => organization.providerId, {

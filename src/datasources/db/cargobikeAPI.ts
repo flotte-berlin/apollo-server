@@ -9,6 +9,7 @@ import { Provider } from '../../model/Provider';
 import { TimeFrame } from '../../model/TimeFrame';
 import { LockUtils } from './utils';
 import { EquipmentType } from '../../model/EquipmentType';
+import { BikeEventType } from '../../model/BikeEventType';
 
 /**
  * extended datasource to feed resolvers with data about cargoBikes
@@ -158,13 +159,62 @@ export class CargoBikeAPI extends DataSource {
     }
 
     async createBikeEvent ({ bikeEvent }: { bikeEvent: any }) {
-        const event = new BikeEvent();
-        event.setValues(bikeEvent);
-        event.cargoBike = await this.findCargoBikeById(bikeEvent.cargoBikeId) as unknown as CargoBike;
-        if (event.cargoBike instanceof GraphQLError) {
-            return event.cargoBike;
-        }
-        return await this.connection.manager.save(event);
+        return (await this.connection.getRepository(BikeEvent)
+            .createQueryBuilder('be')
+            .insert()
+            .values([bikeEvent])
+            .returning('*')
+            .execute()).generatedMaps[0];
+    }
+
+    async cargoBikeByEventId (id: number) {
+        return await this.connection.getRepository(BikeEvent)
+            .createQueryBuilder('be')
+            .relation(BikeEvent, 'cargoBikeId')
+            .of(id)
+            .loadOne();
+    }
+
+    async bikeEventTypeByBikeEventId (id: number) {
+        return await this.connection.getRepository(BikeEvent)
+            .createQueryBuilder('be')
+            .relation(BikeEvent, 'bikeEventTypeId')
+            .of(id)
+            .loadOne();
+    }
+
+    async createBikeEventType (bikeEventType: any) {
+        return (await this.connection.getRepository(BikeEventType)
+            .createQueryBuilder('bet')
+            .insert()
+            .values([{ name: bikeEventType }])
+            .returning('*')
+            .execute())?.generatedMaps[0];
+    }
+
+    async bikeEventTypes (offset: number, limit: number) {
+        return await this.connection.getRepository(BikeEventType)
+            .createQueryBuilder('bet')
+            .select()
+            .skip(offset)
+            .take(limit)
+            .getMany();
+    }
+
+    async responsibleByBikeEventId (id: number) {
+        return await this.connection.getRepository(BikeEvent)
+            .createQueryBuilder('be')
+            .relation(BikeEvent, 'responsibleId')
+            .of(id)
+            .loadOne();
+    }
+
+    async relatedByBikeEventId (id: number) {
+        return await this.connection.getRepository(BikeEvent)
+            .createQueryBuilder('be')
+            .relation(BikeEvent, 'relatedId')
+            .of(id)
+            .loadOne();
     }
 
     /**

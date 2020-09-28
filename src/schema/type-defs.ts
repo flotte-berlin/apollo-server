@@ -412,41 +412,41 @@ input EquipmentTypeUpdateInput {
 "An Event is a point in time, when the state of the bike somehow changed."
 type BikeEvent {
     id: ID!
-    eventType: BikeEventType!
+    bikeEventType: BikeEventType!
     cargoBike: CargoBike!
+    responsible: Participant
+    related: Participant
     date: Date!
-    note: String
+    description: String
     """
     Path to documents
     """
-    documents: [String]!
+    documents: [String]!    
+    remark: String
 }
 
 input BikeEventCreateInput {
-    eventType: BikeEventType!
-    "it is enough to pass the cargoBike id"
+    bikeEventTypeId: ID!
     cargoBikeId: ID!
+    responsibleId: ID
+    relatedId: ID
     date: Date!
-    note: String
+    description: String
     """
     Path to documents
     """
-    documents: [String]!
+    documents: [String]
+    remark: String
 }
 
-"TODO: Some eventTypes are missing"
-enum BikeEventType {
-    """
-    The enum EventType can also be represented as an enum in postgresQL.
-    It is possible to add items to an enum in postgresQL without changing the source code.
-    However, it not possible to change the graphQL schema.
-    Concluding we should not use an enum here, if users want to add EventTypes to the enum.
-    """
-    KAUF
-    INBETRIEBNAHME
-    AUSFALL
-    WARTUNG
-    ANDERE
+type BikeEventType {
+    id: ID!
+    name: String!
+}
+
+input BikeEventTypeInput {
+    id: ID!
+    name: String
 }
 
 "How are the dimensions and how much weight can handle a bike. This data is merged in the CargoBike table and the BikeModel table."
@@ -803,12 +803,16 @@ type Query {
     timeframes(offset: Int!, limit: Int!): [TimeFrame]!
     contactInformation(offset: Int!, limit: Int!): [ContactInformation]!
     persons(offset: Int!, limit: Int!): [Person]
+    bikeEventTypes(offset: Int!, limit: Int!): [BikeEventType]
     "returns BikeEvent with CargoBike"
     bikeEventById(id:ID!): BikeEvent!
 }
 
 type Mutation {
-    "creates new cargoBike and returns cargobike with new ID"
+    """
+    CargoBikes
+    creates new cargoBike and returns cargobike with new ID
+    """
     createCargoBike(cargoBike: CargoBikeCreateInput!): CargoBike!
     "lock cargoBike returns bike if bike is not locked and locks bike or Error if bike cannot be locked"
     lockCargoBikeById(id: ID!): CargoBike!
@@ -816,7 +820,10 @@ type Mutation {
     unlockCargoBikeById(id: ID!): Boolean!
     "updates cargoBike of given ID with supplied fields and returns updated cargoBike"
     updateCargoBike(cargoBike: CargoBikeUpdateInput!): CargoBike!
-    "creates new peace of unique Equipment"
+    """
+    EQUIPMENT
+    creates new peace of unique Equipment
+    """
     createEquipment(equipment: EquipmentCreateInput!): Equipment!
     "lock equipment returns true if bike is not locked or if it doesnt exist"
     lockEquipmentById(id: ID!): Equipment!
@@ -825,13 +832,20 @@ type Mutation {
     "update Equipment, returns updated equipment. CargoBike will be null, if cargoBikeId is not set. Pass null for cargoBikeIs to delete the relation"
     updateEquipment(equipment: EquipmentUpdateInput!): Equipment!
     createEquipmentType(equipmentType: EquipmentTypeCreateInput!): EquipmentType!
-    "creates new lendingStation and returns lendingStation with new ID"
+    """
+    LENDINGSTATION
+    creates new lendingStation and returns lendingStation with new ID
+    """
     createLendingStation(lendingStation: LendingStationCreateInput): LendingStation!
     "updates lendingStation of given ID with supplied fields and returns updated lendingStation"
     updateLendingStation(lendingStation: LendingStationUpdateInput!): LendingStation!
     createTimeFrame(timeFrame: TimeFrameCreateInput!): TimeFrame!
+    """
+    BIKEEVENT
+    """
+    createBikeEventType(name: String!): BikeEventType!
     "creates new BikeEvent"
-    createBikeEvent(bikeEvent: BikeEventCreateInput): BikeEvent!
+    createBikeEvent(bikeEvent: BikeEventCreateInput!): BikeEvent!
     "create participant"
     createParticipant(participant: ParticipantCreateInput!): Participant!
     createWorkshopType(workshopType: WorkshopTypeCreateInput!): WorkshopType!

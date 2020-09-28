@@ -28,6 +28,9 @@ export default {
         },
         organisation: (parent: any, __: any, { dataSources, req }: { dataSources: any, req: any }) => {
             return dataSources.providerAPI.organisationByProviderId(parent.id);
+        },
+        privatePerson: (parent: any, __: any, { dataSources, req }: { dataSources: any, req: any }) => {
+            return dataSources.providerAPI.privatePersonByProviderId(parent.id);
         }
     },
     Organisation: {

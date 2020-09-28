@@ -7,14 +7,6 @@ import { type } from 'os';
 
 @Entity()
 export class BikeEvent {
-    public setValues ({ id, remark, date, documents, cargoBike }: { id: number, remark: string, date: Date, documents: string[], cargoBike: CargoBike}): void {
-        this.id = id;
-        this.remark = remark;
-        this.date = date;
-        this.documents = documents;
-        this.cargoBike = cargoBike;
-    }
-
     @PrimaryGeneratedColumn()
     id: number;
 
@@ -38,22 +30,35 @@ export class BikeEvent {
     date: Date;
 
     @ManyToOne(type => Participant)
-    responsible: Participant;
+    @JoinColumn({
+        name: 'responsibleId'
+    })
+    responsibleId: number;
 
     @ManyToOne(type => Participant)
-    related: Participant;
+    @JoinColumn({
+        name: 'relatedId'
+    })
+    relatedId: number;
 
     @Column('simple-array', {
         nullable: true
     })
     documents: string[];
 
-    @ManyToOne(tpye => CargoBike, cargoBike => cargoBike.bikeEvents, {
+    @ManyToOne(type => CargoBike, cargoBike => cargoBike.bikeEvents, {
         nullable: false
     })
-    @JoinColumn({ name: 'cargoBikeId' })
-    cargoBike: CargoBike;
+    @JoinColumn({
+        name: 'cargoBikeId'
+    })
+    cargoBikeId: number;
 
-    @ManyToOne(type => BikeEventType)
-    bikeEventType: BikeEventType;
+    @ManyToOne(type => BikeEventType, {
+        nullable: false
+    })
+    @JoinColumn({
+        name: 'bikeEventTypeId'
+    })
+    bikeEventTypeId: number;
 }

@@ -186,7 +186,7 @@ export class CargoBike implements Lockable {
     })
     provider: Provider;
 
-    @OneToMany(type => BikeEvent, bikeEvent => bikeEvent.cargoBike, {
+    @OneToMany(type => BikeEvent, bikeEvent => bikeEvent.cargoBikeId, {
         nullable: true,
         cascade: true
     })

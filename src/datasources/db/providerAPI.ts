@@ -2,6 +2,7 @@ import { DataSource } from 'apollo-datasource';
 import { Connection, EntityManager, getConnection } from 'typeorm';
 import { Provider } from '../../model/Provider';
 import { Organisation } from '../../model/Organisation';
+import { UserInputError } from 'apollo-server';
 
 export class ProviderAPI extends DataSource {
     connection : Connection
@@ -51,7 +52,16 @@ export class ProviderAPI extends DataSource {
             .loadOne();
     }
 
+    async privatePersonByProviderId (id: number) {
+        return await this.connection.getRepository(Provider)
+            .createQueryBuilder('p')
+            .relation(Provider, 'privatePersonId')
+            .of(id)
+            .loadOne();
+    }
+
     async createProvider (provider: any) {
+        if (!provider.privatePersonId === !provider.organisationId) { return new UserInputError('Provider must have either privatePersonId or organisationId'); }
         let inserts: any = null;
         await this.connection.transaction(async (entityManager: any) => {
             inserts = await entityManager.getRepository(Provider)
