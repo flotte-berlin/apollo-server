@@ -45,12 +45,14 @@ require('dotenv').config();
 async function authenticate (req: any, res: any, next: any) {
     if (process.env.NODE_ENV === 'develop') {
         req.permissions = requiredPermissions.map((e) => e.name);
+        req.userId = await userAPI.getUserId(req.headers.authorization?.replace('Bearer ', ''));
         next();
     } else {
         const token = req.headers.authorization?.replace('Bearer ', '');
         if (token) {
             if (await userAPI.validateToken(token)) {
                 req.permissions = await userAPI.getUserPermissions(token);
+                req.userId = await userAPI.getUserId(req.headers.authorization?.replace('Bearer ', ''));
                 next();
             } else {
                 res.status(401);

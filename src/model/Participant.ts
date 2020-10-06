@@ -2,9 +2,10 @@ import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn, OneToMany
 import { ContactInformation } from './ContactInformation';
 import { Engagement } from './Engagement';
 import { Workshop } from './Workshop';
+import { Lockable } from './CargoBike';
 
 @Entity()
-export class Participant {
+export class Participant implements Lockable {
     @PrimaryGeneratedColumn()
     id: number;
 
@@ -68,4 +69,15 @@ export class Participant {
         default: false
     })
     memberADFC: boolean;
+
+    @Column({
+        nullable: true,
+        type: 'timestamp'
+    })
+    lockedUntil: Date;
+
+    @Column({
+        nullable: true
+    })
+    lockedBy: number;
 }

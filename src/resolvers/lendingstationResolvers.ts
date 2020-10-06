@@ -1,6 +1,7 @@
 import { Permission } from '../datasources/userserver/permission';
 import { GraphQLError } from 'graphql';
 import { LendingStation } from '../model/LendingStation';
+import { isLocked } from '../datasources/db/utils';
 
 export default {
     Query: {
@@ -35,6 +36,12 @@ export default {
         },
         cargoBikes (parent: any, __: any, { dataSources, req }: { dataSources: any, req: any }) {
             return dataSources.lendingStationAPI.cargoBikesByLendingStationId(parent.id);
+        },
+        isLocked: (parent: any, __: any, { dataSources, req }: { dataSources: any; req: any }) => isLocked(parent, { dataSources, req })
+    },
+    LoanPeriod: {
+        loanTimes  (parent: any, __: any, { dataSources, req }: { dataSources: any, req: any }) {
+            return parent.loanTimes.split(',');
         }
     },
     TimeFrame: {
@@ -50,7 +57,8 @@ export default {
         },
         lendingStation (parent: any, __: any, { dataSources, req }: { dataSources: any, req: any }) {
             return dataSources.lendingStationAPI.lendingStationByTimeFrameId(parent.id);
-        }
+        },
+        isLocked: (parent: any, __: any, { dataSources, req }: { dataSources: any; req: any }) => isLocked(parent, { dataSources, req })
     },
     Mutation: {
         createLendingStation: (_: any, { lendingStation }:{ lendingStation: LendingStation }, { dataSources, req }:{dataSources: any, req: any }) => {
@@ -59,6 +67,16 @@ export default {
             } else {
                 return new GraphQLError('Insufficient Permissions');
             }
+        },
+        lockLendingStationById: (_: any, { id }:{ id: number }, { dataSources, req }:{dataSources: any, req: any }) => {
+            if (req.permissions.includes(Permission.WriteBike)) {
+                return dataSources.lendingStationAPI.lockLendingStationById(id, req.userId);
+            } else {
+                return new GraphQLError('Insufficient Permissions');
+            }
+        },
+        unlockLendingStationById: (_: any, { id }:{ id: number }, { dataSources, req }:{dataSources: any, req: any }) => {
+            return dataSources.lendingStationAPI.unlockLendingStationById(id, req.userId);
         },
         updateLendingStation: (_: any, { lendingStation }:{ lendingStation: LendingStation }, { dataSources, req }:{dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.WriteBike)) {
@@ -70,6 +88,13 @@ export default {
         createTimeFrame: (_: any, { timeFrame }:{ timeFrame: LendingStation }, { dataSources, req }:{dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.WriteBike)) {
                 return dataSources.lendingStationAPI.createTimeFrame(timeFrame);
+            } else {
+                return new GraphQLError('Insufficient Permissions');
+            }
+        },
+        lockTimeFrame: (_: any, { id }:{ id: number }, { dataSources, req }:{dataSources: any, req: any }) => {
+            if (req.permissions.includes(Permission.WriteBike)) {
+                return dataSources.lendingStationAPI.lockTimeFrame(id, req.userId);
             } else {
                 return new GraphQLError('Insufficient Permissions');
             }

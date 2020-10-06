@@ -1,6 +1,7 @@
 import { GraphQLError } from 'graphql';
 import { Permission } from '../datasources/userserver/permission';
 import { EngagementType } from '../model/EngagementType';
+import { isLocked } from '../datasources/db/utils';
 
 export default {
     Query: {
@@ -25,7 +26,8 @@ export default {
         },
         contactInformation (parent: any, _: any, { dataSources, req }: { dataSources: any, req: any }) {
             return (dataSources.participantAPI.contactInformationByParticipantId(parent.id));
-        }
+        },
+        isLocked: (parent: any, __: any, { dataSources, req }: { dataSources: any; req: any }) => isLocked(parent, { dataSources, req })
     },
     Engagement: {
         cargoBike (parent: any, _: any, { dataSources, req }: { dataSources: any, req: any }) {
@@ -43,7 +45,8 @@ export default {
         to (parent: any, __: any, { dataSources, req }: { dataSources: any, req: any }) {
             const str = (parent.dateRange as string).split(',')[1].replace(')', '');
             return (str.length > 0) ? str : null;
-        }
+        },
+        isLocked: (parent: any, __: any, { dataSources, req }: { dataSources: any; req: any }) => isLocked(parent, { dataSources, req })
     },
     Mutation: {
         createParticipant: (_: any, { participant }: { participant: any }, { dataSources, req }: { dataSources: any, req: any }) => {

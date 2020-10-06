@@ -1,6 +1,7 @@
 import { GraphQLError } from 'graphql';
 import { Permission } from '../datasources/userserver/permission';
 import { Person } from '../model/Person';
+import { isLocked } from '../datasources/db/utils';
 
 export default {
     Query: {
@@ -26,7 +27,8 @@ export default {
             } else {
                 return new GraphQLError('Insufficient Permissions');
             }
-        }
+        },
+        isLocked: (parent: any, __: any, { dataSources, req }: { dataSources: any; req: any }) => isLocked(parent, { dataSources, req })
     },
     Person: {
         contactInformation: (parent: Person, __: any, { dataSources, req }: { dataSources: any, req: any }) => {
@@ -35,7 +37,8 @@ export default {
             } else {
                 return new GraphQLError('Insufficient Permissions');
             }
-        }
+        },
+        isLocked: (parent: any, __: any, { dataSources, req }: { dataSources: any; req: any }) => isLocked(parent, { dataSources, req })
     },
     ContactInformation: {
         person: (parent: any, __: any, { dataSources, req }: { dataSources: any, req: any }) => {
@@ -44,7 +47,8 @@ export default {
             } else {
                 return new GraphQLError('Insufficient Permissions');
             }
-        }
+        },
+        isLocked: (parent: any, __: any, { dataSources, req }: { dataSources: any; req: any }) => isLocked(parent, { dataSources, req })
     },
     Mutation: {
         createContactPerson: (_: any, { contactPerson }: { contactPerson: any }, { dataSources, req }: { dataSources: any, req: any }) => {

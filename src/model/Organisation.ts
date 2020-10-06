@@ -2,9 +2,10 @@ import { PrimaryGeneratedColumn, OneToOne, OneToMany, Column, Entity, JoinColumn
 import { LendingStation } from './LendingStation';
 import { Address, Provider } from './Provider';
 import { ContactInformation } from './ContactInformation';
+import { Lockable } from './CargoBike';
 
 @Entity()
-export class Organisation {
+export class Organisation implements Lockable {
     @PrimaryGeneratedColumn()
     id: number;
 
@@ -38,4 +39,15 @@ export class Organisation {
 
     @Column(type => Address)
     address: Address;
+
+    @Column({
+        nullable: true,
+        type: 'timestamp'
+    })
+    lockedUntil: Date;
+
+    @Column({
+        nullable: true
+    })
+    lockedBy: number;
 }

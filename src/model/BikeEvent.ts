@@ -1,12 +1,12 @@
 /* eslint no-unused-vars: "off" */
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn, TreeLevelColumn } from 'typeorm';
-import { CargoBike } from './CargoBike';
+import { CargoBike, Lockable } from './CargoBike';
 import { BikeEventType } from './BikeEventType';
 import { Participant } from './Participant';
 import { type } from 'os';
 
 @Entity()
-export class BikeEvent {
+export class BikeEvent implements Lockable {
     @PrimaryGeneratedColumn()
     id: number;
 
@@ -61,4 +61,15 @@ export class BikeEvent {
         name: 'bikeEventTypeId'
     })
     bikeEventTypeId: number;
+
+    @Column({
+        nullable: true,
+        type: 'timestamp'
+    })
+    lockedUntil: Date;
+
+    @Column({
+        nullable: true
+    })
+    lockedBy: number;
 }

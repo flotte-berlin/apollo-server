@@ -3,6 +3,7 @@ import { TimeFrame } from './TimeFrame';
 import { Organisation } from './Organisation';
 import { Address } from './Provider';
 import { ContactInformation } from './ContactInformation';
+import { Lockable } from './CargoBike';
 
 export class LoanPeriod {
     /**
@@ -30,7 +31,7 @@ export class LoanPeriod {
 }
 
 @Entity()
-export class LendingStation {
+export class LendingStation implements Lockable {
     @PrimaryGeneratedColumn()
     id: number;
 
@@ -63,4 +64,15 @@ export class LendingStation {
         name: 'organisationId'
     })
     organisationId: number;
+
+    @Column({
+        nullable: true,
+        type: 'timestamp'
+    })
+    lockedUntil: Date;
+
+    @Column({
+        nullable: true
+    })
+    lockedBy: number;
 }

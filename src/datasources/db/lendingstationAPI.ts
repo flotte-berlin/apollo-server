@@ -5,6 +5,7 @@ import { Connection, EntityManager, getConnection, QueryFailedError } from 'type
 import { CargoBike } from '../../model/CargoBike';
 import { LendingStation } from '../../model/LendingStation';
 import { TimeFrame } from '../../model/TimeFrame';
+import { LockUtils } from './utils';
 
 export class LendingStationAPI extends DataSource {
     connection : Connection
@@ -81,6 +82,26 @@ export class LendingStationAPI extends DataSource {
             .getMany().catch(() => { return []; });
     }
 
+    async timeFrameById (id: number) {
+        return await this.connection.getRepository(TimeFrame)
+            .createQueryBuilder('tf')
+            .select()
+            .where('id = :id', { id: id })
+            .getOne();
+    }
+
+    async lockLendingStationById (id: number, uId: number) {
+        return await LockUtils.lockEntity(this.connection, LendingStation, 'ls', id, uId);
+    }
+
+    unlockLendingStationById (id: number, uId: number) {
+        return LockUtils.unlockEntity(this.connection, LendingStation, 'ls', id, uId);
+    }
+
+    async lockTimeFrame (id: number, userId: number) {
+        return await LockUtils.lockEntity(this.connection, TimeFrame, 'tf', id, userId);
+    }
+
     /**
      * Counts all timeframes with one lendingStation that overlap with today's date
      * @param id of lendingStation
@@ -115,22 +136,14 @@ export class LendingStationAPI extends DataSource {
      */
     async createLendingStation (lendingStation: any) {
         let inserts: any;
-        try {
-            await this.connection.transaction(async entiyManager => {
-                inserts = await entiyManager.createQueryBuilder(LendingStation, 'lendingstation')
-                    .insert()
-                    .values([lendingStation])
-                    .returning('*')
-                    .execute();
-                await entiyManager.getRepository(LendingStation)
-                    .createQueryBuilder('lendingstation')
-                    .relation(LendingStation, 'contactPersons')
-                    .of(lendingStation.id)
-                    .add(lendingStation?.contactPersonIds.map((e: any) => { return Number(e); }));
-            });
-        } catch (e :any) {
-            return new GraphQLError('Transaction could not be completed');
-        }
+        await this.connection.transaction(async entiyManager => {
+            inserts = await entiyManager.createQueryBuilder(LendingStation, 'lendingstation')
+                .insert()
+                .values([lendingStation])
+                .returning('*')
+                .execute();
+        });
+
         const newLendingStaion = inserts.generatedMaps[0];
         newLendingStaion.id = inserts.identifiers[0].id;
         return newLendingStaion;

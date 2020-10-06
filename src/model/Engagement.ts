@@ -1,10 +1,10 @@
 import { Entity, PrimaryGeneratedColumn, ManyToOne, Column, JoinColumn } from 'typeorm';
 import { Participant } from './Participant';
-import { CargoBike } from './CargoBike';
+import { CargoBike, Lockable } from './CargoBike';
 import { EngagementType } from './EngagementType';
 
 @Entity()
-export class Engagement {
+export class Engagement implements Lockable {
     @PrimaryGeneratedColumn()
     id: number;
 
@@ -62,4 +62,15 @@ export class Engagement {
         default: false
     })
     roleBringer: boolean;
+
+    @Column({
+        nullable: true,
+        type: 'timestamp'
+    })
+    lockedUntil: Date;
+
+    @Column({
+        nullable: true
+    })
+    lockedBy: number;
 }

@@ -32,7 +32,7 @@ export class CargoBikeAPI extends DataSource {
     }
 
     /**
-     * Finds cargo bike by id, retuns null if id was not found
+     * Finds cargo bike by id, returns null if id was not found
      * @param param0 id of bike
      */
     async findCargoBikeById (id: number) {
@@ -67,40 +67,16 @@ export class CargoBikeAPI extends DataSource {
             .loadOne();
     }
 
-    async lockCargoBike (id: number, req: any, dataSources: any) {
-        if (await LockUtils.lockEntity(this.connection, CargoBike, 'cargobike', id, req, dataSources)) {
-            return this.findCargoBikeById(id);
-        } else {
-            return new GraphQLError('CargoBike is locked by other user');
-        }
-    }
-
-    async unlockCargoBike (id: number, req: any, dataSources: any) {
-        return this.unlockEntity(CargoBike, 'cargobike', id, req, dataSources);
-    }
-
-    async lockEntity (target: ObjectType<Lockable>, alias: string, id: number, req: any, dataSources: any) {
-        return LockUtils.lockEntity(this.connection, target, alias, id, req, dataSources);
-    }
-
-    async unlockEntity (target: ObjectType<Lockable>, alias: string, id: number, req: any, dataSources: any) {
-        return LockUtils.unlockEntity(this.connection, target, alias, id, req, dataSources);
-    }
-
-    async isLocked (id: number, req: any, dataSources: any) {
-        return LockUtils.isLocked(this.connection, CargoBike, 'cargobike', id, req, dataSources);
-    }
-
     /**
      * Updates CargoBike and return updated cargoBike
      * @param param0 cargoBike to be updated
      */
-    async updateCargoBike (cargoBike: any, req: any, dataSources: any) {
+    async updateCargoBike (cargoBike: any, userId:number) {
         // TODO lock cargoBike can return error to save one sql query, this will be a complex sql query
         if (!await this.checkId(CargoBike, 'cargobike', cargoBike.id)) {
             return new GraphQLError('ID not found');
         }
-        if (!await this.lockCargoBike(cargoBike.id, req, dataSources)) {
+        if (!await LockUtils.lockEntity(this.connection, CargoBike, 'cb', cargoBike.id, userId)) {
             return new GraphQLError('Bike locked by other user');
         }
         const keepLock = cargoBike?.keepLock;
@@ -124,7 +100,7 @@ export class CargoBikeAPI extends DataSource {
                 .of(cargoBike.id)
                 .addAndRemove(equipmentTypeIds, await this.equipmentTypeByCargoBikeId(cargoBike.id)); // TODO remove all existing relations
         });
-        !keepLock && await this.unlockCargoBike(cargoBike.id, req, dataSources);
+        !keepLock && await LockUtils.unlockEntity(this.connection, CargoBike, 'cb', cargoBike.id, userId);
         return await this.findCargoBikeById(cargoBike.id);
     }
 
@@ -183,6 +159,16 @@ export class CargoBikeAPI extends DataSource {
             .loadOne();
     }
 
+    async bikeEventsByCargoBikeId (id: number, offset: number = 0, limit:number = 100) {
+        return await this.connection.getRepository(CargoBike)
+            .createQueryBuilder('cb')
+            .skip(offset)
+            .take(limit)
+            .relation(CargoBike, 'bikeEvents')
+            .of(id)
+            .loadMany();
+    }
+
     async createBikeEventType (bikeEventType: any) {
         return (await this.connection.getRepository(BikeEventType)
             .createQueryBuilder('bet')
@@ -229,6 +215,14 @@ export class CargoBikeAPI extends DataSource {
             .getOne();
     }
 
+    async lockBikeEvent (id: number, userId: number) {
+        return await LockUtils.lockEntity(this.connection, BikeEvent, 'be', id, userId);
+    }
+
+    async unlockBikeEvent (id: number, userId: number) {
+        return await LockUtils.unlockEntity(this.connection, BikeEvent, 'be', id, userId);
+    }
+
     async findEquipmentById (id: number) {
         return await this.connection.getRepository(Equipment)
             .createQueryBuilder('equipment')
@@ -248,6 +242,12 @@ export class CargoBikeAPI extends DataSource {
         return result === 1;
     }
 
+    /**
+     * Returns equipment of one cargoBike
+     * @param offset
+     * @param limit
+     * @param id
+     */
     async equipmentByCargoBikeId (offset: number, limit: number, id: number) {
         return await this.connection.getRepository(Equipment)
             .createQueryBuilder('equipment')
@@ -282,16 +282,12 @@ export class CargoBikeAPI extends DataSource {
             .getOne())?.cargoBike;
     }
 
-    async lockEquipment (id: number, req: any, dataSources: any) {
-        if (await this.lockEntity(Equipment, 'equipment', id, req, dataSources)) {
-            return this.findEquipmentById(id);
-        } else {
-            return new GraphQLError('Equipment locked by other user');
-        }
+    async lockEquipment (id: number, userId: number) {
+        return LockUtils.lockEntity(this.connection, Equipment, 'e', id, userId);
     }
 
-    async unlockEquipment (id: number, req: any, dataSources: any) {
-        return await this.unlockEntity(Equipment, 'equipment', id, req, dataSources);
+    async unlockEquipment (id: number, userId: number) {
+        return await LockUtils.unlockEntity(this.connection, Equipment, 'equipment', id, userId);
     }
 
     /**
@@ -299,12 +295,12 @@ export class CargoBikeAPI extends DataSource {
      * Will return updated Equipment joined with CargoBike only if cargoBike is was set in param0
      * @param param0 struct with equipment properites
      */
-    async updateEquipment (equipment: any, req: any, dataSources: any) {
+    async updateEquipment (equipment: any, userId: number) {
         // TODO let lock cargoBike can return error to save one sql query, this will be a complex sql query
         if (!await this.checkId(Equipment, 'alias', equipment.id)) {
             return new GraphQLError('ID not found in DB');
         }
-        if (!await this.lockEntity(Equipment, 'equipment', equipment.id, req, dataSources)) {
+        if (!await LockUtils.lockEntity(this.connection, Equipment, 'equipment', equipment.id, userId)) {
             return new GraphQLError('Equipment locked by other user');
         }
         const keepLock = equipment.keepLock;
@@ -324,7 +320,7 @@ export class CargoBikeAPI extends DataSource {
                 .relation(Equipment, 'cargoBike')
                 .of(equipment.id)
                 .set(cargoBikeId);
-            !keepLock && this.unlockCargoBike(equipment.id, req, dataSources);
+            !keepLock && LockUtils.unlockEntity(this.connection, Equipment, 'e', equipment.id, userId);
             return this.findEquipmentById(equipment.id);
         }
         return this.findEquipmentById(equipment.id);

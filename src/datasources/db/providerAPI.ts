@@ -3,6 +3,7 @@ import { Connection, EntityManager, getConnection } from 'typeorm';
 import { Provider } from '../../model/Provider';
 import { Organisation } from '../../model/Organisation';
 import { UserInputError } from 'apollo-server';
+import { CargoBike } from '../../model/CargoBike';
 
 export class ProviderAPI extends DataSource {
     connection : Connection
@@ -34,6 +35,14 @@ export class ProviderAPI extends DataSource {
             .select()
             .where('p."organisationId" = :id', { id: id })
             .getOne();
+    }
+
+    async providerByCargoBikeId (id: number) {
+        return await this.connection.getRepository(CargoBike)
+            .createQueryBuilder('cb')
+            .relation(CargoBike, 'provider')
+            .of(id)
+            .loadOne();
     }
 
     async organisationByProviderId (id: number) {

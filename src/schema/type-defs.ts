@@ -31,7 +31,7 @@ type CargoBike {
     Does not refer to an extra table in the database.
     """
     dimensionsAndLoad: DimensionsAndLoad!
-    bikeEvents: [BikeEvent]
+    bikeEvents(offset: Int, limit: Int): [BikeEvent]
     equipment(offset: Int!, limit: Int!): [Equipment]
     "Refers to equipment that is not unique. See kommentierte info tabelle -> Fragen -> Frage 2"
     equipmentType: [EquipmentType]
@@ -184,271 +184,6 @@ input InsuranceDataUpdateInput {
     notes: String
 }
 
-enum Group{
-    KL
-    LI
-    SP
-    FK
-    MH
-    SZ
-    TS
-    TK
-}
-
-"""
-The BikeModel can be used for instantiate new bikes with a given model.
-It should only be used to fill in default values.
-Even bikes of the same model can have different properties.
-"""
-type BikeModel {
-    id: ID!
-    name: String!
-    dimensionsAndLoad: DimensionsAndLoad!
-    technicalEquipment: TechnicalEquipment!
-}
-
-type Participant {
-    id: ID!
-    start: Date!
-    end: Date
-    contactInformation: ContactInformation!
-    usernamefLotte: String
-    usernameSlack: String
-    memberADFC: Boolean!
-    locationZIPs: [String]!
-    memberCoreTeam: Boolean!
-    """
-    Note the kommentierte Infodaten Tabelle.
-    This value is calculated form other values.
-    It is true, if the person is not on the black list and not retired
-    and is either Mentor dt. Pate or Partner Mentor dt. Partnerpate for at least one bike.
-    """
-    distributedActiveBikeParte: Boolean!
-    engagement: [Engagement]
-}
-
-input ParticipantCreateInput {
-    "if not set, CURRENT_DATE will be used"
-    start: Date
-    end: Date
-    "must create contactinformation first, if you want to use new"
-    contactInformationId: ID!
-    usernamefLotte: String
-    usernameSlack: String
-    "default: false"
-    memberADFC: Boolean!
-    locationZIPs: [String]!
-    "default: false"
-    memberCoreTeam: Boolean
-}
-
-type Workshop {
-    id: ID!
-    title: String!
-    description: String!
-    date: Date!
-    workshopType: WorkshopType!
-    trainer1: Participant!
-    trainer2: Participant
-}
-
-input WorkshopCreateInput {
-    title: String!
-    description: String
-    date: Date!
-    workshopTypeId: ID!
-    trainer1Id: ID!
-    trainer2Id: ID
-}
-
-type WorkshopType {
-    id: ID!
-    name: String!
-}
-
-input WorkshopTypeCreateInput {
-    name: String!
-}
-
-type EngagementType {
-    id: ID!
-    name: String!
-    description: String!
-}
-
-input EngagementTypeCreateInput {
-    name: String!
-    description: String
-}
-
-type Engagement {
-    id: ID!
-    engagementType: EngagementType!
-    from: Date!
-    to: Date
-    participant: Participant!
-    cargoBike: CargoBike!
-    roleCoordinator: Boolean!
-    roleEmployeeADFC: Boolean!
-    """
-    Wahr, wenn die Person Pate ist.
-    """
-    roleMentor: Boolean!
-    roleAmbulance: Boolean!
-    roleBringer: Boolean!
-}
-
-input EngagementCreateInput {
-    engagementTypeId: ID!
-    "will use CURRENT_DATE if not set"
-    from: Date
-    "will use infinit if not set"
-    to: Date
-    participantId: ID!
-    cargoBikeId: ID!
-    "default: false"
-    roleCoordinator: Boolean
-    "default: false"
-    roleEmployeeADFC: Boolean
-    """
-    Wahr, wenn die Person Pate ist.
-    default: false
-    """
-    roleMentor: Boolean
-    "default: false"
-    roleAmbulance: Boolean
-    "default: false"
-    roleBringer: Boolean
-}
-
-type Taxes {
-    costCenter: String!
-    organisationArea: OrganisationArea
-}
-
-input TaxesCreateInput {
-    costCenter: String!
-    organisationArea: OrganisationArea
-}
-
-input TaxesUpdateInput {
-    costCenter: String
-    organisationArea: OrganisationArea
-}
-
-enum OrganisationArea {
-    IB
-    ZB
-}
-
-type ChainSwap {
-    id: ID!
-    """
-    TODO why is this a string"
-    """
-    mechanic: String
-    timeOfSwap: Date
-    keyNumberOldAXAChain: String
-}
-
-"""
-This type represents a piece of equipment that represents a real physical object.
-The object must be unique. So it is possible to tell it apart from similar objects by a serial number.
-"""
-type Equipment {
-    id: ID!
-    serialNo: String!
-    """
-    TODO unclear what this means. tomy fragen
-    """
-    investable: Boolean
-    title: String!
-    description: String
-    cargoBike: CargoBike
-}
-
-input EquipmentCreateInput {
-    serialNo: String!
-    """
-    TODO unclear what this means. tomy fragen
-    """
-    title: String!
-    description: String
-    investable: Boolean
-    cargoBikeId: ID
-}
-
-input EquipmentUpdateInput {
-    id: ID!
-    serialNo: String
-    """
-    TODO unclear what this means. tomy fragen
-    """
-    title: String
-    description: String
-    investable: Boolean
-    cargoBikeId: ID
-    "will keep Bike locked if set to true, default = false"
-    keepLock: Boolean
-}
-
-type EquipmentType {
-    id: ID!
-    name: String!
-    description: String!
-}
-
-input EquipmentTypeCreateInput {
-    name: String
-    description: String
-}
-   
-input EquipmentTypeUpdateInput {
-    id: ID!
-    name: String
-    description: String
-}
-
-"An Event is a point in time, when the state of the bike somehow changed."
-type BikeEvent {
-    id: ID!
-    bikeEventType: BikeEventType!
-    cargoBike: CargoBike!
-    responsible: Participant
-    related: Participant
-    date: Date!
-    description: String
-    """
-    Path to documents
-    """
-    documents: [String]!    
-    remark: String
-}
-
-input BikeEventCreateInput {
-    bikeEventTypeId: ID!
-    cargoBikeId: ID!
-    responsibleId: ID
-    relatedId: ID
-    date: Date!
-    description: String
-    """
-    Path to documents
-    """
-    documents: [String]
-    remark: String
-}
-
-type BikeEventType {
-    id: ID!
-    name: String!
-}
-
-input BikeEventTypeInput {
-    id: ID!
-    name: String
-}
-
 "How are the dimensions and how much weight can handle a bike. This data is merged in the CargoBike table and the BikeModel table."
 type DimensionsAndLoad {
     hasCoverBox: Boolean!
@@ -559,6 +294,271 @@ enum StickerBikeNameState {
     UNKNOWN
 }
 
+enum Group{
+    KL
+    LI
+    SP
+    FK
+    MH
+    SZ
+    TS
+    TK
+}
+
+type Participant {
+    id: ID!
+    start: Date!
+    end: Date
+    contactInformation: ContactInformation!
+    usernamefLotte: String
+    usernameSlack: String
+    memberADFC: Boolean!
+    locationZIPs: [String]!
+    memberCoreTeam: Boolean!
+    """
+    Note the kommentierte Infodaten Tabelle.
+    This value is calculated form other values.
+    It is true, if the person is not on the black list and not retired
+    and is either Mentor dt. Pate or Partner Mentor dt. Partnerpate for at least one bike.
+    """
+    distributedActiveBikeParte: Boolean!
+    engagement: [Engagement]
+    isLocked: Boolean!
+    "null if not locked by other user"
+    lockedBy: ID
+    lockedUntil: Date
+}
+
+input ParticipantCreateInput {
+    "if not set, CURRENT_DATE will be used"
+    start: Date
+    end: Date
+    "must create contactinformation first, if you want to use new"
+    contactInformationId: ID!
+    usernamefLotte: String
+    usernameSlack: String
+    "default: false"
+    memberADFC: Boolean!
+    locationZIPs: [String]!
+    "default: false"
+    memberCoreTeam: Boolean
+}
+
+type Workshop {
+    id: ID!
+    title: String!
+    description: String!
+    date: Date!
+    workshopType: WorkshopType!
+    trainer1: Participant!
+    trainer2: Participant
+    isLocked: Boolean!
+    "null if not locked by other user"
+    lockedBy: ID
+    lockedUntil: Date
+}
+
+input WorkshopCreateInput {
+    title: String!
+    description: String
+    date: Date!
+    workshopTypeId: ID!
+    trainer1Id: ID!
+    trainer2Id: ID
+}
+
+type WorkshopType {
+    id: ID!
+    name: String!
+    isLocked: Boolean!
+    "null if not locked by other user"
+    lockedBy: ID
+    lockedUntil: Date
+}
+
+input WorkshopTypeCreateInput {
+    name: String!
+}
+
+type EngagementType {
+    id: ID!
+    name: String!
+    description: String!
+    isLocked: Boolean!
+    "null if not locked by other user"
+    lockedBy: ID
+    lockedUntil: Date
+}
+
+input EngagementTypeCreateInput {
+    name: String!
+    description: String
+}
+
+type Engagement {
+    id: ID!
+    engagementType: EngagementType!
+    from: Date!
+    to: Date
+    participant: Participant!
+    cargoBike: CargoBike!
+    roleCoordinator: Boolean!
+    roleEmployeeADFC: Boolean!
+    """
+    Wahr, wenn die Person Pate ist.
+    """
+    roleMentor: Boolean!
+    roleAmbulance: Boolean!
+    roleBringer: Boolean!
+    isLocked: Boolean!
+    "null if not locked by other user"
+    lockedBy: ID
+    lockedUntil: Date
+}
+
+input EngagementCreateInput {
+    engagementTypeId: ID!
+    "will use CURRENT_DATE if not set"
+    from: Date
+    "will use infinit if not set"
+    to: Date
+    participantId: ID!
+    cargoBikeId: ID!
+    "default: false"
+    roleCoordinator: Boolean
+    "default: false"
+    roleEmployeeADFC: Boolean
+    """
+    Wahr, wenn die Person Pate ist.
+    default: false
+    """
+    roleMentor: Boolean
+    "default: false"
+    roleAmbulance: Boolean
+    "default: false"
+    roleBringer: Boolean
+}
+
+type Taxes {
+    costCenter: String!
+    organisationArea: OrganisationArea
+}
+
+input TaxesCreateInput {
+    costCenter: String!
+    organisationArea: OrganisationArea
+}
+
+input TaxesUpdateInput {
+    costCenter: String
+    organisationArea: OrganisationArea
+}
+
+enum OrganisationArea {
+    IB
+    ZB
+}
+
+"""
+This type represents a piece of equipment that represents a real physical object.
+The object must be unique. So it is possible to tell it apart from similar objects by a serial number.
+"""
+type Equipment {
+    id: ID!
+    serialNo: String!
+    title: String!
+    description: String
+    cargoBike: CargoBike
+    isLocked: Boolean!
+    "null if not locked by other user"
+    lockedBy: ID
+    lockedUntil: Date
+}
+
+input EquipmentCreateInput {
+    serialNo: String!
+    title: String!
+    description: String
+    cargoBikeId: ID
+}
+
+input EquipmentUpdateInput {
+    id: ID!
+    serialNo: String
+    title: String
+    description: String
+    cargoBikeId: ID
+    "will keep Bike locked if set to true, default = false"
+    keepLock: Boolean
+}
+
+type EquipmentType {
+    id: ID!
+    name: String!
+    description: String!
+    isLocked: Boolean!
+    "null if not locked by other user"
+    lockedBy: ID
+    lockedUntil: Date
+}
+
+input EquipmentTypeCreateInput {
+    name: String
+    description: String
+}
+   
+input EquipmentTypeUpdateInput {
+    id: ID!
+    name: String
+    description: String
+}
+
+"An Event is a point in time, when the state of the bike somehow changed."
+type BikeEvent {
+    id: ID!
+    bikeEventType: BikeEventType!
+    cargoBike: CargoBike!
+    responsible: Participant
+    related: Participant
+    date: Date!
+    description: String
+    """
+    Path to documents
+    """
+    documents: [String]!    
+    remark: String
+    isLocked: Boolean!
+    "null if not locked by other user"
+    lockedBy: ID
+    lockedUntil: Date
+}
+
+input BikeEventCreateInput {
+    bikeEventTypeId: ID!
+    cargoBikeId: ID!
+    responsibleId: ID
+    relatedId: ID
+    date: Date!
+    description: String
+    """
+    Path to documents
+    """
+    documents: [String]
+    remark: String
+}
+
+type BikeEventType {
+    id: ID!
+    name: String!
+    isLocked: Boolean!
+    lockedUntil: Date
+}
+
+input BikeEventTypeInput {
+    id: ID!
+    name: String
+}
+
 "(dt. Anbieter) bezieht sich auf die Beziehung einer Person oder Organisation zum Lastenrad"
 type Provider {
     id: ID!
@@ -566,6 +566,10 @@ type Provider {
     privatePerson: ContactInformation
     organisation: Organisation
     cargoBikes: [CargoBike]
+    isLocked: Boolean!
+    "null if not locked by other user"
+    lockedBy: ID
+    lockedUntil: Date
 }
 
 "(dt. Anbieter)"
@@ -585,6 +589,10 @@ type Person {
     name: String!
     firstName: String!
     contactInformation: [ContactInformation]
+    isLocked: Boolean!
+    "null if not locked by other user"
+    lockedBy: ID
+    lockedUntil: Date
 }
 
 input PersonCreateInput {
@@ -600,6 +608,10 @@ type ContactInformation {
     email: String
     email2: String
     note: String
+    isLocked: Boolean!
+    "null if not locked by other user"
+    lockedBy: ID
+    lockedUntil: Date
 }
 
 input ContactInformationCreateInput {
@@ -626,6 +638,10 @@ type ContactPerson {
     id: ID!
     intern: Boolean!
     contactInformation: ContactInformation!
+    isLocked: Boolean!
+    "null if not locked by other user"
+    lockedBy: ID
+    lockedUntil: Date
 }
 
 input ContactPersonCreateInput {
@@ -652,6 +668,10 @@ type Organisation {
     provider: Provider
     contactInformation: ContactInformation
     otherData: String
+    isLocked: Boolean!
+    "null if not locked by other user"
+    lockedBy: ID
+    lockedUntil: Date
 }
 
 input OrganisationCreateInput {
@@ -680,6 +700,10 @@ type LendingStation {
     cargoBikes: [CargoBike]
     "Total amount of cargoBikes currently assigned to the lending station"
     numCargoBikes: Int!
+    isLocked: Boolean!
+    "null if not locked by other user"
+    lockedBy: ID
+    lockedUntil: Date
 }
 
 """
@@ -715,7 +739,7 @@ type LoanPeriod {
     Loan times from and until for each day of the week.
     Starting with Monday from, Monday to, Tuesday from, ..., Sunday to 
     """
-    times: [String]
+    loanTimes: [String]
 }
 
 """
@@ -729,7 +753,7 @@ input LoanPeriodInput {
     Loan times from and until for each day of the week.
     Starting with Monday from, Monday to, Tuesday from, ..., Sunday to 
     """
-    times: [String]
+    loanTimes: [String]
 }
 
 "(dt. Zeitscheibe) When was a bike where"
@@ -742,6 +766,10 @@ type TimeFrame {
     note: String
     lendingStation: LendingStation!
     cargoBike: CargoBike!
+    isLocked: Boolean!
+    "null if not locked by other user"
+    lockedBy: ID
+    lockedUntil: Date
 }
 
 input TimeFrameCreateInput {
@@ -828,7 +856,7 @@ type Mutation {
     "lock equipment returns true if bike is not locked or if it doesnt exist"
     lockEquipmentById(id: ID!): Equipment!
     "unlock Equipment, returns true if Bike does not exist"
-    unlockEquipment(id: ID!): Boolean!
+    unlockEquipmentById(id: ID!): Boolean!
     "update Equipment, returns updated equipment. CargoBike will be null, if cargoBikeId is not set. Pass null for cargoBikeIs to delete the relation"
     updateEquipment(equipment: EquipmentUpdateInput!): Equipment!
     createEquipmentType(equipmentType: EquipmentTypeCreateInput!): EquipmentType!
@@ -837,15 +865,20 @@ type Mutation {
     creates new lendingStation and returns lendingStation with new ID
     """
     createLendingStation(lendingStation: LendingStationCreateInput): LendingStation!
+    lockLendingStationById(id: ID!): LendingStation
+    unlockLendingStationById(id: ID!): Boolean!
     "updates lendingStation of given ID with supplied fields and returns updated lendingStation"
     updateLendingStation(lendingStation: LendingStationUpdateInput!): LendingStation!
     createTimeFrame(timeFrame: TimeFrameCreateInput!): TimeFrame!
+    lockTimeFrame(id: ID!): TimeFrame
     """
     BIKEEVENT
     """
     createBikeEventType(name: String!): BikeEventType!
     "creates new BikeEvent"
     createBikeEvent(bikeEvent: BikeEventCreateInput!): BikeEvent!
+    lockBikeEventById(id: ID!): BikeEvent
+    unlockBikeEventById(id: ID!): Boolean!
     "create participant"
     createParticipant(participant: ParticipantCreateInput!): Participant!
     createWorkshopType(workshopType: WorkshopTypeCreateInput!): WorkshopType!

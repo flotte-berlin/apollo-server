@@ -1,5 +1,6 @@
 import { GraphQLError } from 'graphql';
 import { Permission } from '../datasources/userserver/permission';
+import { isLocked } from '../datasources/db/utils';
 
 export default {
     Query: {
@@ -31,7 +32,8 @@ export default {
         },
         privatePerson: (parent: any, __: any, { dataSources, req }: { dataSources: any, req: any }) => {
             return dataSources.providerAPI.privatePersonByProviderId(parent.id);
-        }
+        },
+        isLocked: (parent: any, __: any, { dataSources, req }: { dataSources: any; req: any }) => isLocked(parent, { dataSources, req })
     },
     Organisation: {
         provider: (parent: any, __: any, { dataSources, req }: { dataSources: any, req: any }) => {
@@ -39,7 +41,8 @@ export default {
         },
         contactInformation: (parent: any, __: any, { dataSources, req }: { dataSources: any, req: any }) => {
             return dataSources.providerAPI.contactInformationByOrganisationId(parent.id);
-        }
+        },
+        isLocked: (parent: any, __: any, { dataSources, req }: { dataSources: any; req: any }) => isLocked(parent, { dataSources, req })
     },
     Mutation: {
         createProvider: (_: any, { provider }: { provider: number }, { dataSources, req }: { dataSources: any, req: any }) => {
