@@ -18,6 +18,34 @@ export default {
             } else {
                 return new GraphQLError('Insufficient Permissions');
             }
+        },
+        engagementById: (_: any, { id }: { id: number }, { dataSources, req }: { dataSources: any, req: any }) => {
+            if (req.permissions.includes(Permission.ReadBike)) {
+                return dataSources.participantAPI.engagementById(id);
+            } else {
+                return new GraphQLError('Insufficient Permissions');
+            }
+        },
+        engagements: (_: any, { offset, limit }: { offset: number, limit: number }, { dataSources, req }: { dataSources: any, req: any }) => {
+            if (req.permissions.includes(Permission.ReadBike)) {
+                return dataSources.participantAPI.engagements(offset, limit);
+            } else {
+                return new GraphQLError('Insufficient Permissions');
+            }
+        },
+        engagementTypeById: (_: any, { id }: { id: number }, { dataSources, req }: { dataSources: any, req: any }) => {
+            if (req.permissions.includes(Permission.ReadBike)) {
+                return dataSources.participantAPI.engagementTypeById(id);
+            } else {
+                return new GraphQLError('Insufficient Permissions');
+            }
+        },
+        engagementTypes: (_: any, { offset, limit }: { offset: number, limit: number }, { dataSources, req }: { dataSources: any, req: any }) => {
+            if (req.permissions.includes(Permission.ReadBike)) {
+                return dataSources.participantAPI.engagementTypes(offset, limit);
+            } else {
+                return new GraphQLError('Insufficient Permissions');
+            }
         }
     },
     Participant: {

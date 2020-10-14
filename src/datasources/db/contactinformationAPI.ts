@@ -1,7 +1,6 @@
 import { DataSource } from 'apollo-datasource';
 import { Connection, getConnection } from 'typeorm';
 import { ContactInformation } from '../../model/ContactInformation';
-import { LendingStation } from '../../model/LendingStation';
 import { Person } from '../../model/Person';
 
 export class ContactInformationAPI extends DataSource {
@@ -33,19 +32,10 @@ export class ContactInformationAPI extends DataSource {
 
     async contactInformationById (id: number) {
         return await this.connection.getRepository(ContactInformation)
-            .createQueryBuilder('contactInformation')
+            .createQueryBuilder('ci')
             .select()
-            .where('"contactInformation".id = :id', { id: id })
+            .where('id = :id', { id: id })
             .getOne();
-    }
-
-    // TODO change to contactinformation
-    async contactPersonsByLendingStationId (id: number) {
-        return await this.connection
-            .createQueryBuilder()
-            .relation(LendingStation, 'contactPersons')
-            .of(id)
-            .loadMany();
     }
 
     async createPerson (person: any) {
@@ -59,18 +49,6 @@ export class ContactInformationAPI extends DataSource {
         return inserts.generatedMaps[0];
     }
 
-    /**
-     * Return person by ID
-     * @param id
-     */
-    async personById (id: number) {
-        return await this.connection.getRepository(Person)
-            .createQueryBuilder('person')
-            .select()
-            .where('person.id = :id', { id: id })
-            .getOne();
-    }
-
     async persons (offset: number, limit: number) {
         return await this.connection.getRepository(Person)
             .createQueryBuilder('person')
@@ -78,6 +56,14 @@ export class ContactInformationAPI extends DataSource {
             .skip(offset)
             .take(limit)
             .execute();
+    }
+
+    async personById (id: number) {
+        return await this.connection.getRepository(Person)
+            .createQueryBuilder('p')
+            .select()
+            .where('id = :id', { id: id })
+            .getOne();
     }
 
     async personByContactInformationId (id: number) {

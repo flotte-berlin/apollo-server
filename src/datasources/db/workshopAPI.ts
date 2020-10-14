@@ -31,6 +31,14 @@ export class WorkshopAPI extends DataSource {
         return inserts.generatedMaps[0];
     }
 
+    async workshopTypeById (id: number) {
+        return await this.connection.getRepository(WorkshopType)
+            .createQueryBuilder('wt')
+            .select()
+            .where('id = :id', { id: id })
+            .getOne();
+    }
+
     async workshopTypes (offset: number, limit: number) {
         return await this.connection.getRepository(WorkshopType)
             .createQueryBuilder('w')
@@ -38,6 +46,14 @@ export class WorkshopAPI extends DataSource {
             .skip(offset)
             .take(limit)
             .getMany();
+    }
+
+    async workshopById (id: number) {
+        return await this.connection.getRepository(Workshop)
+            .createQueryBuilder('w')
+            .select()
+            .where('id = :id', { id: id })
+            .getOne();
     }
 
     /**

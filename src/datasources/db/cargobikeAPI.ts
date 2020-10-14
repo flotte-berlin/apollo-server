@@ -187,6 +187,23 @@ export class CargoBikeAPI extends DataSource {
             .getMany();
     }
 
+    async bikeEvents (offset: number, limit: number) {
+        return await this.connection.getRepository(BikeEvent)
+            .createQueryBuilder('be')
+            .select()
+            .skip(offset)
+            .take(limit)
+            .getMany();
+    }
+
+    async findBikeEventTypeById (id: number) {
+        return await this.connection.getRepository(BikeEventType)
+            .createQueryBuilder('bet')
+            .select()
+            .where('id = :id', { id: id })
+            .getOne();
+    }
+
     async responsibleByBikeEventId (id: number) {
         return await this.connection.getRepository(BikeEvent)
             .createQueryBuilder('be')
@@ -223,7 +240,7 @@ export class CargoBikeAPI extends DataSource {
         return await LockUtils.unlockEntity(this.connection, BikeEvent, 'be', id, userId);
     }
 
-    async findEquipmentById (id: number) {
+    async equipmentById (id: number) {
         return await this.connection.getRepository(Equipment)
             .createQueryBuilder('equipment')
             .select()
@@ -271,7 +288,7 @@ export class CargoBikeAPI extends DataSource {
                 .of(equipment.id)
                 .set(equipment.cargoBikeId);
         }
-        return this.findEquipmentById(inserts.identifiers[0].id);
+        return this.equipmentById(inserts.identifiers[0].id);
     }
 
     async cargoBikeByEquipmentId (id: number) {
@@ -321,9 +338,9 @@ export class CargoBikeAPI extends DataSource {
                 .of(equipment.id)
                 .set(cargoBikeId);
             !keepLock && LockUtils.unlockEntity(this.connection, Equipment, 'e', equipment.id, userId);
-            return this.findEquipmentById(equipment.id);
+            return this.equipmentById(equipment.id);
         }
-        return this.findEquipmentById(equipment.id);
+        return this.equipmentById(equipment.id);
     }
 
     async getEquipment (offset: number, limit: number) {
@@ -355,8 +372,17 @@ export class CargoBikeAPI extends DataSource {
             .getOne();
     }
 
+    async eqiupmentTypes (offset: number, limit: number) {
+        return await this.connection.getRepository(EquipmentType)
+            .createQueryBuilder('et')
+            .select()
+            .skip(offset)
+            .take(limit)
+            .getMany();
+    }
+
     async equipmentTypeByCargoBikeId (id: number) {
-        return this.connection.getRepository(CargoBike)
+        return await this.connection.getRepository(CargoBike)
             .createQueryBuilder('cargobike')
             .relation(CargoBike, 'equipmentTypeIds')
             .of(id)

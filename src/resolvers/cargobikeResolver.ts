@@ -18,9 +18,23 @@ export default {
                 return new GraphQLError('Insufficiant Permissions');
             }
         },
+        bikeEvents: (_:any, { offset, limit }: { offset: number, limit: number }, { dataSources, req }: { dataSources: any, req: any }) => {
+            if (req.permissions.includes(Permission.ReadBike)) {
+                return dataSources.cargoBikeAPI.bikeEvents(offset, limit);
+            } else {
+                return new GraphQLError('Insufficiant Permissions');
+            }
+        },
         bikeEventById: (_:any, { id }: { id: number }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.ReadBike)) {
                 return dataSources.cargoBikeAPI.findBikeEventById(id);
+            } else {
+                return new GraphQLError('Insufficiant Permissions');
+            }
+        },
+        bikeEventTypeByd: (_:any, { id }: { id: number }, { dataSources, req }: { dataSources: any, req: any }) => {
+            if (req.permissions.includes(Permission.ReadBike)) {
+                return dataSources.cargoBikeAPI.findBikeEventTypeById(id);
             } else {
                 return new GraphQLError('Insufficiant Permissions');
             }
@@ -34,7 +48,21 @@ export default {
         },
         equipmentById: (_:any, { id }: { id: number }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.ReadBike)) {
-                return dataSources.cargoBikeAPI.findEquipmentJoinBikeById(id);
+                return dataSources.cargoBikeAPI.equipmentById(id);
+            } else {
+                return new GraphQLError('Insufficiant Permissions');
+            }
+        },
+        equipmentTypes: (_:any, { offset, limit }: { offset: number, limit: number }, { dataSources, req }: { dataSources: any, req: any }) => {
+            if (req.permissions.includes(Permission.ReadBike)) {
+                return dataSources.cargoBikeAPI.equipmentTypes(offset, limit);
+            } else {
+                return new GraphQLError('Insufficiant Permissions');
+            }
+        },
+        equipmentTypeById: (_:any, { id }: { id: number }, { dataSources, req }: { dataSources: any, req: any }) => {
+            if (req.permissions.includes(Permission.ReadBike)) {
+                return dataSources.cargoBikeAPI.equipmentTypeById(id);
             } else {
                 return new GraphQLError('Insufficiant Permissions');
             }

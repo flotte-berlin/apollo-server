@@ -19,6 +19,13 @@ export default {
                 return new GraphQLError('Insufficient Permissions');
             }
         },
+        timeFrameById: (_: any, { id }: { id: number }, { dataSources, req }: { dataSources: any, req: any }) => {
+            if (req.permissions.includes(Permission.ReadBike)) {
+                return dataSources.lendingStationAPI.timeFrameById(id);
+            } else {
+                return new GraphQLError('Insufficient Permissions');
+            }
+        },
         timeframes: (_: any, { offset, limit }: { offset: number, limit: number }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.ReadBike)) {
                 return dataSources.lendingStationAPI.timeFrames(offset, limit);

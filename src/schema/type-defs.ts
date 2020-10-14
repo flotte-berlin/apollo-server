@@ -813,26 +813,39 @@ type Query {
     cargoBikeById(id:ID!): CargoBike
     "returns cargoBikes ordered by name ascending, relations are not loaded, use cargoBikeById instead"
     cargoBikes(offset: Int!, limit: Int!): [CargoBike]!
+    engagementById(id: ID!): Engagement
+    engagements(offset: Int!, limit: Int!): [Engagement]!
+    engagementTypeById(id: ID!): EngagementType
+    engagementTypes(offset: Int!, limit: Int!): [EngagementType]!
+    "equipment by id, will return null if id not found"
+    equipmentById(id: ID!): Equipment
+    equipment(offset: Int!, limit: Int!): [Equipment]!
+    equipmentTypeById(id: ID!): EquipmentType
+    equipmentTypes(offset: Int!, limit: Int!): [EquipmentType]!
     "return null if id not found"
     providerById(id:ID!): Provider
     "unique equipment with pagination, contains relation to bike (with no further joins), so if you wanna know more about the bike, use cargoBikeById"
-    equipment(offset: Int!, limit: Int!): [Equipment]!
-    "equipment by id, will return null if id not found"
-    equipmentById(id: ID!): Equipment
     providers(offset: Int!, limit: Int!): [Provider]!
     "participant by id"
     participantById(id:ID!):  Participant
-    "p"
     participants(offset: Int!, limit: Int!): [ Participant]!
-    workshopTypes(offset: Int!, limit: Int!): [WorkshopType]
-    workshops(offset: Int!, limit: Int!): [Workshop]
+    workshopTypeById(id: ID!): WorkshopType
+    workshopTypes(offset: Int!, limit: Int!): [WorkshopType]!
+    workshopById(id: ID!): Workshop
+    workshops(offset: Int!, limit: Int!): [Workshop]!
     lendingStationById(id:ID!): LendingStation
     lendingStations(offset: Int!, limit: Int!): [LendingStation]!
+    organisationById(id: ID!): Organisation
+    organisations(offset: Int!, limit: Int!): [Organisation]!
+    timeFrameById(id: ID!): TimeFrame
     timeframes(offset: Int!, limit: Int!): [TimeFrame]!
+    contactInformationById(id: ID!): ContactInformation
     contactInformation(offset: Int!, limit: Int!): [ContactInformation]!
+    personById(id: ID!): Person
     persons(offset: Int!, limit: Int!): [Person]
     bikeEventTypes(offset: Int!, limit: Int!): [BikeEventType]
-    "returns BikeEvent with CargoBike"
+    bikeEventTypeByd(id: ID!): BikeEventType
+    bikeEvents(offset: Int!, limit: Int!): [BikeEvent]!
     bikeEventById(id:ID!): BikeEvent!
 }
 
@@ -879,7 +892,9 @@ type Mutation {
     createBikeEvent(bikeEvent: BikeEventCreateInput!): BikeEvent!
     lockBikeEventById(id: ID!): BikeEvent
     unlockBikeEventById(id: ID!): Boolean!
-    "create participant"
+    """
+    PARTICIPANTS
+    """
     createParticipant(participant: ParticipantCreateInput!): Participant!
     createWorkshopType(workshopType: WorkshopTypeCreateInput!): WorkshopType!
     createWorkshop(workshop: WorkshopCreateInput!): Workshop!

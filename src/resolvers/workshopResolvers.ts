@@ -4,9 +4,23 @@ import { isLocked } from '../datasources/db/utils';
 
 export default {
     Query: {
+        workshopTypeById: (_: any, { id }: { id: number }, { dataSources, req }: { dataSources: any, req: any }) => {
+            if (req.permissions.includes(Permission.ReadBike)) {
+                return dataSources.workshopAPI.workshopTypeById(id);
+            } else {
+                return new GraphQLError('Insufficient Permissions');
+            }
+        },
         workshopTypes: (_: any, { offset, limit }: { offset: number, limit: number }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.ReadBike)) {
                 return dataSources.workshopAPI.workshopTypes(offset, limit);
+            } else {
+                return new GraphQLError('Insufficient Permissions');
+            }
+        },
+        workshopById: (_: any, { id }: { id: number }, { dataSources, req }: { dataSources: any, req: any }) => {
+            if (req.permissions.includes(Permission.ReadBike)) {
+                return dataSources.workshopAPI.workshopById(id);
             } else {
                 return new GraphQLError('Insufficient Permissions');
             }

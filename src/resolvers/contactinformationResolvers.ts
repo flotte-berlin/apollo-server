@@ -12,6 +12,20 @@ export default {
                 return new GraphQLError('Insufficient Permissions');
             }
         },
+        contactInformationById: (_: any, { id }: { id: number }, { dataSources, req }: { dataSources: any, req: any }) => {
+            if (req.permissions.includes(Permission.ReadPerson)) {
+                return dataSources.contactInformationAPI.contactInformationById(id);
+            } else {
+                return new GraphQLError('Insufficient Permissions');
+            }
+        },
+        personById: (_: any, { id }: { id: number }, { dataSources, req }: { dataSources: any, req: any }) => {
+            if (req.permissions.includes(Permission.ReadPerson)) {
+                return dataSources.contactInformationAPI.personById(id);
+            } else {
+                return new GraphQLError('Insufficient Permissions');
+            }
+        },
         persons: (_: any, { offset, limit }: { offset: number, limit: number }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.ReadPerson)) {
                 return dataSources.contactInformationAPI.persons(offset, limit);

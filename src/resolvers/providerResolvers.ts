@@ -17,6 +17,20 @@ export default {
             } else {
                 return new GraphQLError('Insufficient Permissions');
             }
+        },
+        organisations: (_: any, { offset, limit }: { offset: number, limit: number }, { dataSources, req }: { dataSources: any, req: any }) => {
+            if (req.permissions.includes(Permission.ReadBike)) {
+                return dataSources.providerAPI.organisations(offset, limit);
+            } else {
+                return new GraphQLError('Insufficient Permissions');
+            }
+        },
+        organisationById: (_: any, { id }: { id: number }, { dataSources, req }: { dataSources: any, req: any }) => {
+            if (req.permissions.includes(Permission.ReadBike)) {
+                return dataSources.providerAPI.organisationById(id);
+            } else {
+                return new GraphQLError('Insufficient Permissions');
+            }
         }
     },
     Provider: {

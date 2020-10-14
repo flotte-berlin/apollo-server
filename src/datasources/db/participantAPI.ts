@@ -69,12 +69,38 @@ export class ParticipantAPI extends DataSource {
             .getMany();
     }
 
+    async engagements (offset: number, limit: number) {
+        return await this.connection.getRepository(Engagement)
+            .createQueryBuilder('e')
+            .select()
+            .skip(offset)
+            .take(limit)
+            .getMany();
+    }
+
     async engagementById (id: number) {
         return await this.connection.getRepository(Engagement)
             .createQueryBuilder('engagement')
             .select()
             .where('engagement.id = :id', { id: id })
             .getOne();
+    }
+
+    async engagementTypeById (id: number) {
+        return await this.connection.getRepository(EngagementType)
+            .createQueryBuilder('et')
+            .select()
+            .where('id = :id', { id: id })
+            .getOne();
+    }
+
+    async engagementTypes (offset: number, limit: number) {
+        return await this.connection.getRepository(EngagementType)
+            .createQueryBuilder('et')
+            .select()
+            .skip(offset)
+            .take(limit)
+            .getMany();
     }
 
     async engagementTypeByEngagementId (id: number) {

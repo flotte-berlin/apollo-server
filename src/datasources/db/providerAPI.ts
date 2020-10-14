@@ -53,6 +53,23 @@ export class ProviderAPI extends DataSource {
             .loadOne();
     }
 
+    async organisations (offset: number, limit: number) {
+        return await this.connection.getRepository(Organisation)
+            .createQueryBuilder('o')
+            .select()
+            .skip(offset)
+            .limit(limit)
+            .getMany();
+    }
+
+    async organisationById (id: number) {
+        return await this.connection.getRepository(Organisation)
+            .createQueryBuilder('o')
+            .select()
+            .where('id = :id', { id: id })
+            .getOne();
+    }
+
     async contactInformationByOrganisationId (id: number) {
         return await this.connection.getRepository(Organisation)
             .createQueryBuilder('o')
