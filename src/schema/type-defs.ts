@@ -633,28 +633,6 @@ input ContactInformationUpdateInput {
     note: String
 }
 
-"describes Relation of Contact to Provider"
-type ContactPerson {
-    id: ID!
-    intern: Boolean!
-    contactInformation: ContactInformation!
-    isLocked: Boolean!
-    "null if not locked by other user"
-    lockedBy: ID
-    lockedUntil: Date
-}
-
-input ContactPersonCreateInput {
-    intern: Boolean!
-    contactInformationId: ID!
-}
-
-input ContactPersonUpdateInput {
-    id: ID!
-    intern: Boolean
-    contactInformationId: ID
-}
-
 type Organisation {
     id: ID!
     name: String!
@@ -904,13 +882,8 @@ type Mutation {
     createEngagementType(engagementType: EngagementTypeCreateInput!): EngagementType!
     "create Engagement"
     createEngagement(engagement: EngagementCreateInput): Engagement!
-    "createContactPerson, return null if contactInformationId does not exist"
-    createContactPerson(contactPerson: ContactPersonCreateInput): ContactPerson
-    updateContactPerson(contactPerson: ContactPersonUpdateInput): ContactPerson
-    "create Provider, if cargoBikeIds or contactPersonIds are not valid, provider will still be created"
     createProvider(provider: ProviderCreateInput!): Provider!
     createOrganisation(organisation: OrganisationCreateInput!): Organisation!
-    
 }
 
 `;

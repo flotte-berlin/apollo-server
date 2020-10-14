@@ -14,7 +14,7 @@ export class LendingStationAPI extends DataSource {
         this.connection = getConnection();
     }
 
-    async getLendingStationById ({ id }: { id: any }) {
+    async lendingStationById ({ id }: { id: any }) {
         return await this.connection.manager
             .createQueryBuilder()
             .select('lendingStation')
@@ -166,7 +166,7 @@ export class LendingStationAPI extends DataSource {
                 .set({ ...lendingStation })
                 .where('id = :id', { id: lendingStation.id })
                 .execute();
-            return this.getLendingStationById({ id: lendingStation.id });
+            return this.lendingStationById({ id: lendingStation.id });
         } else {
             return new GraphQLError('ID not in database');
         }

@@ -34,16 +34,6 @@ export default {
             }
         }
     },
-    ContactPerson: {
-        contactInformation: (parent: any, __: any, { dataSources, req }: { dataSources: any, req: any }) => {
-            if (req.permissions.includes(Permission.ReadBike)) {
-                return dataSources.contactInformationAPI.contactInformationByContactPersonId(parent.id);
-            } else {
-                return new GraphQLError('Insufficient Permissions');
-            }
-        },
-        isLocked: (parent: any, __: any, { dataSources, req }: { dataSources: any; req: any }) => isLocked(parent, { dataSources, req })
-    },
     Person: {
         contactInformation: (parent: Person, __: any, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.ReadPerson)) {
@@ -65,22 +55,8 @@ export default {
         isLocked: (parent: any, __: any, { dataSources, req }: { dataSources: any; req: any }) => isLocked(parent, { dataSources, req })
     },
     Mutation: {
-        createContactPerson: (_: any, { contactPerson }: { contactPerson: any }, { dataSources, req }: { dataSources: any, req: any }) => {
-            if (req.permissions.includes(Permission.WriteBike)) {
-                return dataSources.contactInformationAPI.createContactPerson(contactPerson);
-            } else {
-                return new GraphQLError('Insufficient Permissions');
-            }
-        },
-        updateContactPerson: (_: any, { contactPerson }: { contactPerson: any }, { dataSources, req }: { dataSources: any, req: any }) => {
-            if (req.permissions.includes(Permission.WriteBike)) {
-                return dataSources.contactInformationAPI.updateContactPerson(contactPerson);
-            } else {
-                return new GraphQLError('Insufficient Permissions');
-            }
-        },
         createContactInformation: (_: any, { contactInformation }: { contactInformation: any }, { dataSources, req }: { dataSources: any, req: any }) => {
-            if (req.permissions.includes(Permission.WriteBike)) {
+            if (req.permissions.includes(Permission.WritePerson)) {
                 return dataSources.contactInformationAPI.createContactInformation(contactInformation);
             } else {
                 return new GraphQLError('Insufficient Permissions');
