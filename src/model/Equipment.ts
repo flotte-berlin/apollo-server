@@ -3,20 +3,6 @@ import { CargoBike, Lockable } from './CargoBike';
 
 @Entity()
 export class Equipment implements Lockable {
-    setValues ({ id, serialNo, title, description, cargoBike }: {
-        id: number,
-        serialNo: string,
-        title: string,
-        description: string,
-        cargoBike: CargoBike
-    }) {
-        this.id = id;
-        this.serialNo = serialNo;
-        this.title = title;
-        this.description = description;
-        this.cargoBike = cargoBike;
-    }
-
     @PrimaryGeneratedColumn()
     id: number;
 

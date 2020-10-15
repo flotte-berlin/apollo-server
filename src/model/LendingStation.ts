@@ -56,7 +56,7 @@ export class LendingStation implements Lockable {
     @Column(type => LoanPeriod)
     loanPeriod: LoanPeriod;
 
-    @OneToMany(type => TimeFrame, timeFrame => timeFrame.lendingStation)
+    @OneToMany(type => TimeFrame, timeFrame => timeFrame.lendingStationId)
     timeFrames: TimeFrame[];
 
     @ManyToOne(type => Organisation, organization => organization.lendingStations)

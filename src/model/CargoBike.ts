@@ -163,7 +163,7 @@ export class CargoBike implements Lockable {
     // Equipment that is not unique and is supposed to be selected out of a list e.g. drop down
     @ManyToMany(type => EquipmentType, equipmentType => equipmentType.cargoBikeIds)
     @JoinTable()
-   equipmentTypeIds: number[];
+    equipmentTypeIds: number[];
 
     // Security information
     @Column(type => Security)
@@ -181,10 +181,10 @@ export class CargoBike implements Lockable {
     })
     note: string;
 
-    @ManyToOne(type => Provider, {
+    @ManyToOne(type => Provider, provider => provider.cargoBikeIds, {
         nullable: true
     })
-    provider: Provider;
+    providerId: number;
 
     @OneToMany(type => BikeEvent, bikeEvent => bikeEvent.cargoBikeId, {
         nullable: true,
@@ -196,7 +196,7 @@ export class CargoBike implements Lockable {
     @Column(type => InsuranceData)
     insuranceData: InsuranceData;
 
-    @OneToMany(type => TimeFrame, loanPeriod => loanPeriod.cargoBike, {
+    @OneToMany(type => TimeFrame, timeFrame => timeFrame.cargoBikeId, {
         nullable: true
     })
     timeFrames: TimeFrame[];

@@ -40,12 +40,16 @@ export class ParticipantAPI extends DataSource {
     }
 
     async participantByCargoBikeId (id:number) {
-        return await this.connection.getRepository(Participant)
-            .createQueryBuilder('participant')
-            .leftJoinAndSelect('participant.cargoBike', 'cargoBike')
-            .where('"cargoBike".id = :id', { id: id })
-            .andWhere('"cargoBike"."participantId" = participant.id')
-            .getOne();
+        return await this.connection.getRepository(Engagement)
+            .createQueryBuilder('e')
+            .relation(Engagement, 'participantId')
+            .of((await this.connection.getRepository(Engagement)// TODO do this with a sub query
+                .createQueryBuilder('e')
+                .select()
+                .where('"dateRange" && daterange(CURRENT_DATE,CURRENT_DATE,\'[]\')')
+                .andWhere('"cargoBikeId" = :id', { id: id })
+                .getOne())?.id
+            ).loadOne();
     }
 
     async engagementByParticipantId (id: number) {
@@ -128,7 +132,7 @@ export class ParticipantAPI extends DataSource {
     }
 
     /**
-     * creates participant and creates realtion to given contactInformation
+     * creates participant and creates relation to given contactInformation
      * @param participant to be created
      */
     async createParticipant (participant: any) {
@@ -142,7 +146,7 @@ export class ParticipantAPI extends DataSource {
                 .returning('*')
                 .execute();
         });
-        return this.getParticipantById(inserts.identifiers[0].id);
+        return this.getParticipantById(inserts?.identifiers[0].id);
     }
 
     async createEngagement (engagement: any) {
@@ -167,7 +171,7 @@ export class ParticipantAPI extends DataSource {
                 .returning('*')
                 .execute();
         });
-        return this.engagementById(inserts.identifiers[0].id);
+        return this.engagementById(inserts?.identifiers[0].id);
     }
 
     async createEngagementType (engagementType: any) {

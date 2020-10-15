@@ -118,11 +118,6 @@ export class CargoBikeAPI extends DataSource {
                 .values([cargoBike])
                 .returning('*')
                 .execute();
-            await entityManager.getRepository(CargoBike)
-                .createQueryBuilder('cargobike')
-                .relation(CargoBike, 'provider')
-                .of(inserts.identifiers[0].id)
-                .set(cargoBike?.providerId);
             cargoBike?.equipmentTypeIds && await entityManager.getRepository(CargoBike)
                 .createQueryBuilder('cargobike')
                 .relation(CargoBike, 'equipmentTypeIds')
@@ -372,7 +367,7 @@ export class CargoBikeAPI extends DataSource {
             .getOne();
     }
 
-    async eqiupmentTypes (offset: number, limit: number) {
+    async equipmentTypes (offset: number, limit: number) {
         return await this.connection.getRepository(EquipmentType)
             .createQueryBuilder('et')
             .select()

@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { LendingStation } from './LendingStation';
 import { CargoBike, Lockable } from './CargoBike';
 
@@ -16,7 +16,10 @@ export class TimeFrame implements Lockable {
     dateRange: Date[];
 
     @ManyToOne(type => LendingStation, lendingStation => lendingStation.timeFrames)
-    lendingStation: LendingStation;
+    @JoinColumn({
+        name: 'lendingStationId'
+    })
+    lendingStationId: number;
 
     @Column({
         nullable: true
@@ -24,7 +27,10 @@ export class TimeFrame implements Lockable {
     note: string;
 
     @ManyToOne(type => CargoBike, cargoBike => cargoBike.timeFrames)
-    cargoBike: CargoBike;
+    @JoinColumn({
+        name: 'cargoBikeId'
+    })
+    cargoBikeId: number;
 
     @Column({
         nullable: true,

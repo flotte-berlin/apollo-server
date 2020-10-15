@@ -41,18 +41,22 @@ export class LendingStationAPI extends DataSource {
      * @param id of cargoBike
      */
     async lendingStationByCargoBikeId (id: number) {
-        return (await this.connection.getRepository(TimeFrame)
-            .createQueryBuilder('timeframe')
-            .leftJoinAndSelect('timeframe.lendingStation', 'lendingStation')
-            .where('timeframe."cargoBikeId" = :id', { id: id })
-            .andWhere('timeframe."dateRange" && daterange(CURRENT_DATE,CURRENT_DATE,\'[]\')')
-            .getOne())?.lendingStation;
+        return await this.connection.getRepository(TimeFrame)
+            .createQueryBuilder('tf')
+            .relation(TimeFrame, 'lendingStationId')
+            .of((await this.connection.getRepository(TimeFrame)// TODO maybe this can be done with a sub query
+                .createQueryBuilder('tf')
+                .select()
+                .where('"cargoBikeId" = :cid', { cid: id })
+                .andWhere('"dateRange" && daterange(CURRENT_DATE,CURRENT_DATE,\'[]\')')
+                .getOne())?.id)
+            .loadOne();
     }
 
     async lendingStationByTimeFrameId (id: number) {
         return await this.connection.getRepository(LendingStation)
             .createQueryBuilder('lendingStation')
-            .relation(TimeFrame, 'lendingStation')
+            .relation(TimeFrame, 'lendingStationId')
             .of(id)
             .loadOne();
     }
@@ -198,7 +202,7 @@ export class LendingStationAPI extends DataSource {
                     .returning('*')
                     .values([timeFrame])
                     .execute();
-                await entityManager.getRepository(TimeFrame)
+                /* await entityManager.getRepository(TimeFrame)
                     .createQueryBuilder()
                     .relation(TimeFrame, 'cargoBike')
                     .of(inserts.identifiers[0].id)
@@ -208,6 +212,7 @@ export class LendingStationAPI extends DataSource {
                     .relation(TimeFrame, 'lendingStation')
                     .of(inserts.identifiers[0].id)
                     .set(timeFrame.lendingStationId);
+                 */
             });
         } catch (e) {
             if (e instanceof UserInputError) {

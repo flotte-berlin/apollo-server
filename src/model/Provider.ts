@@ -55,8 +55,8 @@ export class Provider implements Lockable {
     })
     organisationId: number;
 
-    @OneToMany(type => CargoBike, cargoBike => cargoBike.provider)
-    cargoBikes: CargoBike[];
+    @OneToMany(type => CargoBike, cargoBike => cargoBike.providerId)
+    cargoBikeIds: number[];
 
     @Column({
         nullable: true,

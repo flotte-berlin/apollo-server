@@ -40,7 +40,7 @@ export class ProviderAPI extends DataSource {
     async providerByCargoBikeId (id: number) {
         return await this.connection.getRepository(CargoBike)
             .createQueryBuilder('cb')
-            .relation(CargoBike, 'provider')
+            .relation(CargoBike, 'providerId')
             .of(id)
             .loadOne();
     }
