@@ -72,12 +72,40 @@ export default {
                 return new GraphQLError('Insufficient Permissions');
             }
         },
+        lendingStations: (parent: any, __: any, { dataSources, req }: { dataSources: any, req: any }) => {
+            if (req.permissions.includes(Permission.ReadLendingStation)) {
+                return dataSources.providerAPI.lendingStationByOrganisationId(parent.id);
+            } else {
+                return new GraphQLError('Insufficient Permissions');
+            }
+        },
         isLocked: (parent: any, __: any, { dataSources, req }: { dataSources: any; req: any }) => isLocked(parent, { dataSources, req })
     },
     Mutation: {
-        createProvider: (_: any, { provider }: { provider: number }, { dataSources, req }: { dataSources: any, req: any }) => {
+        createProvider: (_: any, { provider }: { provider: any }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.WriteProvider)) {
                 return dataSources.providerAPI.createProvider(provider);
+            } else {
+                return new GraphQLError('Insufficient Permissions');
+            }
+        },
+        lockProvider: (_: any, { id }: { id: number }, { dataSources, req }: { dataSources: any, req: any }) => {
+            if (req.permissions.includes(Permission.WriteProvider)) {
+                return dataSources.providerAPI.lockProvider(id, req.userId);
+            } else {
+                return new GraphQLError('Insufficient Permissions');
+            }
+        },
+        unlockProvider: (_: any, { id }: { id: number }, { dataSources, req }: { dataSources: any, req: any }) => {
+            if (req.permissions.includes(Permission.WriteProvider)) {
+                return dataSources.providerAPI.unlockProvider(id, req.userId);
+            } else {
+                return new GraphQLError('Insufficient Permissions');
+            }
+        },
+        updateProvider: (_: any, { provider }: { provider: any }, { dataSources, req }: { dataSources: any, req: any }) => {
+            if (req.permissions.includes(Permission.WriteProvider)) {
+                return dataSources.providerAPI.updateProvider(provider, req.userId);
             } else {
                 return new GraphQLError('Insufficient Permissions');
             }
@@ -85,6 +113,27 @@ export default {
         createOrganisation: (_: any, { organisation }: { organisation: any }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.WriteOrganisation)) {
                 return dataSources.providerAPI.createOrganisation(organisation);
+            } else {
+                return new GraphQLError('Insufficient Permissions');
+            }
+        },
+        lockOrganisation: (_: any, { id }: { id: number }, { dataSources, req }: { dataSources: any, req: any }) => {
+            if (req.permissions.includes(Permission.WriteOrganisation)) {
+                return dataSources.providerAPI.lockOrganisation(id, req.userId);
+            } else {
+                return new GraphQLError('Insufficient Permissions');
+            }
+        },
+        unlockOrganisation: (_: any, { id }: { id: number }, { dataSources, req }: { dataSources: any, req: any }) => {
+            if (req.permissions.includes(Permission.WriteOrganisation)) {
+                return dataSources.providerAPI.unlockOrganisation(id, req.userId);
+            } else {
+                return new GraphQLError('Insufficient Permissions');
+            }
+        },
+        updateOrganisation: (_: any, { organisation }: { organisation: any }, { dataSources, req }: { dataSources: any, req: any }) => {
+            if (req.permissions.includes(Permission.WriteOrganisation)) {
+                return dataSources.providerAPI.updateOrganisation(organisation, req.userId);
             } else {
                 return new GraphQLError('Insufficient Permissions');
             }

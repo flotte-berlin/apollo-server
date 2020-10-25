@@ -154,7 +154,7 @@ export class CargoBike implements Lockable {
     @Column()
     name: string;
 
-    @OneToMany(type => Equipment, equipment => equipment.cargoBike, {
+    @OneToMany(type => Equipment, equipment => equipment.cargoBikeId, {
         nullable: true,
         eager: true
     })

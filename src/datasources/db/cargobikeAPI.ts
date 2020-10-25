@@ -7,7 +7,7 @@ import { Equipment } from '../../model/Equipment';
 import { Engagement } from '../../model/Engagement';
 import { Provider } from '../../model/Provider';
 import { TimeFrame } from '../../model/TimeFrame';
-import { LockUtils } from './utils';
+import { ActionLogger, LockUtils } from './utils';
 import { EquipmentType } from '../../model/EquipmentType';
 import { BikeEventType } from '../../model/BikeEventType';
 
@@ -54,7 +54,7 @@ export class CargoBikeAPI extends DataSource {
     async cargoBikesByProviderId (id: number) {
         return await this.connection
             .createQueryBuilder()
-            .relation(Provider, 'cargoBikes')
+            .relation(Provider, 'cargoBikeIds')
             .of(id)
             .loadMany();
     }
@@ -62,7 +62,7 @@ export class CargoBikeAPI extends DataSource {
     async cargoBikeByTimeFrameId (id: number) {
         return await this.connection.getRepository(TimeFrame)
             .createQueryBuilder('timeframe')
-            .relation(TimeFrame, 'cargoBike')
+            .relation(TimeFrame, 'cargoBikeId')
             .of(id)
             .loadOne();
     }
@@ -72,13 +72,6 @@ export class CargoBikeAPI extends DataSource {
      * @param param0 cargoBike to be updated
      */
     async updateCargoBike (cargoBike: any, userId:number) {
-        // TODO lock cargoBike can return error to save one sql query, this will be a complex sql query
-        if (!await this.checkId(CargoBike, 'cargobike', cargoBike.id)) {
-            return new GraphQLError('ID not found');
-        }
-        if (!await LockUtils.lockEntity(this.connection, CargoBike, 'cb', cargoBike.id, userId)) {
-            return new GraphQLError('Bike locked by other user');
-        }
         const keepLock = cargoBike?.keepLock;
         delete cargoBike.keepLock;
         delete cargoBike.lendingStationId;
@@ -88,6 +81,10 @@ export class CargoBikeAPI extends DataSource {
             delete cargoBike.equipmentTypeIds;
         }
         await this.connection.transaction(async (entityManager: EntityManager) => {
+            if (await LockUtils.isLocked(entityManager, CargoBike, 'cb', cargoBike.id, userId)) {
+                throw new GraphQLError('CargoBike locked by other user');
+            }
+            await ActionLogger.log(entityManager, CargoBike, 'cb', cargoBike, userId);
             await entityManager.getRepository(CargoBike)
                 .createQueryBuilder('cargobike')
                 .update()
@@ -138,6 +135,25 @@ export class CargoBikeAPI extends DataSource {
             .execute()).generatedMaps[0];
     }
 
+    async updateBikeEvent (bikeEvent: any, userId: number) {
+        const keepLock = bikeEvent.keepLock;
+        delete bikeEvent.keepLock;
+        await this.connection.transaction(async (entityManager: EntityManager) => {
+            if (await LockUtils.isLocked(entityManager, BikeEvent, 'be', bikeEvent.id, userId)) {
+                throw new GraphQLError('BikeEvent locked by other user');
+            }
+            await ActionLogger.log(entityManager, BikeEvent, 'be', bikeEvent, userId);
+            await entityManager.getRepository(BikeEvent)
+                .createQueryBuilder('be')
+                .update()
+                .set({ ...bikeEvent })
+                .where('id = :id', { id: bikeEvent.id })
+                .execute();
+        });
+        !keepLock && await LockUtils.unlockEntity(this.connection, BikeEvent, 'be', bikeEvent.id, userId);
+        return await this.bikeEventById(bikeEvent.id);
+    }
+
     async cargoBikeByEventId (id: number) {
         return await this.connection.getRepository(BikeEvent)
             .createQueryBuilder('be')
@@ -173,6 +189,33 @@ export class CargoBikeAPI extends DataSource {
             .execute())?.generatedMaps[0];
     }
 
+    async lockBikeEventType (id: number, userId: number) {
+        return await LockUtils.lockEntity(this.connection, BikeEventType, 'bet', id, userId);
+    }
+
+    async unlockBikeEventType (id: number, userId: number) {
+        return await LockUtils.unlockEntity(this.connection, BikeEventType, 'bet', id, userId);
+    }
+
+    async updateBikeEventType (bikeEventType: any, userId: number) {
+        const keepLock = bikeEventType.keepLock;
+        delete bikeEventType.keepLock;
+        await this.connection.transaction(async (entityManager: EntityManager) => {
+            if (await LockUtils.isLocked(entityManager, BikeEventType, 'bet', bikeEventType.id, userId)) {
+                throw new GraphQLError('BikeEventType locked by other user');
+            }
+            await ActionLogger.log(entityManager, BikeEventType, 'bet', bikeEventType, userId);
+            await entityManager.getRepository(BikeEventType)
+                .createQueryBuilder('bet')
+                .update()
+                .set({ ...bikeEventType })
+                .where('id = :id', { id: bikeEventType.id })
+                .execute();
+        });
+        !keepLock && await LockUtils.unlockEntity(this.connection, BikeEventType, 'bet', bikeEventType.id, userId);
+        return await this.bikeEventTypeById(bikeEventType.id);
+    }
+
     async bikeEventTypes (offset: number, limit: number) {
         return await this.connection.getRepository(BikeEventType)
             .createQueryBuilder('bet')
@@ -191,7 +234,7 @@ export class CargoBikeAPI extends DataSource {
             .getMany();
     }
 
-    async findBikeEventTypeById (id: number) {
+    async bikeEventTypeById (id: number) {
         return await this.connection.getRepository(BikeEventType)
             .createQueryBuilder('bet')
             .select()
@@ -219,11 +262,11 @@ export class CargoBikeAPI extends DataSource {
      * return bikeEvent including CargoBike
      * @param id of event
      */
-    async findBikeEventById (id: number) {
+    async bikeEventById (id: number) {
         return await this.connection.getRepository(BikeEvent)
             .createQueryBuilder('bikeEvent')
-            .leftJoinAndSelect('bikeEvent.cargoBike', 'cargoBike')
-            .where('bikeEvent.id = :id', { id: id })
+            .select()
+            .where('id = :id', { id: id })
             .getOne();
     }
 
@@ -276,22 +319,15 @@ export class CargoBikeAPI extends DataSource {
             .values([equipment])
             .returning('*')
             .execute();
-        if (equipment.cargoBikeId) {
-            await this.connection
-                .createQueryBuilder()
-                .relation(Equipment, 'cargoBike')
-                .of(equipment.id)
-                .set(equipment.cargoBikeId);
-        }
         return this.equipmentById(inserts.identifiers[0].id);
     }
 
     async cargoBikeByEquipmentId (id: number) {
-        return (await this.connection.getRepository(Equipment)
+        return await this.connection.getRepository(Equipment)
             .createQueryBuilder('equipment')
-            .leftJoinAndSelect('equipment.cargoBike', 'cargoBike')
-            .where('equipment.id = :id', { id: id })
-            .getOne())?.cargoBike;
+            .relation(Equipment, 'cargoBikeId')
+            .of(id)
+            .loadOne();
     }
 
     async lockEquipment (id: number, userId: number) {
@@ -308,33 +344,33 @@ export class CargoBikeAPI extends DataSource {
      * @param param0 struct with equipment properites
      */
     async updateEquipment (equipment: any, userId: number) {
-        // TODO let lock cargoBike can return error to save one sql query, this will be a complex sql query
-        if (!await this.checkId(Equipment, 'alias', equipment.id)) {
-            return new GraphQLError('ID not found in DB');
-        }
-        if (!await LockUtils.lockEntity(this.connection, Equipment, 'equipment', equipment.id, userId)) {
-            return new GraphQLError('Equipment locked by other user');
-        }
         const keepLock = equipment.keepLock;
         delete equipment.keepLock;
-        const cargoBikeId = equipment.cargoBikeId;
-        delete equipment.cargoBikeId;
-        await this.connection.getRepository(Equipment)
-            .createQueryBuilder('equipment')
-            .update()
-            .set({ ...equipment })
-            .where('id = :id', { id: equipment.id })
-            .returning('*')
-            .execute();
-        if (cargoBikeId || cargoBikeId === null) {
-            await this.connection.getRepository(Equipment)
-                .createQueryBuilder()
-                .relation(Equipment, 'cargoBike')
-                .of(equipment.id)
-                .set(cargoBikeId);
-            !keepLock && LockUtils.unlockEntity(this.connection, Equipment, 'e', equipment.id, userId);
-            return this.equipmentById(equipment.id);
+        // const cargoBikeId = equipment.cargoBikeId;
+        // delete equipment.cargoBikeId;
+        await this.connection.transaction(async (entityManager: EntityManager) => {
+            if (await LockUtils.isLocked(entityManager, Equipment, 'equipment', equipment.id, userId)) {
+                return new GraphQLError('Equipment is locked by other user');
+            }
+            await ActionLogger.log(entityManager, Equipment, 'e', equipment, userId);
+            await entityManager.getRepository(Equipment)
+                .createQueryBuilder('equipment')
+                .update()
+                .set({ ...equipment })
+                .where('id = :id', { id: equipment.id })
+                .execute();
+            /* if (cargoBikeId || cargoBikeId === null) {
+                await this.connection.getRepository(Equipment)
+                    .createQueryBuilder()
+                    .relation(Equipment, 'cargoBike')
+                    .of(equipment.id)
+                    .set(cargoBikeId);
+            }
+
+             */
         }
+        );
+        !keepLock && await LockUtils.unlockEntity(this.connection, Equipment, 'e', equipment.id, userId);
         return this.equipmentById(equipment.id);
     }
 
@@ -357,6 +393,32 @@ export class CargoBikeAPI extends DataSource {
             .execute();
         inserts.generatedMaps[0].id = inserts.identifiers[0].id;
         return inserts.generatedMaps[0];
+    }
+
+    async lockEquipmentType (id: number, userId : number) {
+        return await LockUtils.lockEntity(this.connection, EquipmentType, 'et', id, userId);
+    }
+
+    async unlockEquipmentType (id: number, userId : number) {
+        return await LockUtils.unlockEntity(this.connection, EquipmentType, 'et', id, userId);
+    }
+
+    async updateEquipmentType (equipmentType: any, userId: number) {
+        const keepLock = equipmentType.keepLock;
+        delete equipmentType.keepLock;
+        await this.connection.transaction(async (entityManager: EntityManager) => {
+            if (await LockUtils.isLocked(entityManager, EquipmentType, 'et', equipmentType.id, userId)) {
+                throw new GraphQLError('EquipmentType is locked by other user');
+            }
+            await entityManager.getRepository(EquipmentType)
+                .createQueryBuilder('et')
+                .update()
+                .set({ ...equipmentType })
+                .where('id = :id', { id: equipmentType.id })
+                .execute();
+        });
+        !keepLock && await this.unlockEquipmentType(equipmentType.id, userId);
+        return await this.equipmentTypeById(equipmentType.id);
     }
 
     async equipmentTypeById (id: number) {

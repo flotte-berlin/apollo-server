@@ -1,14 +1,14 @@
-const { src, dest, watch, series, task } = require('gulp')
-const ts = require('gulp-typescript')
-const del = require('delete')
-const eslint = require('gulp-eslint')
-const nodemon = require('gulp-nodemon')
+const { src, dest, watch, series, task } = require('gulp');
+const ts = require('gulp-typescript');
+const del = require('delete');
+const eslint = require('gulp-eslint');
+const nodemon = require('gulp-nodemon');
 /**
  * Clears the dist folder by deleting all files inside.
  * @param cb
  */
 function clearDist (cb) {
-    del('dist/*', cb)
+    del('dist/*', cb);
 }
 
 /**
@@ -16,11 +16,11 @@ function clearDist (cb) {
  * @returns {*}
  */
 function compileTypescript () {
-    const tsProject = ts.createProject('tsconfig.json')
-    const tsResult = tsProject.src().pipe(tsProject())
+    const tsProject = ts.createProject('tsconfig.json');
+    const tsResult = tsProject.src().pipe(tsProject());
     return tsResult
     // .pipe(minify())
-        .pipe(dest('dist'))
+        .pipe(dest('dist'));
 }
 
 /**
@@ -29,7 +29,7 @@ function compileTypescript () {
  */
 function moveRemaining () {
     return src(['src/**/*', '!src/**/*.ts'])
-        .pipe(dest('dist'))
+        .pipe(dest('dist'));
 }
 
 function runEslint () {
@@ -42,7 +42,7 @@ function runEslint () {
         .pipe(eslint.format())
         // To have the process exit with an error code (1) on
         // lint error, return the stream and pipe to failAfterError last.
-        .pipe(eslint.failAfterError())
+        .pipe(eslint.failAfterError());
 }
 task('eslint', () => {
     return src(['src/**/*.ts'])
@@ -54,30 +54,35 @@ task('eslint', () => {
         .pipe(eslint.format())
     // To have the process exit with an error code (1) on
     // lint error, return the stream and pipe to failAfterError last.
-        .pipe(eslint.failAfterError())
-})
+        .pipe(eslint.failAfterError());
+});
 
-task('default', series(clearDist, compileTypescript, moveRemaining))
+task('default', series(clearDist, compileTypescript, moveRemaining));
 
 task('watch', () => {
-    runEslint()
-    compileTypescript()
-    watch('**/*.ts', runEslint)
-    watch('**/*.ts', compileTypescript)
+    runEslint();
+    compileTypescript();
+    watch('**/*.ts', runEslint);
+    watch('**/*.ts', compileTypescript);
     // watch(['src/**/*', '!src/**/*.ts'], moveRemaining());
     nodemon({
         script: 'dist/index.js',
         watch: ['dist/**/*.js'],
         ext: 'js'
-    })
-})
+    });
+});
+
+task('watchTs', () => {
+    compileTypescript();
+    watch('**/*.ts', compileTypescript);
+});
 
 task('watchnolint', () => {
-    watch('**/*.ts', compileTypescript)
+    watch('**/*.ts', compileTypescript);
     // watch(['src/**/*', '!src/**/*.ts'], moveRemaining());
     nodemon({
         script: 'dist/index.js',
         watch: ['dist/**/*.js'],
         ext: 'js'
-    })
-})
+    });
+});

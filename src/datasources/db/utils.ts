@@ -1,11 +1,9 @@
-import { Connection, ObjectType } from 'typeorm';
-import { CargoBike, Lockable } from '../../model/CargoBike';
+import { Connection, EntityManager, ObjectType } from 'typeorm';
+import { Lockable } from '../../model/CargoBike';
 import { GraphQLError } from 'graphql';
+import { ActionLog } from '../../model/ActionLog';
 
 export function genDateRange (struct: any) {
-    if (struct.to === undefined) {
-        struct.to = '';
-    }
     if (struct.to === undefined) {
         struct.to = '';
     }
@@ -13,6 +11,9 @@ export function genDateRange (struct: any) {
     if (struct.from === undefined) {
         delete struct.dateRange;
     }
+    // delete these keys, so the struct can be used to update the engagement entity
+    delete struct.from;
+    delete struct.to;
 }
 
 /**
@@ -115,8 +116,8 @@ export class LockUtils {
      * @param req
      * @param dataSources
      */
-    static async isLocked (connection: Connection, target: ObjectType<Lockable>, alias: string, id: number, userId: number) {
-        const lock = await connection.getRepository(CargoBike)
+    static async isLocked (connection: EntityManager, target: ObjectType<Lockable>, alias: string, id: number, userId: number) {
+        const lock = await connection.getRepository(target)
             .createQueryBuilder(alias)
             .select([
                 alias + '.lockedUntil',
@@ -150,5 +151,63 @@ export class LockUtils {
             .where('id = :id', { id: id })
             .getCount();
         return result === 1;
+    }
+}
+
+export class ActionLogger {
+    private static buildSelect (updates: any, alias: string) : string[] {
+        // this hacky shit makes it possible to select subfields like the address or insurance data. Only one layer at the moment
+        const ret :string[] = [];
+        Object.keys(updates).forEach(value => {
+            if (typeof updates[value] === 'object' && !Array.isArray(updates[value])) {
+                Object.keys(updates[value]).forEach(subValue => {
+                    ret.push(alias + '."' + value + subValue[0].toUpperCase() + subValue.substr(1).toLowerCase() + '"');
+                });
+            } else {
+                ret.push(alias + '."' + value + '"');
+            }
+        });
+        return ret;
+    }
+
+    static async log (em: EntityManager, target: ObjectType<any>, alias: string, updates: any, userId: number) {
+        const oldValues = await em.getRepository(target).createQueryBuilder(alias)
+            .select(this.buildSelect(updates, alias))
+            .where('id = :id', { id: updates.id })
+            .getRawOne().then(value => {
+                if (value === undefined) {
+                    throw new GraphQLError('Id not found');
+                }
+                return value;
+            }); // use getRawOne to also get ids of related entities
+
+        Object.keys(oldValues).forEach(value => {
+            if (value.match(alias + '_')) {
+                oldValues[value.replace(alias + '_', '')] = oldValues[value];
+                delete oldValues[value];
+            }
+        });
+        // TODO: check if new values are different from old note: the commented section will probably fail for nested objects.
+        /*
+               const newValues = { ...updates }; // copy updates to mimic call by value
+               Object.keys(updates).forEach((key, i) => {
+                   // eslint-disable-next-line eqeqeq
+                   if (newValues[key] == oldValues[key]) {
+                       delete newValues[key];
+                       delete oldValues[key];
+                   }
+               });
+                */
+        const logEntry : ActionLog = {
+            userId: userId,
+            entity: target.name,
+            entriesOld: JSON.stringify(oldValues),
+            entriesNew: JSON.stringify(updates)
+        };
+        await em.getRepository(ActionLog)
+            .createQueryBuilder('al')
+            .insert()
+            .values([logEntry])
+            .execute();
     }
 }

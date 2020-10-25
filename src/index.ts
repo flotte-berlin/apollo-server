@@ -33,6 +33,7 @@ import { EquipmentType } from './model/EquipmentType';
 import { BikeEventType } from './model/BikeEventType';
 import { WorkshopAPI } from './datasources/db/workshopAPI';
 import workshopResolvers from './resolvers/workshopResolvers';
+import { ActionLog } from './model/ActionLog';
 
 require('dotenv').config();
 
@@ -84,7 +85,8 @@ createConnection({
         EngagementType,
         Workshop,
         Person,
-        WorkshopType
+        WorkshopType,
+        ActionLog
     ],
     synchronize: true,
     logging: false

@@ -68,6 +68,48 @@ export default {
             } else {
                 return new GraphQLError('Insufficient Permissions');
             }
+        },
+        lockPerson: (_: any, { id }: { id: number }, { dataSources, req }: { dataSources: any, req: any }) => {
+            if (req.permissions.includes(Permission.WritePerson)) {
+                return dataSources.contactInformationAPI.lockPerson(id, req.userId);
+            } else {
+                return new GraphQLError('Insufficient Permissions');
+            }
+        },
+        unlockPerson: (_: any, { id }: { id: number }, { dataSources, req }: { dataSources: any, req: any }) => {
+            if (req.permissions.includes(Permission.WritePerson)) {
+                return dataSources.contactInformationAPI.unlockPerson(id, req.userId);
+            } else {
+                return new GraphQLError('Insufficient Permissions');
+            }
+        },
+        updatePerson: (_: any, { person }: { person: any }, { dataSources, req }: { dataSources: any, req: any }) => {
+            if (req.permissions.includes(Permission.WritePerson)) {
+                return dataSources.contactInformationAPI.updatePerson(person, req.userId);
+            } else {
+                return new GraphQLError('Insufficient Permissions');
+            }
+        },
+        lockContactInformation: (_: any, { id }: { id: number }, { dataSources, req }: { dataSources: any, req: any }) => {
+            if (req.permissions.includes(Permission.WritePerson)) {
+                return dataSources.contactInformationAPI.lockContactInformation(id, req.userId);
+            } else {
+                return new GraphQLError('Insufficient Permissions');
+            }
+        },
+        unlockContactInformation: (_: any, { id }: { id: number }, { dataSources, req }: { dataSources: any, req: any }) => {
+            if (req.permissions.includes(Permission.WritePerson)) {
+                return dataSources.contactInformationAPI.unlockContactInformation(id, req.userId);
+            } else {
+                return new GraphQLError('Insufficient Permissions');
+            }
+        },
+        updateContactInformation: (_: any, { contactInformation }: { contactInformation: any }, { dataSources, req }: { dataSources: any, req: any }) => {
+            if (req.permissions.includes(Permission.WritePerson)) {
+                return dataSources.contactInformationAPI.updateContactInformation(contactInformation, req.userId);
+            } else {
+                return new GraphQLError('Insufficient Permissions');
+            }
         }
     }
 };

@@ -4,8 +4,9 @@ import { ContactInformation } from '../../model/ContactInformation';
 import { Engagement } from '../../model/Engagement';
 import { Participant } from '../../model/Participant';
 import { EngagementType } from '../../model/EngagementType';
-import { genDateRange } from './utils';
+import { ActionLogger, genDateRange, LockUtils } from './utils';
 import { UserInputError } from 'apollo-server';
+import { GraphQLError } from 'graphql';
 
 export class ParticipantAPI extends DataSource {
     connection : Connection
@@ -14,11 +15,11 @@ export class ParticipantAPI extends DataSource {
         this.connection = getConnection();
     }
 
-    async getParticipantById (id: number) {
+    async participantById (id: number) {
         return await this.connection.getRepository(Participant)
             .createQueryBuilder('participant')
             .select()
-            .where('participant.id = :id', { id: id })
+            .where('id = :id', { id: id })
             .getOne();
     }
 
@@ -146,7 +147,34 @@ export class ParticipantAPI extends DataSource {
                 .returning('*')
                 .execute();
         });
-        return this.getParticipantById(inserts?.identifiers[0].id);
+        return this.participantById(inserts?.identifiers[0].id);
+    }
+
+    async lockParticipant (id: number, userId: number) {
+        return await LockUtils.lockEntity(this.connection, Participant, 'p', id, userId);
+    }
+
+    async unlockParticipant (id: number, userId: number) {
+        return await LockUtils.unlockEntity(this.connection, Participant, 'p', id, userId);
+    }
+
+    async updateParticipant (participant: any, userId: number) {
+        const keepLock = participant.keepLock;
+        delete participant.keepLock;
+        await this.connection.transaction(async (entityManager: EntityManager) => {
+            if (await LockUtils.isLocked(entityManager, Participant, 'p', participant.id, userId)) {
+                throw new GraphQLError('Participant is locked by another user');
+            }
+            await ActionLogger.log(entityManager, Participant, 'p', participant, userId);
+            await entityManager.getRepository(Participant)
+                .createQueryBuilder('p')
+                .update()
+                .set({ ...participant })
+                .where('id = :id', { id: participant.id })
+                .execute().then(value => { if (value.affected !== 1) { throw new GraphQLError('ID not found'); } });
+        });
+        !keepLock && await this.unlockParticipant(participant.id, userId);
+        return await this.participantById(participant.id);
     }
 
     async createEngagement (engagement: any) {
@@ -174,6 +202,46 @@ export class ParticipantAPI extends DataSource {
         return this.engagementById(inserts?.identifiers[0].id);
     }
 
+    async lockEngagement (id: number, userId: number) {
+        return await LockUtils.lockEntity(this.connection, Engagement, 'e', id, userId);
+    }
+
+    async unlockEngagement (id: number, userId: number) {
+        return await LockUtils.unlockEntity(this.connection, Engagement, 'e', id, userId);
+    }
+
+    async updateEngagement (engagement: any, userId: number) {
+        const keepLock = engagement.keepLock;
+        delete engagement.keepLock;
+        genDateRange(engagement);
+        await this.connection.transaction(async (entityManager: EntityManager) => {
+            if (await LockUtils.isLocked(entityManager, Engagement, 'e', engagement.id, userId)) {
+                throw new GraphQLError('Engagement is locked by other user');
+            }
+            await ActionLogger.log(entityManager, Engagement, 'e', engagement, userId);
+            // check for overlapping engagements
+            const overlapping = await entityManager.getRepository(Engagement)
+                .createQueryBuilder('e')
+                .select()
+                .where('e."cargoBikeId" = :id', { id: engagement.cargoBikeId })
+                .andWhere('e."dateRange" && :dr', { dr: engagement.dateRange })
+                .andWhere('e."engagementTypeId" = :etId', { etId: engagement.engagementTypeId })
+                .andWhere('e.id != :eid', { eid: engagement.id })
+                .getMany();
+            if (overlapping.length > 0) {
+                throw new UserInputError('Engagements with ids: ' + overlapping.map((e) => { return e.id + ', '; }) + 'are overlapping');
+            }
+            await entityManager.getRepository(Engagement)
+                .createQueryBuilder('engagement')
+                .update()
+                .set({ ...engagement })
+                .where('id = :id', { id: engagement.id })
+                .execute();
+        });
+        !keepLock && await LockUtils.unlockEntity(this.connection, Engagement, 'e', engagement.id, userId);
+        return await this.engagementById(engagement.id);
+    }
+
     async createEngagementType (engagementType: any) {
         const inserts = await this.connection.getRepository(EngagementType)
             .createQueryBuilder('et')
@@ -183,5 +251,32 @@ export class ParticipantAPI extends DataSource {
             .execute();
         inserts.generatedMaps[0].id = inserts.identifiers[0].id;
         return inserts.generatedMaps[0];
+    }
+
+    async lockEngagementType (id:number, userId: number) {
+        return await LockUtils.lockEntity(this.connection, EngagementType, 'e', id, userId);
+    }
+
+    async unlockEngagementType (id:number, userId: number) {
+        return await LockUtils.unlockEntity(this.connection, EngagementType, 'e', id, userId);
+    }
+
+    async updateEngagementType (engagementType: any, userId: number) {
+        const keepLock = engagementType.keepLock;
+        delete engagementType.keepLock;
+        await this.connection.transaction(async (entityManager: EntityManager) => {
+            if (await LockUtils.isLocked(entityManager, EngagementType, 'et', engagementType.id, userId)) {
+                throw new GraphQLError('EngagementType is locked by other user');
+            }
+            await ActionLogger.log(entityManager, EngagementType, 'et', engagementType, userId);
+            await entityManager.getRepository(EngagementType)
+                .createQueryBuilder('et')
+                .update()
+                .set({ ...engagementType })
+                .where('id = :id', { id: engagementType.id })
+                .execute();
+        });
+        !keepLock && await LockUtils.unlockEntity(this.connection, EngagementType, 'et', engagementType.id, userId);
+        return await this.engagementTypeById(engagementType.id);
     }
 }

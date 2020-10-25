@@ -344,6 +344,23 @@ input ParticipantCreateInput {
     memberCoreTeam: Boolean
 }
 
+input ParticipantUpdateInput {
+    id: ID!
+    "if not set, CURRENT_DATE will be used"
+    start: Date
+    end: Date
+    "must create contactinformation first, if you want to use new"
+    contactInformationId: ID
+    usernamefLotte: String
+    usernameSlack: String
+    "default: false"
+    memberADFC: Boolean
+    locationZIPs: [String]
+    "default: false"
+    memberCoreTeam: Boolean
+    keepLock: Boolean
+}
+
 type Workshop {
     id: ID!
     title: String!
@@ -367,6 +384,17 @@ input WorkshopCreateInput {
     trainer2Id: ID
 }
 
+input WorkshopUpdateInput {
+    id: ID!
+    title: String
+    description: String
+    date: Date!
+    workshopTypeId: ID
+    trainer1Id: ID
+    trainer2Id: ID
+    keepLock: Boolean
+}
+
 type WorkshopType {
     id: ID!
     name: String!
@@ -378,6 +406,11 @@ type WorkshopType {
 
 input WorkshopTypeCreateInput {
     name: String!
+}
+
+input WorkshopTypeUpdateInput {
+    id: ID!
+    name: String
 }
 
 type EngagementType {
@@ -395,6 +428,13 @@ input EngagementTypeCreateInput {
     description: String
 }
 
+input EngagementTypeUpdateInput {
+    id: ID!
+    name: String
+    description: String
+    keepLock: Boolean
+}
+
 type Engagement {
     id: ID!
     engagementType: EngagementType!
@@ -402,14 +442,6 @@ type Engagement {
     to: Date
     participant: Participant!
     cargoBike: CargoBike!
-    roleCoordinator: Boolean!
-    roleEmployeeADFC: Boolean!
-    """
-    Wahr, wenn die Person Pate ist.
-    """
-    roleMentor: Boolean!
-    roleAmbulance: Boolean!
-    roleBringer: Boolean!
     isLocked: Boolean!
     "null if not locked by other user"
     lockedBy: ID
@@ -424,19 +456,15 @@ input EngagementCreateInput {
     to: Date
     participantId: ID!
     cargoBikeId: ID!
-    "default: false"
-    roleCoordinator: Boolean
-    "default: false"
-    roleEmployeeADFC: Boolean
-    """
-    Wahr, wenn die Person Pate ist.
-    default: false
-    """
-    roleMentor: Boolean
-    "default: false"
-    roleAmbulance: Boolean
-    "default: false"
-    roleBringer: Boolean
+}
+input EngagementUpdateInput {
+    id: ID!
+    engagementTypeId: ID
+    from: Date
+    to: Date
+    participantId: ID
+    cargoBikeId: ID
+    keepLock: Boolean
 }
 
 type Taxes {
@@ -511,6 +539,7 @@ input EquipmentTypeUpdateInput {
     id: ID!
     name: String
     description: String
+    keepLock: Boolean
 }
 
 "An Event is a point in time, when the state of the bike somehow changed."
@@ -547,6 +576,22 @@ input BikeEventCreateInput {
     remark: String
 }
 
+input BikeEventUpdateInput {
+    id: ID!
+    bikeEventTypeId: ID
+    cargoBikeId: ID
+    responsibleId: ID
+    relatedId: ID
+    date: Date
+    description: String
+    """
+    Path to documents
+    """
+    documents: [String]
+    remark: String
+    keepLock: Boolean
+}
+
 type BikeEventType {
     id: ID!
     name: String!
@@ -554,9 +599,10 @@ type BikeEventType {
     lockedUntil: Date
 }
 
-input BikeEventTypeInput {
+input BikeEventTypeUpdateInput {
     id: ID!
     name: String
+    keepLock: Boolean
 }
 
 "(dt. Anbieter) bezieht sich auf die Beziehung einer Person oder Organisation zum Lastenrad"
@@ -580,6 +626,16 @@ input ProviderCreateInput {
     cargoBikeIds: [ID]
 }
 
+input ProviderUpdateInput {
+    id: ID!
+    formName: String
+    privatePersonId: ID
+    organisationId: ID
+    "cargoBikes are added, you can not take existing relations away. use update cargoBike or add bike to another provider instead"
+    cargoBikeIds: [ID]
+    keepLock: Boolean
+}
+
 """
 A Person can have several instances of contact information.
 The reason for this is, that some people have info for interns and externals that are different.
@@ -598,6 +654,13 @@ type Person {
 input PersonCreateInput {
     name: String!
     firstName: String!
+}
+
+input PersonUpdateInput {
+    id: ID!
+    name: String
+    firstName: String
+    keepLock: Boolean
 }
 
 type ContactInformation {
@@ -631,6 +694,7 @@ input ContactInformationUpdateInput {
     email: String
     email2: String
     note: String
+    keepLock: Boolean
 }
 
 type Organisation {
@@ -655,15 +719,25 @@ type Organisation {
 input OrganisationCreateInput {
     address: AddressCreateInput!
     name: String!
-    "(dt. Ausleihstation)"
-    lendingStationIds: [ID]
     "registration number of association"
     associationNo: String!
     "If Club, at what court registered"
     registeredAt: String
-    providerId: ID
     contactInformationId: ID
     otherData: String
+}
+
+input OrganisationUpdateInput {
+    id: ID!
+    address: AddressCreateInput
+    name: String
+    "registration number of association"
+    associationNo: String
+    "If Club, at what court registered"
+    registeredAt: String
+    contactInformationId: ID
+    otherData: String
+    keepLock: Boolean
 }
 
 "(dt. Standort)"
@@ -678,6 +752,7 @@ type LendingStation {
     cargoBikes: [CargoBike]
     "Total amount of cargoBikes currently assigned to the lending station"
     numCargoBikes: Int!
+    organisation: Organisation
     isLocked: Boolean!
     "null if not locked by other user"
     lockedBy: ID
@@ -693,6 +768,7 @@ input LendingStationCreateInput {
     contactInformationExternId: ID
     address: AddressCreateInput!
     loanPeriod: LoanPeriodInput
+    organisationId: ID
 }
 
 """
@@ -701,9 +777,12 @@ If you want to create LendingStation with cargoBikes, use createTimeFrame and se
 input LendingStationUpdateInput {
     id: ID!
     name: String
-    contactInformation: [ContactInformationUpdateInput]
+    contactInformationInternId: ID
+    contactInformationExternId: ID
     address: AddressUpdateInput
     loanPeriod: LoanPeriodInput
+    organisationId: ID
+    keepLock: Boolean
 }
 
 """
@@ -763,8 +842,8 @@ input TimeFrameUpdateInput {
     from: Date
     to: Date
     note: String
-    lendingStation: ID
-    cargoBike: ID
+    lendingStationId: ID
+    cargoBikeId: ID
     keepLock: Boolean
 }
 
@@ -824,7 +903,7 @@ type Query {
     bikeEventTypes(offset: Int!, limit: Int!): [BikeEventType]
     bikeEventTypeByd(id: ID!): BikeEventType
     bikeEvents(offset: Int!, limit: Int!): [BikeEvent]!
-    bikeEventById(id:ID!): BikeEvent!
+    bikeEventById(id:ID!): BikeEvent
 }
 
 type Mutation {
@@ -851,6 +930,9 @@ type Mutation {
     "update Equipment, returns updated equipment. CargoBike will be null, if cargoBikeId is not set. Pass null for cargoBikeIs to delete the relation"
     updateEquipment(equipment: EquipmentUpdateInput!): Equipment!
     createEquipmentType(equipmentType: EquipmentTypeCreateInput!): EquipmentType!
+    lockEquipmentType(id: ID!): EquipmentType!
+    unlockEquipmentType(id: ID!): Boolean!
+    updateEquipmentType(equipmentType: EquipmentTypeUpdateInput!): EquipmentType!
     """
     LENDINGSTATION
     creates new lendingStation and returns lendingStation with new ID
@@ -861,29 +943,62 @@ type Mutation {
     "updates lendingStation of given ID with supplied fields and returns updated lendingStation"
     updateLendingStation(lendingStation: LendingStationUpdateInput!): LendingStation!
     createTimeFrame(timeFrame: TimeFrameCreateInput!): TimeFrame!
-    lockTimeFrame(id: ID!): TimeFrame
+    lockTimeFrame(id: ID!): TimeFrame!
+    unlockTimeFrame(id: ID!): Boolean!
+    updateTimeFrame(timeFrame: TimeFrameUpdateInput!): TimeFrame!
     """
     BIKEEVENT
     """
     createBikeEventType(name: String!): BikeEventType!
+    lockBikeEventType(id: ID!): BikeEventType!
+    unlockBikeEventType(id:ID!): Boolean!
+    updateBikeEventType(bikeEventType: BikeEventTypeUpdateInput!): BikeEventType!
     "creates new BikeEvent"
     createBikeEvent(bikeEvent: BikeEventCreateInput!): BikeEvent!
     lockBikeEventById(id: ID!): BikeEvent
     unlockBikeEventById(id: ID!): Boolean!
+    updateBikeEvent(bikeEvent: BikeEventUpdateInput!): BikeEvent
     """
     PARTICIPANTS
     """
     createParticipant(participant: ParticipantCreateInput!): Participant!
+    lockParticipant(id: ID!): Participant!
+    unlockParticipant(id: ID!): Boolean
+    updateParticipant(participant: ParticipantUpdateInput!): Participant!
     createWorkshopType(workshopType: WorkshopTypeCreateInput!): WorkshopType!
+    lockWorkshopType(id: ID!): WorkshopType!
+    unlockWorkshopType(id: ID!): Boolean!
+    updateWorkshopType(workshopType: WorkshopTypeUpdateInput!): WorkshopType!
     createWorkshop(workshop: WorkshopCreateInput!): Workshop!
+    lockWorkshop(id: ID!): Workshop!
+    unlockWorkshop(id: ID!): Boolean!
+    updateWorkshop(workshop: WorkshopUpdateInput!): Workshop!
     "create new contactInfo"
     createContactInformation(contactInformation: ContactInformationCreateInput!): ContactInformation!
+    lockContactInformation(id: ID!): ContactInformation!
+    unlockContactInformation(id: ID!): Boolean!
+    updateContactInformation(contactInformation: ContactInformationUpdateInput!): ContactInformation!
     createPerson(person: PersonCreateInput!): Person!
+    lockPerson(id: ID!): Person!
+    unlockPerson(id: ID!): Person!
+    updatePerson(person: PersonUpdateInput!): Person!
+    lockEngagement(id: ID!): Engagement!
+    unlockEngagement(id: ID!): Boolean!
+    updateEngagement(engagement: EngagementUpdateInput!): Engagement!
     createEngagementType(engagementType: EngagementTypeCreateInput!): EngagementType!
+    lockEngagementType(id: ID!): EngagementType!
+    unlockEngagementType(id: ID!): Boolean!
+    updateEngagementType(engagementType: EngagementTypeUpdateInput!): EngagementType!
     "create Engagement"
     createEngagement(engagement: EngagementCreateInput): Engagement!
     createProvider(provider: ProviderCreateInput!): Provider!
+    lockProvider(id: ID!): Provider!
+    unlockProvider(id: ID!): Boolean!
+    updateProvider(provider: ProviderUpdateInput!): Provider!
     createOrganisation(organisation: OrganisationCreateInput!): Organisation!
+    lockOrganisation(id: ID!): Organisation!
+    unlockOrganisation(id: ID!): Boolean!
+    updateOrganisation(organisation: OrganisationUpdateInput!): Organisation!
 }
 
 `;

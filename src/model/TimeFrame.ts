@@ -15,7 +15,7 @@ export class TimeFrame implements Lockable {
     })
     dateRange: Date[];
 
-    @ManyToOne(type => LendingStation, lendingStation => lendingStation.timeFrames)
+    @ManyToOne(type => LendingStation, lendingStation => lendingStation.timeFrames, { nullable: false })
     @JoinColumn({
         name: 'lendingStationId'
     })
@@ -26,7 +26,7 @@ export class TimeFrame implements Lockable {
     })
     note: string;
 
-    @ManyToOne(type => CargoBike, cargoBike => cargoBike.timeFrames)
+    @ManyToOne(type => CargoBike, cargoBike => cargoBike.timeFrames, { nullable: false })
     @JoinColumn({
         name: 'cargoBikeId'
     })

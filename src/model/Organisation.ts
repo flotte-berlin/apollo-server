@@ -35,7 +35,7 @@ export class Organisation implements Lockable {
     @Column({
         nullable: true
     })
-    registerNo: string;
+    associationNo: string;
 
     @Column(type => Address)
     address: Address;

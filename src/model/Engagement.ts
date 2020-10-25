@@ -40,30 +40,6 @@ export class Engagement implements Lockable {
     dateRange: Date[];
 
     @Column({
-        type: 'boolean',
-        default: false
-    })
-    roleCoordinator: boolean;
-
-    @Column({
-        type: 'boolean',
-        default: false
-    })
-    roleMentor: boolean;
-
-    @Column({
-        type: 'boolean',
-        default: false
-    })
-    roleAmbulance: boolean;
-
-    @Column({
-        type: 'boolean',
-        default: false
-    })
-    roleBringer: boolean;
-
-    @Column({
         nullable: true,
         type: 'timestamp'
     })

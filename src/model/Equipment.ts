@@ -23,7 +23,7 @@ export class Equipment implements Lockable {
     @JoinColumn({
         name: 'cargoBikeId', referencedColumnName: 'id'
     })
-    cargoBike: CargoBike;
+    cargoBikeId: number;
 
     @Column({
         type: 'timestamp',

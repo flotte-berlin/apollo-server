@@ -25,7 +25,8 @@ export class LoanPeriod {
     to: Date;
 
     @Column({
-        type: 'simple-array'
+        type: 'simple-array',
+        nullable: true
     })
     loanTimes: string[];
 }

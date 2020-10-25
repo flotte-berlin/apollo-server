@@ -27,14 +27,14 @@ export default {
         },
         bikeEventById: (_:any, { id }: { id: number }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.ReadBikeEvent)) {
-                return dataSources.cargoBikeAPI.findBikeEventById(id);
+                return dataSources.cargoBikeAPI.bikeEventById(id);
             } else {
                 return new GraphQLError('Insufficient Permissions');
             }
         },
         bikeEventTypeByd: (_:any, { id }: { id: number }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.ReadBikeEvent)) {
-                return dataSources.cargoBikeAPI.findBikeEventTypeById(id);
+                return dataSources.cargoBikeAPI.bikeEventTypeById(id);
             } else {
                 return new GraphQLError('Insufficient Permissions');
             }
@@ -229,6 +229,13 @@ export default {
                 return new GraphQLError('Insufficient Permissions');
             }
         },
+        updateBikeEvent: (_: any, { bikeEvent }: { bikeEvent: any }, { dataSources, req }: { dataSources: any, req: any }) => {
+            if (req.permissions.includes(Permission.WriteBikeEvent)) {
+                return dataSources.cargoBikeAPI.updateBikeEvent(bikeEvent, req.userId);
+            } else {
+                return new GraphQLError('Insufficient Permissions');
+            }
+        },
         createEquipment: (_: any, { equipment }: { equipment: any }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.WriteEquipment)) {
                 return dataSources.cargoBikeAPI.createEquipment({ equipment });
@@ -264,9 +271,51 @@ export default {
                 return new GraphQLError('Insufficient Permissions');
             }
         },
+        lockEquipmentType: (_: any, { id }: { id: number }, { dataSources, req }: { dataSources: any, req: any }) => {
+            if (req.permissions.includes(Permission.WriteEquipmentType)) {
+                return dataSources.cargoBikeAPI.lockEquipmentType(id, req.userId);
+            } else {
+                return new GraphQLError('Insufficient Permissions');
+            }
+        },
+        unlockEquipmentType: (_: any, { id }: { id: number }, { dataSources, req }: { dataSources: any, req: any }) => {
+            if (req.permissions.includes(Permission.WriteEquipmentType)) {
+                return dataSources.cargoBikeAPI.unlockEquipmentType(id, req.userId);
+            } else {
+                return new GraphQLError('Insufficient Permissions');
+            }
+        },
+        updateEquipmentType: (_: any, { equipmentType }: { equipmentType: any }, { dataSources, req }: { dataSources: any, req: any }) => {
+            if (req.permissions.includes(Permission.WriteEquipmentType)) {
+                return dataSources.cargoBikeAPI.updateEquipmentType(equipmentType, req.userId);
+            } else {
+                return new GraphQLError('Insufficient Permissions');
+            }
+        },
         createBikeEventType: (_: any, { name }: { name: any }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.WriteEventType)) {
                 return dataSources.cargoBikeAPI.createBikeEventType(name);
+            } else {
+                return new GraphQLError('Insufficient Permissions');
+            }
+        },
+        lockBikeEventType: (_: any, { id }: { id: number }, { dataSources, req }: { dataSources: any, req: any }) => {
+            if (req.permissions.includes(Permission.WriteEventType)) {
+                return dataSources.cargoBikeAPI.lockBikeEventType(id, req.userId);
+            } else {
+                return new GraphQLError('Insufficient Permissions');
+            }
+        },
+        unlockBikeEventType: (_: any, { id }: { id: number }, { dataSources, req }: { dataSources: any, req: any }) => {
+            if (req.permissions.includes(Permission.WriteEventType)) {
+                return dataSources.cargoBikeAPI.unlockBikeEventType(id, req.userId);
+            } else {
+                return new GraphQLError('Insufficient Permissions');
+            }
+        },
+        updateBikeEventType: (_: any, { bikeEventType }: { bikeEventType: any }, { dataSources, req }: { dataSources: any, req: any }) => {
+            if (req.permissions.includes(Permission.WriteEventType)) {
+                return dataSources.cargoBikeAPI.updateBikeEventType(bikeEventType, req.userId);
             } else {
                 return new GraphQLError('Insufficient Permissions');
             }
