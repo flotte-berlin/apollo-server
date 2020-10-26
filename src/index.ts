@@ -34,6 +34,8 @@ import { BikeEventType } from './model/BikeEventType';
 import { WorkshopAPI } from './datasources/db/workshopAPI';
 import workshopResolvers from './resolvers/workshopResolvers';
 import { ActionLog } from './model/ActionLog';
+import actionlogResolvers from './resolvers/actionlogResolvers';
+import { ActionLogAPI } from './datasources/db/actionLogAPI';
 
 require('dotenv').config();
 
@@ -103,7 +105,8 @@ const server = new ApolloServer({
         participantResolvers,
         providerResolvers,
         contactinformationResolvers,
-        workshopResolvers
+        workshopResolvers,
+        actionlogResolvers
     ],
     typeDefs,
     dataSources: () => ({
@@ -113,6 +116,7 @@ const server = new ApolloServer({
         contactInformationAPI: new ContactInformationAPI(),
         providerAPI: new ProviderAPI(),
         workshopAPI: new WorkshopAPI(),
+        actionLogAPI: new ActionLogAPI(),
         userAPI
     }),
     context: (req: any) => {

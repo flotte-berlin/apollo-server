@@ -865,6 +865,17 @@ input AddressUpdateInput {
     zip: String
 }
 
+type ActionLog {
+    id: ID!
+    userId: ID!
+    date: Date!
+    entity: String!
+    "in json format"
+    entriesOld: String!
+    "in json format"
+    entriesNew: String!
+}
+    
 type Query {
     "Will (eventually) return all properties of cargo bike"
     cargoBikeById(id:ID!): CargoBike
@@ -904,6 +915,12 @@ type Query {
     bikeEventTypeByd(id: ID!): BikeEventType
     bikeEvents(offset: Int!, limit: Int!): [BikeEvent]!
     bikeEventById(id:ID!): BikeEvent
+    "actionLog for current user"
+    actionLog: [ActionLog]
+    "actionLog for specific user"
+    actionLogByUser(id: ID!): [ActionLog]
+    "actionLog form all users"
+    actionLogAll: [ActionLog]
 }
 
 type Mutation {

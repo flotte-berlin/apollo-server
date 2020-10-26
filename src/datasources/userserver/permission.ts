@@ -25,7 +25,9 @@ export enum Permission {
     WriteWorkshopType = 'WORKSHOP_TYPE_WRITE',
     WriteEventType = 'BIKE_EVENT_TYPE_WRITE',
     WriteEquipmentType = 'EQUIPMENT_TYPE_WRITE',
-    WriteEngagementType = 'ENGAGEMENT_TYPE_WRITE'
+    WriteEngagementType = 'ENGAGEMENT_TYPE_WRITE',
+    ReadActionLog = 'ACTION_LOG_READ',
+    ReadActionLogAll = 'ACTION_LOG_ALL_READ'
 }
 
 // Permissions where the creation will be requested on startup
@@ -133,5 +135,13 @@ export const requiredPermissions = [
     {
         name: Permission.WriteEngagementType,
         description: 'Allows to write and create engagement types'
+    },
+    {
+        name: Permission.ReadActionLog,
+        description: 'Allows to read own action log'
+    },
+    {
+        name: Permission.ReadActionLogAll,
+        description: 'Allows to read action log of other users'
     }
 ];
