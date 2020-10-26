@@ -2,7 +2,7 @@ import { DataSource } from 'apollo-datasource';
 import { Connection, EntityManager, getConnection } from 'typeorm';
 import { WorkshopType } from '../../model/WorkshopType';
 import { Workshop } from '../../model/Workshop';
-import { ActionLogger, LockUtils } from './utils';
+import { ActionLogger, deleteEntity, LockUtils } from './utils';
 import { UserInputError } from 'apollo-server-express';
 import { GraphQLError } from 'graphql';
 
@@ -52,6 +52,10 @@ export class WorkshopAPI extends DataSource {
         return await this.workshopById(workshop.id);
     }
 
+    async deleteWorkshop (id: number, userId: number) {
+        return await deleteEntity(this.connection, Workshop, 'w', id, userId);
+    }
+
     async createWorkshopType (workshopType: any) {
         const inserts = await this.connection.getRepository(WorkshopType)
             .createQueryBuilder('wt')
@@ -88,6 +92,10 @@ export class WorkshopAPI extends DataSource {
         });
         !keepLock && await this.unlockWorkshopType(workshopType.id, userId);
         return await this.workshopTypeById(workshopType.id);
+    }
+
+    async deleteWorkshopType (id: number, userId: number) {
+        return await deleteEntity(this.connection, WorkshopType, 'wt', id, userId);
     }
 
     async workshopTypeById (id: number) {

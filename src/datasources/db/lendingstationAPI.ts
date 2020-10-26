@@ -1,11 +1,11 @@
 import { DataSource } from 'apollo-datasource';
-import { ApolloError, UserInputError } from 'apollo-server-express';
+import { UserInputError } from 'apollo-server-express';
 import { GraphQLError } from 'graphql';
-import { Connection, EntityManager, getConnection, QueryFailedError } from 'typeorm';
+import { Connection, EntityManager, getConnection } from 'typeorm';
 import { CargoBike } from '../../model/CargoBike';
 import { LendingStation } from '../../model/LendingStation';
 import { TimeFrame } from '../../model/TimeFrame';
-import { ActionLogger, genDateRange, LockUtils } from './utils';
+import { ActionLogger, deleteEntity, genDateRange, LockUtils } from './utils';
 
 export class LendingStationAPI extends DataSource {
     connection : Connection
@@ -71,7 +71,7 @@ export class LendingStationAPI extends DataSource {
 
     async timeFramesByCargoBikeId (id: number) {
         return await this.connection.getRepository(CargoBike)
-            .createQueryBuilder('cargobike')
+            .createQueryBuilder('cb')
             .relation(CargoBike, 'timeFrames')
             .of(id)
             .loadMany();
@@ -126,36 +126,37 @@ export class LendingStationAPI extends DataSource {
             .where('timeframes."lendingStationId" = :id', { id: id })
             .andWhere('timeframes."dateRange" && daterange(CURRENT_DATE,CURRENT_DATE,\'[]\')')
             .printSql()
-            .getMany(); // .catch(() => { return []; });
+            .getMany();
     }
 
     /**
      * creates new lendingStation and returns new lendingStation with its new id
-     * @param param0 new lendingStation
+     * @param lendingStation
      */
     async createLendingStation (lendingStation: any) {
         let inserts: any;
         await this.connection.transaction(async entityManager => {
-            inserts = await entityManager.createQueryBuilder(LendingStation, 'lendingstation')
+            inserts = await entityManager.createQueryBuilder(LendingStation, 'ls')
                 .insert()
                 .values([lendingStation])
                 .returning('*')
                 .execute();
         });
         // when using the return values, the simple array has a different format and must treated in another way, so this is the more expansive solution
-        return await this.lendingStationById(inserts.generatedMaps[0].id);
+        return await this.lendingStationById(inserts?.generatedMaps[0].id);
     }
 
     /**
      * updates lendingStation and return updated lendingStation
-     * @param param0 lendingStation to be updated
+     * @param lendingStation
+     * @param userId
      */
     async updateLendingStation (lendingStation: any, userId: number) {
         const keepLock = lendingStation.keepLock;
         delete lendingStation.keepLock;
         await this.connection.transaction(async (entityManager: EntityManager) => {
             if (await LockUtils.isLocked(entityManager, LendingStation, 'ls', lendingStation.id, userId)) {
-                throw new GraphQLError('LendingStation is locked by another user');
+                throw new UserInputError('Attempting to update locked resource');
             }
             await ActionLogger.log(entityManager, LendingStation, 'ls', lendingStation, userId);
             await entityManager.getRepository(LendingStation)
@@ -169,43 +170,39 @@ export class LendingStationAPI extends DataSource {
         return await this.lendingStationById(lendingStation.id);
     }
 
+    async deleteLendingStationById (id: number, userId: number) {
+        return await deleteEntity(this.connection, LendingStation, 'ls', id, userId);
+    }
+
     async createTimeFrame (timeFrame: any) {
-        let inserts: any;
-        try {
-            await this.connection.transaction(async (entityManager: EntityManager) => {
-                if (timeFrame.to === undefined) {
-                    timeFrame.to = '';
-                }
-                timeFrame.dateRange = '[' + timeFrame.from + ',' + timeFrame.to + ')';
-                // checking for overlapping time frames
-                const overlapping = await entityManager.getRepository(TimeFrame)
-                    .createQueryBuilder('timeframe')
-                    .select([
-                        'timeframe.id'
-                    ])
-                    .where('timeframe."cargoBikeId" = :id', { id: timeFrame.cargoBikeId })
-                    .andWhere('timeframe."dateRange" && :tr', { tr: timeFrame.dateRange })
-                    .getMany();
-                if (overlapping.length !== 0) {
-                    throw new UserInputError('TimeFrames with ids: ' + overlapping.map((e) => { return e.id + ', '; }) + 'are overlapping');
-                }
-                inserts = await entityManager.getRepository(TimeFrame)
-                    .createQueryBuilder('timeframe')
-                    .insert()
-                    .returning('*')
-                    .values([timeFrame])
-                    .execute();
-            });
-        } catch (e) {
-            if (e instanceof UserInputError) {
-                return e;
-            } else if (e instanceof QueryFailedError) {
-                return e;
+        return await this.connection.transaction(async (entityManager: EntityManager) => {
+            if (timeFrame.to === undefined) {
+                timeFrame.to = '';
             }
-            return new ApolloError('Transaction could not be completed');
-        }
-        inserts.generatedMaps[0].id = inserts.identifiers[0].id;
-        return inserts.generatedMaps[0];
+            timeFrame.dateRange = '[' + timeFrame.from + ',' + timeFrame.to + ')';
+            // checking for overlapping time frames
+            const overlapping = await entityManager.getRepository(TimeFrame)
+                .createQueryBuilder('timeframe')
+                .select([
+                    'timeframe.id'
+                ])
+                .where('timeframe."cargoBikeId" = :id', { id: timeFrame.cargoBikeId })
+                .andWhere('timeframe."dateRange" && :tr', { tr: timeFrame.dateRange })
+                .getMany();
+            if (overlapping.length !== 0) {
+                throw new UserInputError('TimeFrames with ids: ' + overlapping.map((e) => { return e.id + ', '; }) + 'are overlapping');
+            }
+            return await entityManager.getRepository(TimeFrame)
+                .createQueryBuilder('timeframe')
+                .insert()
+                .returning('*')
+                .values([timeFrame])
+                .execute()
+                .then(inserts => {
+                    inserts.generatedMaps[0].id = inserts?.identifiers[0].id;
+                    return inserts.generatedMaps[0];
+                });
+        });
     }
 
     async lockTimeFrame (id: number, userId: number) {
@@ -245,9 +242,13 @@ export class LendingStationAPI extends DataSource {
                 .set({ ...timeFrame })
                 .where('id = :id', { id: timeFrame.id })
                 .execute()
-                .then(value => { if (value.affected !== 1) { throw new GraphQLError('ID not found'); } });
+                .then(value => { if (value.affected !== 1) { throw new UserInputError('ID not found'); } });
         });
         !keepLock && await this.unlockTimeFrame(timeFrame.id, userId);
         return this.timeFrameById(timeFrame.id);
+    }
+
+    async deleteTimeFrame (id: number, userId: number) {
+        return await deleteEntity(this.connection, TimeFrame, 'tf', id, userId);
     }
 }

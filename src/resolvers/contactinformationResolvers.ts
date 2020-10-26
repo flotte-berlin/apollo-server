@@ -55,13 +55,6 @@ export default {
         isLocked: (parent: any, __: any, { dataSources, req }: { dataSources: any; req: any }) => isLocked(parent, { dataSources, req })
     },
     Mutation: {
-        createContactInformation: (_: any, { contactInformation }: { contactInformation: any }, { dataSources, req }: { dataSources: any, req: any }) => {
-            if (req.permissions.includes(Permission.WritePerson)) {
-                return dataSources.contactInformationAPI.createContactInformation(contactInformation);
-            } else {
-                return new GraphQLError('Insufficient Permissions');
-            }
-        },
         createPerson: (_: any, { person }: { person: any }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.WritePerson)) {
                 return dataSources.contactInformationAPI.createPerson(person);
@@ -90,6 +83,20 @@ export default {
                 return new GraphQLError('Insufficient Permissions');
             }
         },
+        deletePerson: (_: any, { id }: { id: number }, { dataSources, req }: { dataSources: any, req: any }) => {
+            if (req.permissions.includes(Permission.DeletePerson)) {
+                return dataSources.contactInformationAPI.deletePerson(id, req.userId);
+            } else {
+                return new GraphQLError('Insufficient Permissions');
+            }
+        },
+        createContactInformation: (_: any, { contactInformation }: { contactInformation: any }, { dataSources, req }: { dataSources: any, req: any }) => {
+            if (req.permissions.includes(Permission.WritePerson)) {
+                return dataSources.contactInformationAPI.createContactInformation(contactInformation);
+            } else {
+                return new GraphQLError('Insufficient Permissions');
+            }
+        },
         lockContactInformation: (_: any, { id }: { id: number }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.WritePerson)) {
                 return dataSources.contactInformationAPI.lockContactInformation(id, req.userId);
@@ -107,6 +114,13 @@ export default {
         updateContactInformation: (_: any, { contactInformation }: { contactInformation: any }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.WritePerson)) {
                 return dataSources.contactInformationAPI.updateContactInformation(contactInformation, req.userId);
+            } else {
+                return new GraphQLError('Insufficient Permissions');
+            }
+        },
+        deleteContactInformation: (_: any, { id }: { id: number }, { dataSources, req }: { dataSources: any, req: any }) => {
+            if (req.permissions.includes(Permission.DeletePerson)) {
+                return dataSources.contactInformationAPI.deleteContactInformation(id, req.userId);
             } else {
                 return new GraphQLError('Insufficient Permissions');
             }

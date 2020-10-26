@@ -926,44 +926,50 @@ type Query {
 
 type Mutation {
     """
-    CargoBikes
+    CARGO BIKE
     creates new cargoBike and returns cargobike with new ID
     """
     createCargoBike(cargoBike: CargoBikeCreateInput!): CargoBike!
     "lock cargoBike returns bike if bike is not locked and locks bike or Error if bike cannot be locked"
-    lockCargoBikeById(id: ID!): CargoBike!
+    lockCargoBike(id: ID!): CargoBike!
     "unlock cargoBike, returns true if Bike does not exist"
-    unlockCargoBikeById(id: ID!): Boolean!
+    unlockCargoBike(id: ID!): Boolean!
     "updates cargoBike of given ID with supplied fields and returns updated cargoBike"
     updateCargoBike(cargoBike: CargoBikeUpdateInput!): CargoBike!
+    "true on success"
+    deleteCargoBike(id: ID!): Boolean!
     """
     EQUIPMENT
     creates new peace of unique Equipment
     """
     createEquipment(equipment: EquipmentCreateInput!): Equipment!
     "lock equipment returns true if bike is not locked or if it doesnt exist"
-    lockEquipmentById(id: ID!): Equipment!
+    lockEquipment(id: ID!): Equipment!
     "unlock Equipment, returns true if Bike does not exist"
-    unlockEquipmentById(id: ID!): Boolean!
+    unlockEquipment(id: ID!): Boolean!
     "update Equipment, returns updated equipment. CargoBike will be null, if cargoBikeId is not set. Pass null for cargoBikeIs to delete the relation"
     updateEquipment(equipment: EquipmentUpdateInput!): Equipment!
+    deleteEquipment(id: ID!): Boolean!
     createEquipmentType(equipmentType: EquipmentTypeCreateInput!): EquipmentType!
     lockEquipmentType(id: ID!): EquipmentType!
     unlockEquipmentType(id: ID!): Boolean!
     updateEquipmentType(equipmentType: EquipmentTypeUpdateInput!): EquipmentType!
+    deleteEquipmentType(id: ID!): Boolean!
     """
     LENDINGSTATION
     creates new lendingStation and returns lendingStation with new ID
     """
     createLendingStation(lendingStation: LendingStationCreateInput): LendingStation!
-    lockLendingStationById(id: ID!): LendingStation
-    unlockLendingStationById(id: ID!): Boolean!
+    lockLendingStation(id: ID!): LendingStation
+    unlockLendingStation(id: ID!): Boolean!
     "updates lendingStation of given ID with supplied fields and returns updated lendingStation"
     updateLendingStation(lendingStation: LendingStationUpdateInput!): LendingStation!
+    deleteLendingStation(id: ID!): Boolean!
     createTimeFrame(timeFrame: TimeFrameCreateInput!): TimeFrame!
     lockTimeFrame(id: ID!): TimeFrame!
     unlockTimeFrame(id: ID!): Boolean!
     updateTimeFrame(timeFrame: TimeFrameUpdateInput!): TimeFrame!
+    deleteTimeFrame(id: ID!): Boolean!
     """
     BIKEEVENT
     """
@@ -971,11 +977,13 @@ type Mutation {
     lockBikeEventType(id: ID!): BikeEventType!
     unlockBikeEventType(id:ID!): Boolean!
     updateBikeEventType(bikeEventType: BikeEventTypeUpdateInput!): BikeEventType!
+    deleteBikeEventType(id: ID!): Boolean!
     "creates new BikeEvent"
     createBikeEvent(bikeEvent: BikeEventCreateInput!): BikeEvent!
-    lockBikeEventById(id: ID!): BikeEvent
-    unlockBikeEventById(id: ID!): Boolean!
+    lockBikeEvent(id: ID!): BikeEvent
+    unlockBikeEvent(id: ID!): Boolean!
     updateBikeEvent(bikeEvent: BikeEventUpdateInput!): BikeEvent
+    deleteBikeEvent(id: ID!): Boolean!
     """
     PARTICIPANTS
     """
@@ -983,40 +991,49 @@ type Mutation {
     lockParticipant(id: ID!): Participant!
     unlockParticipant(id: ID!): Boolean
     updateParticipant(participant: ParticipantUpdateInput!): Participant!
+    deleteParticipant(id: ID!): Boolean!
     createWorkshopType(workshopType: WorkshopTypeCreateInput!): WorkshopType!
     lockWorkshopType(id: ID!): WorkshopType!
     unlockWorkshopType(id: ID!): Boolean!
     updateWorkshopType(workshopType: WorkshopTypeUpdateInput!): WorkshopType!
+    deleteWorkshopType(id: ID!): Boolean!
     createWorkshop(workshop: WorkshopCreateInput!): Workshop!
     lockWorkshop(id: ID!): Workshop!
     unlockWorkshop(id: ID!): Boolean!
     updateWorkshop(workshop: WorkshopUpdateInput!): Workshop!
+    deleteWorkshop(id: ID!): Boolean!
     "create new contactInfo"
     createContactInformation(contactInformation: ContactInformationCreateInput!): ContactInformation!
     lockContactInformation(id: ID!): ContactInformation!
     unlockContactInformation(id: ID!): Boolean!
     updateContactInformation(contactInformation: ContactInformationUpdateInput!): ContactInformation!
+    deleteContactInformation(id: ID!): Boolean!
     createPerson(person: PersonCreateInput!): Person!
     lockPerson(id: ID!): Person!
     unlockPerson(id: ID!): Person!
     updatePerson(person: PersonUpdateInput!): Person!
+    deletePerson(id: ID!): Boolean!
+    "create Engagement"
+    createEngagement(engagement: EngagementCreateInput): Engagement!
     lockEngagement(id: ID!): Engagement!
     unlockEngagement(id: ID!): Boolean!
     updateEngagement(engagement: EngagementUpdateInput!): Engagement!
+    deleteEngagement(id: ID!): Boolean!
     createEngagementType(engagementType: EngagementTypeCreateInput!): EngagementType!
     lockEngagementType(id: ID!): EngagementType!
     unlockEngagementType(id: ID!): Boolean!
     updateEngagementType(engagementType: EngagementTypeUpdateInput!): EngagementType!
-    "create Engagement"
-    createEngagement(engagement: EngagementCreateInput): Engagement!
+    deleteEngagementType(id: ID!): Boolean!
     createProvider(provider: ProviderCreateInput!): Provider!
     lockProvider(id: ID!): Provider!
     unlockProvider(id: ID!): Boolean!
     updateProvider(provider: ProviderUpdateInput!): Provider!
+    deleteProvider(id: ID!): Boolean!
     createOrganisation(organisation: OrganisationCreateInput!): Organisation!
     lockOrganisation(id: ID!): Organisation!
     unlockOrganisation(id: ID!): Boolean!
     updateOrganisation(organisation: OrganisationUpdateInput!): Organisation!
+    deleteOrganisation(id: ID!): Boolean!
 }
 
 `;

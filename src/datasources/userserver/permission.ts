@@ -27,7 +27,22 @@ export enum Permission {
     WriteEquipmentType = 'EQUIPMENT_TYPE_WRITE',
     WriteEngagementType = 'ENGAGEMENT_TYPE_WRITE',
     ReadActionLog = 'ACTION_LOG_READ',
-    ReadActionLogAll = 'ACTION_LOG_ALL_READ'
+    ReadActionLogAll = 'ACTION_LOG_ALL_READ',
+    DeleteBike = 'BIKE_DELETE',
+    DeleteTimeFrame = 'TIME_FRAME_DELETE',
+    DeletePerson = 'PERSON_DELETE',
+    DeleteParticipant = ' PARTICIPANT_DELETE',
+    DeleteProvider = 'PROVIDER_DELETE',
+    DeleteLendingStation = 'LENDING_STATION_DELETE',
+    DeleteOrganisation = 'ORGANISATION_DELETE',
+    DeleteWorkshop = 'WORKSHOP_DELETE',
+    DeleteBikeEvent = 'BIKE_EVENT_DELETE',
+    DeleteEngagement = 'ENGAGEMENT_DELETE',
+    DeleteEquipment = 'EQUIPMENT_DELETE',
+    DeleteWorkshopType = 'WORKSHOP_TYPE_DELETE',
+    DeleteEventType = 'EVENT_TYPE_DELETE',
+    DeleteEquipmentType = 'EQUIPMENT_TYPE_DELETE',
+    DeleteEngagementType = 'ENGAGEMENT_TYPE_DELETE'
 }
 
 // Permissions where the creation will be requested on startup
@@ -143,5 +158,65 @@ export const requiredPermissions = [
     {
         name: Permission.ReadActionLogAll,
         description: 'Allows to read action log of other users'
+    },
+    {
+        name: Permission.DeleteBike,
+        description: 'Allows to delete bikes'
+    },
+    {
+        name: Permission.DeleteTimeFrame,
+        description: 'Allows to delete time frames'
+    },
+    {
+        name: Permission.DeletePerson,
+        description: 'Allows to delete persons and personal data'
+    },
+    {
+        name: Permission.DeleteParticipant,
+        description: 'Allows to delete participants'
+    },
+    {
+        name: Permission.DeleteProvider,
+        description: 'Allows to delete provider'
+    },
+    {
+        name: Permission.DeleteLendingStation,
+        description: 'Allows to delete lending stations'
+    },
+    {
+        name: Permission.DeleteOrganisation,
+        description: 'Allows to delete organisations'
+    },
+    {
+        name: Permission.DeleteWorkshop,
+        description: 'Allows to delete workshops'
+    },
+    {
+        name: Permission.DeleteBikeEvent,
+        description: 'Allows to delete bike events'
+    },
+    {
+        name: Permission.DeleteEngagement,
+        description: 'Allows to delete engagements'
+    },
+    {
+        name: Permission.DeleteEquipment,
+        description: 'Allows to delete equipment'
+    },
+    {
+        name: Permission.DeleteWorkshopType,
+        description: 'Allows to delete workshop types'
+    },
+    {
+        name: Permission.DeleteEventType,
+        description: 'Allows to delete event types'
+    },
+    {
+        name: Permission.DeleteEquipmentType,
+        description: 'Allows to delete equipment types'
+    },
+    {
+        name: Permission.DeleteEngagementType,
+        description: 'Allows to delete engagement types'
     }
 ];

@@ -2,6 +2,7 @@ import { Connection, EntityManager, ObjectType } from 'typeorm';
 import { Lockable } from '../../model/CargoBike';
 import { GraphQLError } from 'graphql';
 import { ActionLog, Actions } from '../../model/ActionLog';
+import { UserInputError } from 'apollo-server-express';
 
 export function genDateRange (struct: any) {
     if (struct.to === undefined) {
@@ -29,12 +30,26 @@ export function isLocked (parent: any, { dataSources, req }: { dataSources: any;
     });
 }
 
+export async function deleteEntity (connection: Connection, target: ObjectType<Lockable>, alias: string, id: number, userId: number): Promise<Boolean> {
+    return await connection.transaction(async (entityManger: EntityManager) => {
+        if (await LockUtils.isLocked(entityManger, target, alias, id, userId)) {
+            throw new UserInputError('Attempting to delete locked resource');
+        }
+        await ActionLogger.log(entityManger, target, alias, { id: id }, userId, Actions.DELETE);
+        return await entityManger.getRepository(target)
+            .createQueryBuilder(alias)
+            .delete()
+            .where('id = :id', { id: id })
+            .execute().then(value => value.affected === 1);
+    });
+}
+
 export class LockUtils {
     static getToken (req: any) : string {
         return req.headers.authorization?.replace('Bearer ', '');
     }
 
-    static async findById (connection: Connection, target: ObjectType<Lockable>, alias: string, id: number, userId: number): Promise<Lockable> {
+    static async findById (connection: Connection, target: ObjectType<Lockable>, alias: string, id: number): Promise<Lockable> {
         return await connection.getRepository(target)
             .createQueryBuilder(alias)
             .select()
@@ -66,7 +81,7 @@ export class LockUtils {
                 })
                 .where('id = :id', { id: id })
                 .execute();
-            return await this.findById(connection, target, alias, id, userId);
+            return await this.findById(connection, target, alias, id);
         } else {
             // lock was set
             throw new GraphQLError('Entry locked by other user');
@@ -113,8 +128,7 @@ export class LockUtils {
      * @param target
      * @param alias
      * @param id
-     * @param req
-     * @param dataSources
+     * @param userId
      */
     static async isLocked (connection: EntityManager, target: ObjectType<Lockable>, alias: string, id: number, userId: number) {
         const lock = await connection.getRepository(target)
@@ -134,29 +148,14 @@ export class LockUtils {
             // eslint-disable-next-line eqeqeq
         } else return lock?.lockedBy != userId;
     }
-
-    /**
-     * Returns true if id is found in database
-     * @param connection
-     * @param target
-     * @param alias
-     * @param id
-     */
-    static async checkId (connection: Connection, target: ObjectType<Lockable>, alias: string, id: number) {
-        const result = await connection.getRepository(target)
-            .createQueryBuilder(alias)
-            .select([
-                alias + '.id'
-            ])
-            .where('id = :id', { id: id })
-            .getCount();
-        return result === 1;
-    }
 }
 
 export class ActionLogger {
     private static buildSelect (updates: any, alias: string) : string[] {
         // this hacky shit makes it possible to select subfields like the address or insurance data. Only one layer at the moment
+        if (updates === null) {
+            return ['*'];
+        }
         const ret :string[] = [];
         Object.keys(updates).forEach(value => {
             if (typeof updates[value] === 'object' && !Array.isArray(updates[value])) {
@@ -176,7 +175,7 @@ export class ActionLogger {
             .where('id = :id', { id: updates.id })
             .getRawOne().then(value => {
                 if (value === undefined) {
-                    throw new GraphQLError('Id not found');
+                    throw new UserInputError('Id not found');
                 }
                 return value;
             }); // use getRawOne to also get ids of related entities

@@ -110,6 +110,13 @@ export default {
                 return new GraphQLError('Insufficient Permissions');
             }
         },
+        deleteProvider: (_: any, { id }: { id: number }, { dataSources, req }: { dataSources: any, req: any }) => {
+            if (req.permissions.includes(Permission.DeleteProvider)) {
+                return dataSources.providerAPI.deleteProvider(id, req.userId);
+            } else {
+                return new GraphQLError('Insufficient Permissions');
+            }
+        },
         createOrganisation: (_: any, { organisation }: { organisation: any }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.WriteOrganisation)) {
                 return dataSources.providerAPI.createOrganisation(organisation);
@@ -134,6 +141,13 @@ export default {
         updateOrganisation: (_: any, { organisation }: { organisation: any }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.WriteOrganisation)) {
                 return dataSources.providerAPI.updateOrganisation(organisation, req.userId);
+            } else {
+                return new GraphQLError('Insufficient Permissions');
+            }
+        },
+        deleteOrganisation: (_: any, { id }: { id: number }, { dataSources, req }: { dataSources: any, req: any }) => {
+            if (req.permissions.includes(Permission.DeleteOrganisation)) {
+                return dataSources.providerAPI.deleteOrganisation(id, req.userId);
             } else {
                 return new GraphQLError('Insufficient Permissions');
             }

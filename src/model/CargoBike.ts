@@ -1,5 +1,15 @@
 /* eslint no-unused-vars: "off" */
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany, ManyToOne, JoinColumn, ManyToMany, JoinTable } from 'typeorm';
+import {
+    Entity,
+    Column,
+    PrimaryGeneratedColumn,
+    OneToMany,
+    ManyToOne,
+    JoinColumn,
+    ManyToMany,
+    JoinTable,
+    DeleteDateColumn
+} from 'typeorm';
 import { Provider } from './Provider';
 import { Participant } from './Participant';
 import { InsuranceData } from './InsuranceData';
@@ -144,6 +154,9 @@ export class DimensionsAndLoad {
 export class CargoBike implements Lockable {
     @PrimaryGeneratedColumn()
     id: number;
+
+    @DeleteDateColumn()
+    deleteDate: Date;
 
     @Column({
         type: 'enum',

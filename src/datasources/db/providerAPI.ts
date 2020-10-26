@@ -5,7 +5,7 @@ import { Organisation } from '../../model/Organisation';
 import { UserInputError } from 'apollo-server-express';
 import { CargoBike } from '../../model/CargoBike';
 import { LendingStation } from '../../model/LendingStation';
-import { ActionLogger, LockUtils } from './utils';
+import { ActionLogger, deleteEntity, LockUtils } from './utils';
 import { GraphQLError } from 'graphql';
 
 export class ProviderAPI extends DataSource {
@@ -160,6 +160,10 @@ export class ProviderAPI extends DataSource {
         return await this.providerById(provider.id);
     }
 
+    async deleteProvider (id: number, userId: number) {
+        return await deleteEntity(this.connection, Provider, 'p', id, userId);
+    }
+
     async createOrganisation (organisation: any) {
         let inserts: any = null;
         await this.connection.transaction(async (entityManager: EntityManager) => {
@@ -197,5 +201,9 @@ export class ProviderAPI extends DataSource {
         });
         !keepLock && await LockUtils.unlockEntity(this.connection, Organisation, 'o', organisation.id, userId);
         return this.organisationById(organisation.id);
+    }
+
+    async deleteOrganisation (id: number, userId: number) {
+        return await deleteEntity(this.connection, Organisation, 'o', id, userId);
     }
 }

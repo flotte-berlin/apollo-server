@@ -2,7 +2,7 @@ import { DataSource } from 'apollo-datasource';
 import { Connection, EntityManager, getConnection } from 'typeorm';
 import { ContactInformation } from '../../model/ContactInformation';
 import { Person } from '../../model/Person';
-import { ActionLogger, LockUtils } from './utils';
+import { ActionLogger, deleteEntity, LockUtils } from './utils';
 import { GraphQLError } from 'graphql';
 import { LendingStation } from '../../model/LendingStation';
 
@@ -23,7 +23,7 @@ export class ContactInformationAPI extends DataSource {
 
     async contactInformation (offset: number, limit: number) {
         return await this.connection.getRepository(ContactInformation)
-            .createQueryBuilder('contactinformation')
+            .createQueryBuilder('ci')
             .select()
             .offset(offset)
             .limit(limit)
@@ -74,6 +74,10 @@ export class ContactInformationAPI extends DataSource {
         });
         !keepLock && await this.unlockPerson(person.id, userId);
         return this.personById(person.id);
+    }
+
+    async deletePerson (id: number, userId: number) {
+        return await deleteEntity(this.connection, Person, 'p', id, userId);
     }
 
     async persons (offset: number, limit: number) {
@@ -155,12 +159,15 @@ export class ContactInformationAPI extends DataSource {
         return await this.contactInformationById(contactInformation.id);
     }
 
+    async deleteContactInformation (id: number, userId: number) {
+        return await deleteEntity(this.connection, ContactInformation, 'ci', id, userId);
+    }
+
     async contactInformationByPersonId (id: number) {
-        const res = await this.connection.getRepository(ContactInformation)
+        return await this.connection.getRepository(ContactInformation)
             .createQueryBuilder('ci')
             .select()
             .where('ci."personId" = :id', { id: id })
             .getMany();
-        return res;
     }
 }

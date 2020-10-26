@@ -4,7 +4,7 @@ import { ContactInformation } from '../../model/ContactInformation';
 import { Engagement } from '../../model/Engagement';
 import { Participant } from '../../model/Participant';
 import { EngagementType } from '../../model/EngagementType';
-import { ActionLogger, genDateRange, LockUtils } from './utils';
+import { ActionLogger, deleteEntity, genDateRange, LockUtils } from './utils';
 import { UserInputError } from 'apollo-server-express';
 import { GraphQLError } from 'graphql';
 
@@ -177,6 +177,10 @@ export class ParticipantAPI extends DataSource {
         return await this.participantById(participant.id);
     }
 
+    async deleteParticipant (id: number, userId: number) {
+        return await deleteEntity(this.connection, Participant, 'p', id, userId);
+    }
+
     async createEngagement (engagement: any) {
         let inserts: any;
         genDateRange(engagement);
@@ -242,6 +246,10 @@ export class ParticipantAPI extends DataSource {
         return await this.engagementById(engagement.id);
     }
 
+    async deleteEngagement (id: number, userId: number) {
+        return await deleteEntity(this.connection, Engagement, 'e', id, userId);
+    }
+
     async createEngagementType (engagementType: any) {
         const inserts = await this.connection.getRepository(EngagementType)
             .createQueryBuilder('et')
@@ -278,5 +286,9 @@ export class ParticipantAPI extends DataSource {
         });
         !keepLock && await LockUtils.unlockEntity(this.connection, EngagementType, 'et', engagementType.id, userId);
         return await this.engagementTypeById(engagementType.id);
+    }
+
+    async deleteEngagementType (id: number, userId: number) {
+        return await deleteEntity(this.connection, EngagementType, 'et', id, userId);
     }
 }

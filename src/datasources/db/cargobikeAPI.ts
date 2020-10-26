@@ -1,15 +1,17 @@
 import { DataSource } from 'apollo-datasource';
-import { getConnection, Connection, ObjectType, EntityManager } from 'typeorm';
-import { CargoBike, Lockable } from '../../model/CargoBike';
+import { Connection, EntityManager, getConnection } from 'typeorm';
+import { CargoBike } from '../../model/CargoBike';
 import { GraphQLError } from 'graphql';
 import { BikeEvent } from '../../model/BikeEvent';
 import { Equipment } from '../../model/Equipment';
 import { Engagement } from '../../model/Engagement';
 import { Provider } from '../../model/Provider';
 import { TimeFrame } from '../../model/TimeFrame';
-import { ActionLogger, LockUtils } from './utils';
+import { ActionLogger, deleteEntity, LockUtils } from './utils';
 import { EquipmentType } from '../../model/EquipmentType';
 import { BikeEventType } from '../../model/BikeEventType';
+import { UserInputError } from 'apollo-server-express';
+import { Actions } from '../../model/ActionLog';
 
 /**
  * extended datasource to feed resolvers with data about cargoBikes
@@ -33,13 +35,13 @@ export class CargoBikeAPI extends DataSource {
 
     /**
      * Finds cargo bike by id, returns null if id was not found
-     * @param param0 id of bike
+     * @param id
      */
     async findCargoBikeById (id: number) {
         return await this.connection.getRepository(CargoBike)
-            .createQueryBuilder('cargobike')
+            .createQueryBuilder('cb')
             .select()
-            .where('cargobike.id = :id', { id })
+            .where('id = :id', { id })
             .getOne();
     }
 
@@ -67,9 +69,18 @@ export class CargoBikeAPI extends DataSource {
             .loadOne();
     }
 
+    async lockCargoBike (id: number, userId: number) {
+        return await LockUtils.lockEntity(this.connection, CargoBike, 'cb', id, userId);
+    }
+
+    async unlockCargoBike (id: number, userId: number) {
+        return await LockUtils.unlockEntity(this.connection, CargoBike, 'cb', id, userId);
+    }
+
     /**
      * Updates CargoBike and return updated cargoBike
-     * @param param0 cargoBike to be updated
+     * @param cargoBike
+     * @param userId
      */
     async updateCargoBike (cargoBike: any, userId:number) {
         const keepLock = cargoBike?.keepLock;
@@ -86,13 +97,13 @@ export class CargoBikeAPI extends DataSource {
             }
             await ActionLogger.log(entityManager, CargoBike, 'cb', cargoBike, userId);
             await entityManager.getRepository(CargoBike)
-                .createQueryBuilder('cargobike')
+                .createQueryBuilder('cb')
                 .update()
                 .set({ ...cargoBike })
                 .where('id = :id', { id: cargoBike.id })
                 .execute();
             equipmentTypeIds && await entityManager.getRepository(CargoBike)
-                .createQueryBuilder('cargobike')
+                .createQueryBuilder('cb')
                 .relation(CargoBike, 'equipmentTypeIds')
                 .of(cargoBike.id)
                 .addAndRemove(equipmentTypeIds, await this.equipmentTypeByCargoBikeId(cargoBike.id)); // TODO remove all existing relations
@@ -101,29 +112,42 @@ export class CargoBikeAPI extends DataSource {
         return await this.findCargoBikeById(cargoBike.id);
     }
 
+    async deleteCargoBike (id: number, userId: number) {
+        return await this.connection.transaction(async (entityManager: EntityManager) => {
+            if (await LockUtils.isLocked(entityManager, CargoBike, 'cb', id, userId)) {
+                throw new UserInputError('Attempting to soft delete locked resource');
+            }
+            await ActionLogger.log(entityManager, CargoBike, 'bg', { id: id }, userId, Actions.SOFT_DELETE);
+            return await entityManager.getRepository(CargoBike)
+                .createQueryBuilder('cb')
+                .delete()
+                .where('id = :id', { id: id })
+                .execute();
+        }).then(value => value.affected === 1);
+    }
+
     /**
      * createCargoBike
      * created CargoBike and returns created bike with new ID
      * @param param0 cargoBike to be created
      */
     async createCargoBike ({ cargoBike }: { cargoBike: any }) {
-        let inserts: any;
+        let inserts: any = {};
         await this.connection.transaction(async (entityManager:any) => {
             inserts = await entityManager.getRepository(CargoBike)
-                .createQueryBuilder('cargobike')
+                .createQueryBuilder('cb')
                 .insert()
                 .values([cargoBike])
                 .returning('*')
                 .execute();
             cargoBike?.equipmentTypeIds && await entityManager.getRepository(CargoBike)
-                .createQueryBuilder('cargobike')
+                .createQueryBuilder('cb')
                 .relation(CargoBike, 'equipmentTypeIds')
                 .of(inserts.identifiers[0].id)
                 .add(cargoBike.equipmentTypeIds);
         });
-        const newbike = inserts.generatedMaps[0];
-        newbike.id = inserts.identifiers[0].id;
-        return newbike;
+        inserts.generatedMaps[0] = inserts?.identifiers[0].id;
+        return inserts?.generatedMaps[0];
     }
 
     async createBikeEvent ({ bikeEvent }: { bikeEvent: any }) {
@@ -152,6 +176,14 @@ export class CargoBikeAPI extends DataSource {
         });
         !keepLock && await LockUtils.unlockEntity(this.connection, BikeEvent, 'be', bikeEvent.id, userId);
         return await this.bikeEventById(bikeEvent.id);
+    }
+
+    async deleteBikeEventType (id: number, userId: number) {
+        return await deleteEntity(this.connection, BikeEventType, 'bet', id, userId);
+    }
+
+    async deleteBikeEvent (id: number, userId: number) {
+        return await deleteEntity(this.connection, BikeEvent, 'be', id, userId);
     }
 
     async cargoBikeByEventId (id: number) {
@@ -286,17 +318,6 @@ export class CargoBikeAPI extends DataSource {
             .getOne();
     }
 
-    async checkId (target: ObjectType<Lockable>, alias: string, id: number) {
-        const result = await this.connection.getRepository(target)
-            .createQueryBuilder(alias)
-            .select([
-                alias + '.id'
-            ])
-            .where('id = :id', { id: id })
-            .getCount();
-        return result === 1;
-    }
-
     /**
      * Returns equipment of one cargoBike
      * @param offset
@@ -312,14 +333,16 @@ export class CargoBikeAPI extends DataSource {
     }
 
     async createEquipment ({ equipment }: { equipment: any }) {
-        const inserts = await this.connection.getRepository(Equipment)
+        return await this.connection.getRepository(Equipment)
             .createQueryBuilder('equipment')
             .insert()
             .into(Equipment)
             .values([equipment])
             .returning('*')
-            .execute();
-        return this.equipmentById(inserts.identifiers[0].id);
+            .execute()
+            .then(async inserts => {
+                return await this.equipmentById(inserts.identifiers[0].id);
+            });
     }
 
     async cargoBikeByEquipmentId (id: number) {
@@ -341,13 +364,12 @@ export class CargoBikeAPI extends DataSource {
     /**
      * Will update Equipment, crashes when id not in db or cargoBikeId not db.
      * Will return updated Equipment joined with CargoBike only if cargoBike is was set in param0
-     * @param param0 struct with equipment properites
+     * @param equipment
+     * @param userId
      */
     async updateEquipment (equipment: any, userId: number) {
         const keepLock = equipment.keepLock;
         delete equipment.keepLock;
-        // const cargoBikeId = equipment.cargoBikeId;
-        // delete equipment.cargoBikeId;
         await this.connection.transaction(async (entityManager: EntityManager) => {
             if (await LockUtils.isLocked(entityManager, Equipment, 'equipment', equipment.id, userId)) {
                 return new GraphQLError('Equipment is locked by other user');
@@ -359,19 +381,13 @@ export class CargoBikeAPI extends DataSource {
                 .set({ ...equipment })
                 .where('id = :id', { id: equipment.id })
                 .execute();
-            /* if (cargoBikeId || cargoBikeId === null) {
-                await this.connection.getRepository(Equipment)
-                    .createQueryBuilder()
-                    .relation(Equipment, 'cargoBike')
-                    .of(equipment.id)
-                    .set(cargoBikeId);
-            }
-
-             */
-        }
-        );
+        });
         !keepLock && await LockUtils.unlockEntity(this.connection, Equipment, 'e', equipment.id, userId);
         return this.equipmentById(equipment.id);
+    }
+
+    async deleteEquipment (id: number, userId: number) {
+        return await deleteEntity(this.connection, Equipment, 'e', id, userId);
     }
 
     async getEquipment (offset: number, limit: number) {
@@ -385,14 +401,16 @@ export class CargoBikeAPI extends DataSource {
     }
 
     async createEquipmentType (equipmentType: any) {
-        const inserts = await this.connection.getRepository(EquipmentType)
+        return await this.connection.getRepository(EquipmentType)
             .createQueryBuilder('equipment')
             .insert()
             .values([equipmentType])
             .returning('*')
-            .execute();
-        inserts.generatedMaps[0].id = inserts.identifiers[0].id;
-        return inserts.generatedMaps[0];
+            .execute()
+            .then(inserts => {
+                inserts.generatedMaps[0].id = inserts.identifiers[0].id;
+                return inserts.generatedMaps[0];
+            });
     }
 
     async lockEquipmentType (id: number, userId : number) {
@@ -422,6 +440,10 @@ export class CargoBikeAPI extends DataSource {
         return await this.equipmentTypeById(equipmentType.id);
     }
 
+    async deleteEquipmentType (id:number, userId: number) {
+        return await deleteEntity(this.connection, EquipmentType, 'et', id, userId);
+    }
+
     async equipmentTypeById (id: number) {
         return await this.connection.getRepository(EquipmentType)
             .createQueryBuilder('equipmentType')
@@ -441,7 +463,7 @@ export class CargoBikeAPI extends DataSource {
 
     async equipmentTypeByCargoBikeId (id: number) {
         return await this.connection.getRepository(CargoBike)
-            .createQueryBuilder('cargobike')
+            .createQueryBuilder('cb')
             .relation(CargoBike, 'equipmentTypeIds')
             .of(id)
             .loadMany();

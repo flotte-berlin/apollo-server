@@ -82,6 +82,13 @@ export default {
                 return new GraphQLError('Insufficient Permissions');
             }
         },
+        deleteWorkshop: (_: any, { id }: { id: number }, { dataSources, req }: { dataSources: any, req: any }) => {
+            if (req.permissions.includes(Permission.DeleteWorkshop)) {
+                return dataSources.workshopAPI.deleteWorkshop(id, req.userId);
+            } else {
+                return new GraphQLError('Insufficient Permissions');
+            }
+        },
         createWorkshopType: (_: any, { workshopType }: { workshopType: any }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.WriteWorkshopType)) {
                 return dataSources.workshopAPI.createWorkshopType(workshopType);
@@ -106,6 +113,13 @@ export default {
         updateWorkshopType: (_: any, { workshopType }: { workshopType: any }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.WriteWorkshopType)) {
                 return dataSources.workshopAPI.updateWorkshopType(workshopType, req.userId);
+            } else {
+                return new GraphQLError('Insufficient Permissions');
+            }
+        },
+        deleteWorkshopType: (_: any, { id }: { id: number }, { dataSources, req }: { dataSources: any, req: any }) => {
+            if (req.permissions.includes(Permission.DeleteWorkshopType)) {
+                return dataSources.workshopAPI.deleteWorkshopType(id, req.userId);
             } else {
                 return new GraphQLError('Insufficient Permissions');
             }
