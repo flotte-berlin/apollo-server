@@ -869,6 +869,7 @@ type ActionLog {
     id: ID!
     userId: ID!
     date: Date!
+    action: String!
     entity: String!
     "in json format"
     entriesOld: String!

@@ -1,4 +1,12 @@
+/* eslint no-unused-vars: "off" */
 import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from 'typeorm';
+
+export enum Actions {
+    UPDATE='UPDATE',
+    SOFT_DELETE='SOFT_DELETE',
+    DELETE='DELETE',
+    RESTORE='RESTORE',
+}
 
 @Entity()
 export class ActionLog {
@@ -7,6 +15,9 @@ export class ActionLog {
 
     @CreateDateColumn()
     date?: Date;
+
+    @Column()
+    action: string;
 
     @Column()
     userId: number;

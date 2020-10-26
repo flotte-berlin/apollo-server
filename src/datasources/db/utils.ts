@@ -1,7 +1,7 @@
 import { Connection, EntityManager, ObjectType } from 'typeorm';
 import { Lockable } from '../../model/CargoBike';
 import { GraphQLError } from 'graphql';
-import { ActionLog } from '../../model/ActionLog';
+import { ActionLog, Actions } from '../../model/ActionLog';
 
 export function genDateRange (struct: any) {
     if (struct.to === undefined) {
@@ -170,7 +170,7 @@ export class ActionLogger {
         return ret;
     }
 
-    static async log (em: EntityManager, target: ObjectType<any>, alias: string, updates: any, userId: number) {
+    static async log (em: EntityManager, target: ObjectType<any>, alias: string, updates: any, userId: number, action: Actions = Actions.UPDATE) {
         const oldValues = await em.getRepository(target).createQueryBuilder(alias)
             .select(this.buildSelect(updates, alias))
             .where('id = :id', { id: updates.id })
@@ -201,6 +201,7 @@ export class ActionLogger {
         const logEntry : ActionLog = {
             userId: userId,
             entity: target.name,
+            action: action,
             entriesOld: JSON.stringify(oldValues),
             entriesNew: JSON.stringify(updates)
         };
