@@ -2,7 +2,7 @@ import { DataSource } from 'apollo-datasource';
 import { Connection, EntityManager, getConnection } from 'typeorm';
 import { Provider } from '../../model/Provider';
 import { Organisation } from '../../model/Organisation';
-import { UserInputError } from 'apollo-server';
+import { UserInputError } from 'apollo-server-express';
 import { CargoBike } from '../../model/CargoBike';
 import { LendingStation } from '../../model/LendingStation';
 import { ActionLogger, LockUtils } from './utils';

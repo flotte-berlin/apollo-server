@@ -5,7 +5,7 @@ import { Engagement } from '../../model/Engagement';
 import { Participant } from '../../model/Participant';
 import { EngagementType } from '../../model/EngagementType';
 import { ActionLogger, genDateRange, LockUtils } from './utils';
-import { UserInputError } from 'apollo-server';
+import { UserInputError } from 'apollo-server-express';
 import { GraphQLError } from 'graphql';
 
 export class ParticipantAPI extends DataSource {

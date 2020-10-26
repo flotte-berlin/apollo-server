@@ -410,6 +410,7 @@ export class CargoBikeAPI extends DataSource {
             if (await LockUtils.isLocked(entityManager, EquipmentType, 'et', equipmentType.id, userId)) {
                 throw new GraphQLError('EquipmentType is locked by other user');
             }
+            await ActionLogger.log(entityManager, EquipmentType, 'et', equipmentType, userId);
             await entityManager.getRepository(EquipmentType)
                 .createQueryBuilder('et')
                 .update()

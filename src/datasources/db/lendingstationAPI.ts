@@ -1,5 +1,5 @@
 import { DataSource } from 'apollo-datasource';
-import { ApolloError, UserInputError } from 'apollo-server';
+import { ApolloError, UserInputError } from 'apollo-server-express';
 import { GraphQLError } from 'graphql';
 import { Connection, EntityManager, getConnection, QueryFailedError } from 'typeorm';
 import { CargoBike } from '../../model/CargoBike';
