@@ -146,7 +146,7 @@ export class CargoBikeAPI extends DataSource {
                 .of(inserts.identifiers[0].id)
                 .add(cargoBike.equipmentTypeIds);
         });
-        inserts.generatedMaps[0] = inserts?.identifiers[0].id;
+        inserts.generatedMaps[0].id = inserts?.identifiers[0].id;
         return inserts?.generatedMaps[0];
     }
 
