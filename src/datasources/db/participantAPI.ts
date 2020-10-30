@@ -40,17 +40,21 @@ export class ParticipantAPI extends DataSource {
             .loadOne();
     }
 
-    async participantByCargoBikeId (id:number) {
-        return await this.connection.getRepository(Engagement)
+    async participantsByCargoBikeId (id:number) {
+        return await this.connection.getRepository(Engagement)// TODO do this with a sub query
             .createQueryBuilder('e')
-            .relation(Engagement, 'participantId')
-            .of((await this.connection.getRepository(Engagement)// TODO do this with a sub query
-                .createQueryBuilder('e')
-                .select()
-                .where('"dateRange" && daterange(CURRENT_DATE,CURRENT_DATE,\'[]\')')
-                .andWhere('"cargoBikeId" = :id', { id: id })
-                .getOne())?.id
-            ).loadOne();
+            .select()
+            .where('"dateRange" && daterange(CURRENT_DATE,CURRENT_DATE,\'[]\')')
+            .andWhere('"cargoBikeId" = :id', { id: id })
+            .getMany()
+            .then(async (value: Engagement[]) => {
+                return value?.map(async (engagement: Engagement) => {
+                    return await this.connection.getRepository(Engagement)
+                        .createQueryBuilder('e')
+                        .relation(Engagement, 'participantId')
+                        .of(engagement.id).loadOne();
+                });
+            });
     }
 
     async engagementByParticipantId (id: number) {
@@ -70,6 +74,16 @@ export class ParticipantAPI extends DataSource {
             })
             .skip(offset)
             .take(limit)
+            .orderBy('engagement."dateRange"', 'DESC')
+            .getMany();
+    }
+
+    async currentEngagementByCargoBikeId (id: number) {
+        return await this.connection.getRepository(Engagement)
+            .createQueryBuilder('engagement')
+            .select()
+            .where('engagement."cargoBikeId" = :id', { id: id })
+            .where('"dateRange" && daterange(CURRENT_DATE,CURRENT_DATE,\'[]\')')
             .orderBy('engagement."dateRange"', 'DESC')
             .getMany();
     }

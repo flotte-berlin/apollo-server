@@ -76,6 +76,13 @@ export default {
         }
     },
     CargoBike: {
+        currentEngagements (parent: any, __: any, { dataSources, req }: { dataSources: any, req: any }) {
+            if (req.permissions.includes(Permission.ReadEngagement)) {
+                return dataSources.participantAPI.currentEngagementByCargoBikeId(parent.id);
+            } else {
+                return new GraphQLError('Insufficient Permissions');
+            }
+        },
         engagement (parent: any, { offset, limit }: { offset: number, limit: number }, { dataSources, req }: { dataSources: any, req: any }) {
             if (req.permissions.includes(Permission.ReadEngagement)) {
                 return dataSources.participantAPI.engagementByCargoBikeId(offset, limit, parent.id);
@@ -83,9 +90,9 @@ export default {
                 return new GraphQLError('Insufficient Permissions');
             }
         },
-        coordinator (parent: any, { offset, limit }: { offset: number, limit: number }, { dataSources, req }: { dataSources: any, req: any }) { // TODO should be done with engagements
+        participants (parent: any, { offset, limit }: { offset: number, limit: number }, { dataSources, req }: { dataSources: any, req: any }) { // TODO should be done with engagements
             if (req.permissions.includes(Permission.ReadParticipant)) {
-                return dataSources.participantAPI.participantByCargoBikeId(parent.id);
+                return dataSources.participantAPI.participantsByCargoBikeId(parent.id);
             } else {
                 return new GraphQLError('Insufficient Permissions');
             }

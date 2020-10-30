@@ -39,10 +39,12 @@ type CargoBike {
     stickerBikeNameState: StickerBikeNameState
     note: String
     provider: Provider
-    coordinator:  Participant
+    "all participants currently engaged with the cargoBike"
+    participants:  [Participant]
     insuranceData: InsuranceData!
     lendingStation: LendingStation
     taxes: Taxes
+    currentEngagements: [Engagement]
     engagement(offset: Int!, limit: Int!): [Engagement]
     timeFrames: [TimeFrame]
     isLocked: Boolean!
@@ -129,7 +131,7 @@ input CargoBikeUpdateInput {
 
 type InsuranceData {
     """
-    Eventuelly, this field will become an enum or a separate data table and user can choose from a pool of insurance companies.
+    Eventually, this field will become an enum or a separate data table and user can choose from a pool of insurance companies.
     """
     name: String!
     benefactor: String!
