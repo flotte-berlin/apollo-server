@@ -22,10 +22,10 @@ export class Workshop implements Lockable {
     })
     date: Date;
 
-    @ManyToMany(type => Participant, participant => participant.workshops, {
+    @ManyToMany(type => Participant, participant => participant.workshopIds, {
         nullable: true
     })
-    participants: Participant[];
+    participantIds: number[];
 
     @ManyToOne(type => Participant, {
         nullable: false

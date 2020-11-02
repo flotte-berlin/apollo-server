@@ -1,9 +1,9 @@
 import { ApolloServer } from 'apollo-server-express';
-import bikeresolver from './resolvers/cargobikeResolver';
+import bikeResolver from './resolvers/cargoBikeResolver';
 import { CargoBikeAPI } from './datasources/db/cargobikeAPI';
 import typeDefs from './schema/type-defs';
 import 'reflect-metadata';
-import { createConnection } from 'typeorm';
+import { ConnectionOptions, createConnection } from 'typeorm';
 import { UserServerAPI } from './datasources/userserver/userserviceAPI';
 import express from 'express';
 import { requiredPermissions } from './datasources/userserver/permission';
@@ -19,13 +19,13 @@ import { Provider } from './model/Provider';
 import { Engagement } from './model/Engagement';
 import { Workshop } from './model/Workshop';
 import { LendingStationAPI } from './datasources/db/lendingstationAPI';
-import lendingstationResolvers from './resolvers/lendingstationResolvers';
+import lendingStationResolvers from './resolvers/lendingStationResolvers';
 import { ParticipantAPI } from './datasources/db/participantAPI';
 import participantResolvers from './resolvers/participantResolvers';
 import { ContactInformationAPI } from './datasources/db/contactinformationAPI';
 import providerResolvers from './resolvers/providerResolvers';
 import { ProviderAPI } from './datasources/db/providerAPI';
-import contactinformationResolvers from './resolvers/contactinformationResolvers';
+import contactInformationResolvers from './resolvers/contactInformationResolvers';
 import { Person } from './model/Person';
 import { WorkshopType } from './model/WorkshopType';
 import { EngagementType } from './model/EngagementType';
@@ -34,11 +34,36 @@ import { BikeEventType } from './model/BikeEventType';
 import { WorkshopAPI } from './datasources/db/workshopAPI';
 import workshopResolvers from './resolvers/workshopResolvers';
 import { ActionLog } from './model/ActionLog';
-import actionlogResolvers from './resolvers/actionlogResolvers';
+import actionLogResolvers from './resolvers/actionLogResolvers';
 import { ActionLogAPI } from './datasources/db/actionLogAPI';
 
 require('dotenv').config();
 
+const connOptions: ConnectionOptions = {
+    type: 'postgres',
+    url: process.env.POSTGRES_CONNECTION_URL,
+    entities: [
+        CargoBike,
+        BikeEvent,
+        BikeEventType,
+        ContactInformation,
+        Equipment,
+        EquipmentType,
+        LendingStation,
+        TimeFrame,
+        Organisation,
+        Participant,
+        Provider,
+        Engagement,
+        EngagementType,
+        Workshop,
+        Person,
+        WorkshopType,
+        ActionLog
+    ],
+    synchronize: true,
+    logging: false
+};
 /**
  * Function that is called to authenticate a user by using the user rpc server
  * @param req
@@ -68,45 +93,26 @@ async function authenticate (req: any, res: any, next: any) {
     }
 }
 
-createConnection({
-    type: 'postgres',
-    url: process.env.POSTGRES_CONNECTION_URL,
-    entities: [
-        CargoBike,
-        BikeEvent,
-        BikeEventType,
-        ContactInformation,
-        Equipment,
-        EquipmentType,
-        LendingStation,
-        TimeFrame,
-        Organisation,
-        Participant,
-        Provider,
-        Engagement,
-        EngagementType,
-        Workshop,
-        Person,
-        WorkshopType,
-        ActionLog
-    ],
-    synchronize: true,
-    logging: false
-}).then(async () => {
-    console.log('connected to db');
-}).catch(error => console.log(error));
+function retryConnect (): any {
+    createConnection(connOptions).catch(error => {
+        console.log(error);
+        setTimeout(retryConnect, 3000);
+    });
+}
+
+retryConnect();
 
 const userAPI = new UserServerAPI(process.env.RPC_HOST);
 
 const server = new ApolloServer({
     resolvers: [
-        bikeresolver,
-        lendingstationResolvers,
+        bikeResolver,
+        lendingStationResolvers,
         participantResolvers,
         providerResolvers,
-        contactinformationResolvers,
+        contactInformationResolvers,
         workshopResolvers,
-        actionlogResolvers
+        actionLogResolvers
     ],
     typeDefs,
     dataSources: () => ({
@@ -130,8 +136,7 @@ app.post('/graphql', authenticate);
 app.get(/\/graphql?&.*query=/, authenticate);
 server.applyMiddleware({ app });
 
-console.log(__dirname);
 app.listen(4000, async () => {
-    console.log('Server listening on port 4000');
-    await userAPI.createDefinedPermissions();
+    await userAPI.createDefinedPermissions().catch(
+        err => console.log(err));
 });

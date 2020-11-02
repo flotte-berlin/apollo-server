@@ -5,6 +5,7 @@ import { Workshop } from '../../model/Workshop';
 import { ActionLogger, deleteEntity, LockUtils } from './utils';
 import { UserInputError } from 'apollo-server-express';
 import { GraphQLError } from 'graphql';
+import { Participant } from '../../model/Participant';
 
 export class WorkshopAPI extends DataSource {
     connection: Connection
@@ -151,5 +152,13 @@ export class WorkshopAPI extends DataSource {
             .relation(Workshop, 'trainer2Id')
             .of(id)
             .loadOne();
+    }
+
+    async participantsByWorkshopId (id: number): Promise<Participant[]> {
+        return await this.connection.getRepository(Workshop)
+            .createQueryBuilder('w')
+            .relation(Workshop, 'participantIds')
+            .of(id)
+            .loadMany();
     }
 }

@@ -62,6 +62,13 @@ export default {
                 return new GraphQLError('Insufficient Permissions');
             }
         },
+        workshops (parent: any, _: any, { dataSources, req }: { dataSources: any, req: any }) {
+            if (req.permissions.includes(Permission.ReadWorkshop)) {
+                return (dataSources.participantAPI.workshopsByParticipantId(parent.id));
+            } else {
+                return new GraphQLError('Insufficient Permissions');
+            }
+        },
         isLocked: (parent: any, __: any, { dataSources, req }: { dataSources: any; req: any }) => isLocked(parent, { dataSources, req })
     },
     Engagement: {

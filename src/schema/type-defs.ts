@@ -325,6 +325,7 @@ type Participant {
     """
     distributedActiveBikeParte: Boolean!
     engagement: [Engagement]
+    workshops: [Workshop]
     isLocked: Boolean!
     "null if not locked by other user"
     lockedBy: ID
@@ -344,6 +345,7 @@ input ParticipantCreateInput {
     locationZIPs: [String]!
     "default: false"
     memberCoreTeam: Boolean
+    workshopIds: [ID]
 }
 
 input ParticipantUpdateInput {
@@ -360,6 +362,7 @@ input ParticipantUpdateInput {
     locationZIPs: [String]
     "default: false"
     memberCoreTeam: Boolean
+    workshopIds: [ID]
     keepLock: Boolean
 }
 
@@ -371,6 +374,7 @@ type Workshop {
     workshopType: WorkshopType!
     trainer1: Participant!
     trainer2: Participant
+    participants: [Participant]
     isLocked: Boolean!
     "null if not locked by other user"
     lockedBy: ID

@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn, OneToMany, ManyToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn, OneToMany, ManyToMany, JoinTable } from 'typeorm';
 import { ContactInformation } from './ContactInformation';
 import { Engagement } from './Engagement';
 import { Workshop } from './Workshop';
@@ -47,10 +47,11 @@ export class Participant implements Lockable {
     @OneToMany(type => Engagement, engagement => engagement.participantId)
     engagement: Engagement[];
 
-    @ManyToMany(type => Workshop, workshop => workshop.participants, {
+    @ManyToMany(type => Workshop, workshop => workshop.participantIds, {
         nullable: true
     })
-    workshops: Workshop[];
+    @JoinTable()
+    workshopIds: number[];
 
     @Column({
         nullable: false,

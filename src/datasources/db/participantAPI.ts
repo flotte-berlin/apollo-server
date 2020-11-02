@@ -146,6 +146,14 @@ export class ParticipantAPI extends DataSource {
             .loadOne();
     }
 
+    async workshopsByParticipantId (id: number) {
+        return await this.connection.getRepository(Participant)
+            .createQueryBuilder('p')
+            .relation(Participant, 'workshopIds')
+            .of(id)
+            .loadMany();
+    }
+
     /**
      * creates participant and creates relation to given contactInformation
      * @param participant to be created
@@ -160,6 +168,11 @@ export class ParticipantAPI extends DataSource {
                 .values([participant])
                 .returning('*')
                 .execute();
+            await entityManager.getRepository(Participant)
+                .createQueryBuilder('w')
+                .relation(Participant, 'workshopIds')
+                .of(participant.id)
+                .add(participant.workshopIds);
         });
         return this.participantById(inserts?.identifiers[0].id);
     }
@@ -179,6 +192,8 @@ export class ParticipantAPI extends DataSource {
             if (await LockUtils.isLocked(entityManager, Participant, 'p', participant.id, userId)) {
                 throw new GraphQLError('Participant is locked by another user');
             }
+            const workshops = participant.workshopIds;
+            delete participant.workshopIds;
             await ActionLogger.log(entityManager, Participant, 'p', participant, userId);
             await entityManager.getRepository(Participant)
                 .createQueryBuilder('p')
@@ -186,6 +201,11 @@ export class ParticipantAPI extends DataSource {
                 .set({ ...participant })
                 .where('id = :id', { id: participant.id })
                 .execute().then(value => { if (value.affected !== 1) { throw new GraphQLError('ID not found'); } });
+            await entityManager.getRepository(Participant)
+                .createQueryBuilder('w')
+                .relation(Participant, 'workshopIds')
+                .of(participant.id)
+                .add(workshops);
         });
         !keepLock && await this.unlockParticipant(participant.id, userId);
         return await this.participantById(participant.id);

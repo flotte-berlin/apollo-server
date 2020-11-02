@@ -1,6 +1,7 @@
 import { Permission } from '../datasources/userserver/permission';
 import { GraphQLError } from 'graphql';
 import { isLocked } from '../datasources/db/utils';
+import { Participant } from '../model/Participant';
 
 export default {
     Query: {
@@ -44,6 +45,13 @@ export default {
         trainer2: (parent: any, __:any, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.ReadParticipant)) {
                 return dataSources.workshopAPI.trainer2ByWorkshopId(parent.id);
+            } else {
+                return new GraphQLError('Insufficient Permissions');
+            }
+        },
+        participants (parent: any, _: any, { dataSources, req }: { dataSources: any; req: any }): Promise<Participant[]> | GraphQLError {
+            if (req.permissions.includes(Permission.ReadParticipant)) {
+                return dataSources.workshopAPI.participantsByWorkshopId(parent.id);
             } else {
                 return new GraphQLError('Insufficient Permissions');
             }

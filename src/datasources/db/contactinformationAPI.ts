@@ -13,14 +13,6 @@ export class ContactInformationAPI extends DataSource {
         this.connection = getConnection();
     }
 
-    async numContactInformationById (id: number) {
-        return await this.connection.getRepository(ContactInformation)
-            .createQueryBuilder('contactInformation')
-            .select()
-            .where('"contactInformation".id = :id', { id: id })
-            .getCount();
-    }
-
     async contactInformation (offset: number, limit: number) {
         return await this.connection.getRepository(ContactInformation)
             .createQueryBuilder('ci')
