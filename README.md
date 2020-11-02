@@ -1,7 +1,7 @@
 # API-server
 Apollo server written in typescript that handles business logic.
 
-[![Build Status](https://travis-ci.com/flotte-goes-smart/apollo-server.svg?token=YfRmpHAXqyUafCgSEexw&branch=main)](https://travis-ci.com/flotte-goes-smart/apollo-server)
+[![Build Status](https://travis-ci.com/fLotte-meets-HWR-DB/apollo-server.svg?token=YfRmpHAXqyUafCgSEexw&branch=main)](https://travis-ci.com/fLotte-meets-HWR-DB/apollo-server)
 
 ## Assumptions
 Userserver and postgres are running e.g. with Julius' Docker Compose.
