@@ -36,6 +36,7 @@ import workshopResolvers from './resolvers/workshopResolvers';
 import { ActionLog } from './model/ActionLog';
 import actionLogResolvers from './resolvers/actionLogResolvers';
 import { ActionLogAPI } from './datasources/db/actionLogAPI';
+import bodyParser from 'body-parser';
 const cors = require('cors');
 require('dotenv').config();
 
@@ -71,7 +72,9 @@ const connOptions: ConnectionOptions = {
  * @param next
  */
 async function authenticate (req: any, res: any, next: any) {
-    if (process.env.NODE_ENV === 'develop') {
+    if (req.body.operationName === 'IntrospectionQuery') {
+        next();
+    } else if (process.env.NODE_ENV === 'develop') {
         req.permissions = requiredPermissions.map((e) => e.name);
         req.userId = await userAPI.getUserId(req.headers.authorization?.replace('Bearer ', ''));
         next();
@@ -132,6 +135,7 @@ const server = new ApolloServer({
 
 const app = express();
 app.use(cors());
+app.use(bodyParser.json());
 app.post('/graphql', authenticate);
 app.get(/\/graphql?&.*query=/, authenticate);
 
