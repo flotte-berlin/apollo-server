@@ -83,11 +83,8 @@ export class LockUtils {
                 })
                 .where('id = :id', { id: id })
                 .execute();
-            return await this.findById(connection, target, alias, id);
-        } else {
-            // lock was set
-            throw new GraphQLError('Entry locked by other user');
         }
+        return await this.findById(connection, target, alias, id);
     }
 
     static async unlockEntity (connection: Connection, target: ObjectType<Lockable>, alias: string, id: number, userId: number): Promise<boolean> {

@@ -78,7 +78,7 @@ export class ContactInformationAPI extends DataSource {
             .select()
             .skip(offset)
             .take(limit)
-            .execute();
+            .getMany();
     }
 
     async personById (id: number) {
