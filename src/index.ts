@@ -36,7 +36,7 @@ import workshopResolvers from './resolvers/workshopResolvers';
 import { ActionLog } from './model/ActionLog';
 import actionLogResolvers from './resolvers/actionLogResolvers';
 import { ActionLogAPI } from './datasources/db/actionLogAPI';
-
+const cors = require('express-cors');
 require('dotenv').config();
 
 const connOptions: ConnectionOptions = {
@@ -135,7 +135,11 @@ const app = express();
 app.post('/graphql', authenticate);
 app.get(/\/graphql?&.*query=/, authenticate);
 server.applyMiddleware({ app });
-
+app.use(cors({
+    allowedOrigins: [
+        '*'
+    ]
+}));
 app.listen(4000, async () => {
     await userAPI.createDefinedPermissions().catch(
         err => console.log(err));
