@@ -1,6 +1,6 @@
 import { Permission } from '../datasources/userserver/permission';
 import { GraphQLError } from 'graphql';
-import { isLocked } from '../datasources/db/utils';
+import { isLocked, isLockedByMe } from '../datasources/db/utils';
 import { Participant } from '../model/Participant';
 
 export default {
@@ -56,6 +56,7 @@ export default {
                 return new GraphQLError('Insufficient Permissions');
             }
         },
+        isLockedByMe: (parent: any, __: any, { dataSources, req }: { dataSources: any; req: any }) => isLockedByMe(parent, { dataSources, req }),
         isLocked: (parent: any, __: any, { dataSources, req }: { dataSources: any; req: any }) => isLocked(parent, { dataSources, req })
     },
     WorkshopType: {

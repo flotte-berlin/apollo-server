@@ -48,6 +48,7 @@ type CargoBike {
     engagement(offset: Int!, limit: Int!): [Engagement]
     timeFrames: [TimeFrame]
     isLocked: Boolean!
+    isLockedByMe: Boolean!
     "null if not locked by other user"
     lockedBy: ID
     lockedUntil: Date
@@ -327,6 +328,7 @@ type Participant {
     engagement: [Engagement]
     workshops: [Workshop]
     isLocked: Boolean!
+    isLockedByMe: Boolean!
     "null if not locked by other user"
     lockedBy: ID
     lockedUntil: Date
@@ -376,6 +378,7 @@ type Workshop {
     trainer2: Participant
     participants: [Participant]
     isLocked: Boolean!
+    isLockedByMe: Boolean!
     "null if not locked by other user"
     lockedBy: ID
     lockedUntil: Date
@@ -405,6 +408,7 @@ type WorkshopType {
     id: ID!
     name: String!
     isLocked: Boolean!
+    isLockedByMe: Boolean!
     "null if not locked by other user"
     lockedBy: ID
     lockedUntil: Date
@@ -424,6 +428,7 @@ type EngagementType {
     name: String!
     description: String!
     isLocked: Boolean!
+    isLockedByMe: Boolean!
     "null if not locked by other user"
     lockedBy: ID
     lockedUntil: Date
@@ -449,6 +454,7 @@ type Engagement {
     participant: Participant!
     cargoBike: CargoBike!
     isLocked: Boolean!
+    isLockedByMe: Boolean!
     "null if not locked by other user"
     lockedBy: ID
     lockedUntil: Date
@@ -504,6 +510,7 @@ type Equipment {
     description: String
     cargoBike: CargoBike
     isLocked: Boolean!
+    isLockedByMe: Boolean!
     "null if not locked by other user"
     lockedBy: ID
     lockedUntil: Date
@@ -531,6 +538,7 @@ type EquipmentType {
     name: String!
     description: String!
     isLocked: Boolean!
+    isLockedByMe: Boolean!
     "null if not locked by other user"
     lockedBy: ID
     lockedUntil: Date
@@ -563,6 +571,7 @@ type BikeEvent {
     documents: [String]!    
     remark: String
     isLocked: Boolean!
+    isLockedByMe: Boolean!
     "null if not locked by other user"
     lockedBy: ID
     lockedUntil: Date
@@ -601,6 +610,7 @@ input BikeEventUpdateInput {
 type BikeEventType {
     id: ID!
     name: String!
+    isLockedByMe: Boolean!
     isLocked: Boolean!
     lockedUntil: Date
 }
@@ -619,6 +629,7 @@ type Provider {
     organisation: Organisation
     cargoBikes: [CargoBike]
     isLocked: Boolean!
+    isLockedByMe: Boolean!
     "null if not locked by other user"
     lockedBy: ID
     lockedUntil: Date
@@ -652,6 +663,7 @@ type Person {
     firstName: String!
     contactInformation: [ContactInformation]
     isLocked: Boolean!
+    isLockedByMe: Boolean!
     "null if not locked by other user"
     lockedBy: ID
     lockedUntil: Date
@@ -678,6 +690,7 @@ type ContactInformation {
     email2: String
     note: String
     isLocked: Boolean!
+    isLockedByMe: Boolean!
     "null if not locked by other user"
     lockedBy: ID
     lockedUntil: Date
@@ -717,6 +730,7 @@ type Organisation {
     contactInformation: ContactInformation
     otherData: String
     isLocked: Boolean!
+    isLockedByMe: Boolean!
     "null if not locked by other user"
     lockedBy: ID
     lockedUntil: Date
@@ -760,6 +774,7 @@ type LendingStation {
     numCargoBikes: Int!
     organisation: Organisation
     isLocked: Boolean!
+    isLockedByMe: Boolean!
     "null if not locked by other user"
     lockedBy: ID
     lockedUntil: Date
@@ -830,6 +845,7 @@ type TimeFrame {
     lendingStation: LendingStation!
     cargoBike: CargoBike!
     isLocked: Boolean!
+    isLockedByMe: Boolean!
     "null if not locked by other user"
     lockedBy: ID
     lockedUntil: Date

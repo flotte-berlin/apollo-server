@@ -1,6 +1,6 @@
 import { GraphQLError } from 'graphql';
 import { Permission } from '../datasources/userserver/permission';
-import { isLocked } from '../datasources/db/utils';
+import { isLocked, isLockedByMe } from '../datasources/db/utils';
 
 export default {
     Query: {
@@ -69,6 +69,7 @@ export default {
                 return new GraphQLError('Insufficient Permissions');
             }
         },
+        isLockedByMe: (parent: any, __: any, { dataSources, req }: { dataSources: any; req: any }) => isLockedByMe(parent, { dataSources, req }),
         isLocked: (parent: any, __: any, { dataSources, req }: { dataSources: any; req: any }) => isLocked(parent, { dataSources, req })
     },
     Engagement: {
@@ -100,6 +101,7 @@ export default {
             const str = (parent.dateRange as string).split(',')[1].replace(')', '');
             return (str.length > 0) ? str : null;
         },
+        isLockedByMe: (parent: any, __: any, { dataSources, req }: { dataSources: any; req: any }) => isLockedByMe(parent, { dataSources, req }),
         isLocked: (parent: any, __: any, { dataSources, req }: { dataSources: any; req: any }) => isLocked(parent, { dataSources, req })
     },
     Mutation: {

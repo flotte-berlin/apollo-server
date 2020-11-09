@@ -25,9 +25,11 @@ export function genDateRange (struct: any) {
  * @param req user request
  */
 export function isLocked (parent: any, { dataSources, req }: { dataSources: any; req: any }) {
-    return dataSources.userAPI.getUserId(LockUtils.getToken(req)).then((value: number) => {
-        return value !== parent.lockedBy && new Date() <= new Date(parent.lockedUntil);
-    });
+    return req.userId !== parent.lockedBy && new Date() <= new Date(parent.lockedUntil);
+}
+
+export function isLockedByMe (parent: any, { dataSources, req }: { dataSources: any; req: any }) {
+    return req.userId === parent.lockedBy && new Date() <= new Date(parent.lockedUntil);
 }
 
 export async function deleteEntity (connection: Connection, target: ObjectType<Lockable>, alias: string, id: number, userId: number): Promise<Boolean> {

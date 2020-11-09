@@ -1,6 +1,6 @@
 import { Permission } from '../datasources/userserver/permission';
 import { GraphQLError } from 'graphql';
-import { isLocked } from '../datasources/db/utils';
+import { isLocked, isLockedByMe } from '../datasources/db/utils';
 
 export default {
     Query: {
@@ -119,6 +119,7 @@ export default {
             }
         },
         isLocked: (parent: any, __: any, { dataSources, req }: { dataSources: any; req: any }) => isLocked(parent, { dataSources, req }),
+        isLockedByMe: (parent: any, __: any, { dataSources, req }: { dataSources: any; req: any }) => isLockedByMe(parent, { dataSources, req }),
         timeFrames (parent: any, __: any, { dataSources, req }: { dataSources: any, req: any }) {
             if (req.permissions.includes(Permission.ReadTimeFrame)) {
                 return dataSources.lendingStationAPI.timeFramesByCargoBikeId(parent.id);
@@ -150,6 +151,7 @@ export default {
                 return new GraphQLError('Insufficient Permissions');
             }
         },
+        isLockedByMe: (parent: any, __: any, { dataSources, req }: { dataSources: any; req: any }) => isLockedByMe(parent, { dataSources, req }),
         isLocked: (parent: any, __: any, { dataSources, req }: { dataSources: any; req: any }) => isLocked(parent, { dataSources, req })
     },
     BikeEvent: {
@@ -181,9 +183,11 @@ export default {
                 return new GraphQLError('Insufficient Permissions');
             }
         },
+        isLockedByMe: (parent: any, __: any, { dataSources, req }: { dataSources: any; req: any }) => isLockedByMe(parent, { dataSources, req }),
         isLocked: (parent: any, __: any, { dataSources, req }: { dataSources: any; req: any }) => isLocked(parent, { dataSources, req })
     },
     BikeEventType: {
+        isLockedByMe: (parent: any, __: any, { dataSources, req }: { dataSources: any; req: any }) => isLockedByMe(parent, { dataSources, req }),
         isLocked: (parent: any, __: any, { dataSources, req }: { dataSources: any; req: any }) => isLocked(parent, { dataSources, req })
     },
     Mutation: {
