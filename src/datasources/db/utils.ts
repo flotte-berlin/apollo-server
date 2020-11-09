@@ -56,7 +56,9 @@ export class LockUtils {
             .createQueryBuilder(alias)
             .select()
             .where(alias + '.id = :id', { id: id })
-            .getOne();
+            .getOne().catch(() => {
+                throw new UserInputError('ID not found');
+            });
     }
 
     static async lockEntity (connection: Connection, target: ObjectType<Lockable>, alias: string, id: number, userId: number): Promise<Lockable> {
@@ -87,7 +89,7 @@ export class LockUtils {
         return await this.findById(connection, target, alias, id);
     }
 
-    static async unlockEntity (connection: Connection, target: ObjectType<Lockable>, alias: string, id: number, userId: number): Promise<boolean> {
+    static async unlockEntity_old (connection: Connection, target: ObjectType<Lockable>, alias: string, id: number, userId: number): Promise<boolean> {
         const lock = await connection.getRepository(target)
             .createQueryBuilder(alias)
             .select([
@@ -119,6 +121,20 @@ export class LockUtils {
             // entity is locked by other user
             return false;
         }
+    }
+
+    static async unlockEntity (connection: Connection, target: ObjectType<Lockable>, alias: string, id: number, userId: number): Promise<Lockable> {
+        await connection.getRepository(target)
+            .createQueryBuilder(alias)
+            .update()
+            .set({
+                lockedUntil: null,
+                lockedBy: null
+            })
+            .where('id = :id', { id: id })
+            .andWhere('lockedBy = :uid OR lockedUntil < CURRENT_TIMESTAMP', { uid: userId })
+            .execute();
+        return await this.findById(connection, target, alias, id);
     }
 
     /**

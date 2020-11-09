@@ -955,7 +955,7 @@ type Mutation {
     "lock cargoBike returns bike if bike is not locked and locks bike or Error if bike cannot be locked"
     lockCargoBike(id: ID!): CargoBike!
     "unlock cargoBike, returns true if Bike does not exist"
-    unlockCargoBike(id: ID!): Boolean!
+    unlockCargoBike(id: ID!): CargoBike!
     "updates cargoBike of given ID with supplied fields and returns updated cargoBike"
     updateCargoBike(cargoBike: CargoBikeUpdateInput!): CargoBike!
     "true on success"
@@ -968,13 +968,13 @@ type Mutation {
     "lock equipment returns true if bike is not locked or if it doesnt exist"
     lockEquipment(id: ID!): Equipment!
     "unlock Equipment, returns true if Bike does not exist"
-    unlockEquipment(id: ID!): Boolean!
+    unlockEquipment(id: ID!): Equipment!
     "update Equipment, returns updated equipment. CargoBike will be null, if cargoBikeId is not set. Pass null for cargoBikeIs to delete the relation"
     updateEquipment(equipment: EquipmentUpdateInput!): Equipment!
     deleteEquipment(id: ID!): Boolean!
     createEquipmentType(equipmentType: EquipmentTypeCreateInput!): EquipmentType!
     lockEquipmentType(id: ID!): EquipmentType!
-    unlockEquipmentType(id: ID!): Boolean!
+    unlockEquipmentType(id: ID!): EquipmentType!
     updateEquipmentType(equipmentType: EquipmentTypeUpdateInput!): EquipmentType!
     deleteEquipmentType(id: ID!): Boolean!
     """
@@ -982,14 +982,14 @@ type Mutation {
     creates new lendingStation and returns lendingStation with new ID
     """
     createLendingStation(lendingStation: LendingStationCreateInput): LendingStation!
-    lockLendingStation(id: ID!): LendingStation
-    unlockLendingStation(id: ID!): Boolean!
+    lockLendingStation(id: ID!): LendingStation!
+    unlockLendingStation(id: ID!): LendingStation!
     "updates lendingStation of given ID with supplied fields and returns updated lendingStation"
     updateLendingStation(lendingStation: LendingStationUpdateInput!): LendingStation!
     deleteLendingStation(id: ID!): Boolean!
     createTimeFrame(timeFrame: TimeFrameCreateInput!): TimeFrame!
     lockTimeFrame(id: ID!): TimeFrame!
-    unlockTimeFrame(id: ID!): Boolean!
+    unlockTimeFrame(id: ID!): TimeFrame!
     updateTimeFrame(timeFrame: TimeFrameUpdateInput!): TimeFrame!
     deleteTimeFrame(id: ID!): Boolean!
     """
@@ -997,13 +997,13 @@ type Mutation {
     """
     createBikeEventType(name: String!): BikeEventType!
     lockBikeEventType(id: ID!): BikeEventType!
-    unlockBikeEventType(id:ID!): Boolean!
+    unlockBikeEventType(id:ID!): BikeEventType!
     updateBikeEventType(bikeEventType: BikeEventTypeUpdateInput!): BikeEventType!
     deleteBikeEventType(id: ID!): Boolean!
     "creates new BikeEvent"
     createBikeEvent(bikeEvent: BikeEventCreateInput!): BikeEvent!
-    lockBikeEvent(id: ID!): BikeEvent
-    unlockBikeEvent(id: ID!): Boolean!
+    lockBikeEvent(id: ID!): BikeEvent!
+    unlockBikeEvent(id: ID!): BikeEvent!
     updateBikeEvent(bikeEvent: BikeEventUpdateInput!): BikeEvent
     deleteBikeEvent(id: ID!): Boolean!
     """
