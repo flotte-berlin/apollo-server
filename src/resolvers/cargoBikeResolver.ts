@@ -118,8 +118,8 @@ export default {
                 return new GraphQLError('Insufficient Permissions');
             }
         },
-        isLocked: (parent: any, __: any, { dataSources, req }: { dataSources: any; req: any }) => isLocked(parent, { dataSources, req }),
-        isLockedByMe: (parent: any, __: any, { dataSources, req }: { dataSources: any; req: any }) => isLockedByMe(parent, { dataSources, req }),
+        isLockedByMe: (parent: any, __: any, { req }: { req: any }) => isLockedByMe(parent, { req }),
+        isLocked: (parent: any, __: any, { req }: { req: any }) => isLocked(parent, { req }),
         timeFrames (parent: any, __: any, { dataSources, req }: { dataSources: any, req: any }) {
             if (req.permissions.includes(Permission.ReadTimeFrame)) {
                 return dataSources.lendingStationAPI.timeFramesByCargoBikeId(parent.id);
@@ -151,8 +151,8 @@ export default {
                 return new GraphQLError('Insufficient Permissions');
             }
         },
-        isLockedByMe: (parent: any, __: any, { dataSources, req }: { dataSources: any; req: any }) => isLockedByMe(parent, { dataSources, req }),
-        isLocked: (parent: any, __: any, { dataSources, req }: { dataSources: any; req: any }) => isLocked(parent, { dataSources, req })
+        isLockedByMe: (parent: any, __: any, { req }: { req: any }) => isLockedByMe(parent, { req }),
+        isLocked: (parent: any, __: any, { req }: { req: any }) => isLocked(parent, { req })
     },
     BikeEvent: {
         cargoBike (parent: any, __: any, { dataSources, req }: { dataSources: any, req: any }) {
@@ -183,12 +183,12 @@ export default {
                 return new GraphQLError('Insufficient Permissions');
             }
         },
-        isLockedByMe: (parent: any, __: any, { dataSources, req }: { dataSources: any; req: any }) => isLockedByMe(parent, { dataSources, req }),
-        isLocked: (parent: any, __: any, { dataSources, req }: { dataSources: any; req: any }) => isLocked(parent, { dataSources, req })
+        isLockedByMe: (parent: any, __: any, { req }: { req: any }) => isLockedByMe(parent, { req }),
+        isLocked: (parent: any, __: any, { req }: { req: any }) => isLocked(parent, { req })
     },
     BikeEventType: {
-        isLockedByMe: (parent: any, __: any, { dataSources, req }: { dataSources: any; req: any }) => isLockedByMe(parent, { dataSources, req }),
-        isLocked: (parent: any, __: any, { dataSources, req }: { dataSources: any; req: any }) => isLocked(parent, { dataSources, req })
+        isLockedByMe: (parent: any, __: any, { req }: { req: any }) => isLockedByMe(parent, { req }),
+        isLocked: (parent: any, __: any, { req }: { req: any }) => isLocked(parent, { req })
     },
     Mutation: {
         createCargoBike: (_: any, { cargoBike }: { cargoBike: any }, { dataSources, req }: { dataSources: any, req: any }) => {

@@ -77,8 +77,8 @@ export default {
                 return new GraphQLError('Insufficient Permissions');
             }
         },
-        isLockedByMe: (parent: any, __: any, { dataSources, req }: { dataSources: any; req: any }) => isLockedByMe(parent, { dataSources, req }),
-        isLocked: (parent: any, __: any, { dataSources, req }: { dataSources: any; req: any }) => isLocked(parent, { dataSources, req })
+        isLockedByMe: (parent: any, __: any, { req }: { req: any }) => isLockedByMe(parent, { req }),
+        isLocked: (parent: any, __: any, { req }: { req: any }) => isLocked(parent, { req })
     },
     LoanPeriod: {
         loanTimes  (parent: any) {
@@ -107,8 +107,8 @@ export default {
                 return new GraphQLError('Insufficient Permissions');
             }
         },
-        isLockedByMe: (parent: any, __: any, { dataSources, req }: { dataSources: any; req: any }) => isLockedByMe(parent, { dataSources, req }),
-        isLocked: (parent: any, __: any, { dataSources, req }: { dataSources: any; req: any }) => isLocked(parent, { dataSources, req })
+        isLockedByMe: (parent: any, __: any, { req }: { req: any }) => isLockedByMe(parent, { req }),
+        isLocked: (parent: any, __: any, { req }: { req: any }) => isLocked(parent, { req })
     },
     Mutation: {
         createLendingStation: (_: any, { lendingStation }:{ lendingStation: LendingStation }, { dataSources, req }:{dataSources: any, req: any }) => {
