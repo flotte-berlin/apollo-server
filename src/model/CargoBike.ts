@@ -197,6 +197,7 @@ export class CargoBike implements Lockable {
     @ManyToOne(type => Provider, provider => provider.cargoBikeIds, {
         nullable: true
     })
+    @JoinColumn({ name: 'providerId' })
     providerId: number;
 
     @OneToMany(type => BikeEvent, bikeEvent => bikeEvent.cargoBikeId, {

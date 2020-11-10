@@ -117,13 +117,13 @@ input CargoBikeUpdateInput {
     dimensionsAndLoad: DimensionsAndLoadUpdateInput
     """
     Refers to equipment that is not unique. See kommentierte info tabelle -> Fragen -> Frage 2
-    If set, ols realtions will be over written. Set [] to delete all
+    If set, ols relations will be over written. Set [] to delete all
     """
     equipmentTypeIds: [ID]
     "Sticker State"
     stickerBikeNameState: StickerBikeNameState
     note: String
-    provider: String
+    providerId: ID
     insuranceData: InsuranceDataUpdateInput
     taxes: TaxesUpdateInput
     "will keep Bike locked if set to true, default = false"
