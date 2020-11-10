@@ -1,7 +1,7 @@
 /* eslint no-unused-vars: "off" */
 import { Column } from 'typeorm';
 
-export enum OrganizationArea {
+export enum OrganisationArea {
     IB = 'IB',
     ZB = 'ZB'
 }
@@ -11,8 +11,8 @@ export class Taxes {
 
     @Column({
         type: 'enum',
-        enum: OrganizationArea,
+        enum: OrganisationArea,
         nullable: true
     })
-    organizationArea: OrganizationArea;
+    organisationArea: OrganisationArea;
 }

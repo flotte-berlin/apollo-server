@@ -32,12 +32,12 @@ export enum Group {
 }
 
 export enum StickerBikeNameState {
-    OK,
-    IMPROVE,
-    PRODUCED,
-    NONEED,
-    MISSING,
-    UNKNOWN
+    OK = 'OK',
+    IMPROVE = 'IMPROVE',
+    PRODUCED = 'PRODUCED',
+    NONEED = 'NONEED',
+    MISSING = 'MISSING',
+    UNKNOWN = 'UNKNOWN'
 }
 
 export interface Lockable {

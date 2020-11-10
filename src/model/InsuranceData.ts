@@ -43,5 +43,5 @@ export class InsuranceData {
     @Column({
         nullable: true
     })
-    note: string;
+    notes: string;
 }

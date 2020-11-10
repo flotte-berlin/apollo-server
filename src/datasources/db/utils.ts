@@ -173,7 +173,7 @@ export class ActionLogger {
         }
         const ret :string[] = [];
         Object.keys(updates).forEach(value => {
-            if (typeof updates[value] === 'object' && !Array.isArray(updates[value])) {
+            if (typeof updates[value] === 'object' && !Array.isArray(updates[value]) && updates[value]) {
                 Object.keys(updates[value]).forEach(subValue => {
                     ret.push(alias + '."' + value + subValue[0].toUpperCase() + subValue.substr(1).toLowerCase() + '"');
                 });
