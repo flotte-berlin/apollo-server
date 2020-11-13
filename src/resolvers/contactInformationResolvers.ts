@@ -1,3 +1,22 @@
+/*
+Copyright (C) 2020  Leon Löchner
+
+This file is part of fLotte-API-Server.
+
+    fLotte-API-Server is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    fLotte-API-Server is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with fLotte-API-Server.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
 import { GraphQLError } from 'graphql';
 import { Permission } from '../datasources/userserver/permission';
 import { Person } from '../model/Person';
@@ -42,8 +61,8 @@ export default {
                 return new GraphQLError('Insufficient Permissions');
             }
         },
-        isLockedByMe: (parent: any, __: any, { dataSources, req }: { dataSources: any; req: any }) => isLockedByMe(parent, { dataSources, req }),
-        isLocked: (parent: any, __: any, { dataSources, req }: { dataSources: any; req: any }) => isLocked(parent, { dataSources, req })
+        isLockedByMe: (parent: any, __: any, { req }: { req: any }) => isLockedByMe(parent, { req }),
+        isLocked: (parent: any, __: any, { req }: { req: any }) => isLocked(parent, { req })
     },
     ContactInformation: {
         person: (parent: any, __: any, { dataSources, req }: { dataSources: any, req: any }) => {
@@ -53,8 +72,8 @@ export default {
                 return new GraphQLError('Insufficient Permissions');
             }
         },
-        isLockedByMe: (parent: any, __: any, { dataSources, req }: { dataSources: any; req: any }) => isLockedByMe(parent, { dataSources, req }),
-        isLocked: (parent: any, __: any, { dataSources, req }: { dataSources: any; req: any }) => isLocked(parent, { dataSources, req })
+        isLockedByMe: (parent: any, __: any, { req }: { req: any }) => isLockedByMe(parent, { req }),
+        isLocked: (parent: any, __: any, { req }: { req: any }) => isLocked(parent, { req })
     },
     Mutation: {
         createPerson: (_: any, { person }: { person: any }, { dataSources, req }: { dataSources: any, req: any }) => {

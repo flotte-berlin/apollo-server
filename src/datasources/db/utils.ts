@@ -1,6 +1,24 @@
+/*
+Copyright (C) 2020  Leon Löchner
+
+This file is part of fLotte-API-Server.
+
+    fLotte-API-Server is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    fLotte-API-Server is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with fLotte-API-Server.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
 import { Connection, EntityManager, ObjectType } from 'typeorm';
 import { Lockable } from '../../model/CargoBike';
-import { GraphQLError } from 'graphql';
 import { ActionLog, Actions } from '../../model/ActionLog';
 import { UserInputError } from 'apollo-server-express';
 
@@ -24,11 +42,11 @@ export function genDateRange (struct: any) {
  * @param dataSources
  * @param req user request
  */
-export function isLocked (parent: any, { dataSources, req }: { dataSources: any; req: any }) {
+export function isLocked (parent: any, { req }: { req: any }) {
     return req.userId !== parent.lockedBy && new Date() <= new Date(parent.lockedUntil);
 }
 
-export function isLockedByMe (parent: any, { dataSources, req }: { dataSources: any; req: any }) {
+export function isLockedByMe (parent: any, { req }: { req: any }) {
     return req.userId === parent.lockedBy && new Date() <= new Date(parent.lockedUntil);
 }
 
@@ -47,10 +65,6 @@ export async function deleteEntity (connection: Connection, target: ObjectType<L
 }
 
 export class LockUtils {
-    static getToken (req: any) : string {
-        return req.headers.authorization?.replace('Bearer ', '');
-    }
-
     static async findById (connection: Connection, target: ObjectType<Lockable>, alias: string, id: number): Promise<Lockable> {
         return await connection.getRepository(target)
             .createQueryBuilder(alias)
@@ -87,40 +101,6 @@ export class LockUtils {
                 .execute();
         }
         return await this.findById(connection, target, alias, id);
-    }
-
-    static async unlockEntity_old (connection: Connection, target: ObjectType<Lockable>, alias: string, id: number, userId: number): Promise<boolean> {
-        const lock = await connection.getRepository(target)
-            .createQueryBuilder(alias)
-            .select([
-                alias + '.lockedUntil',
-                alias + '.lockedBy'
-            ])
-            .where('id = :id', {
-                id: id
-            })
-            .andWhere(alias + '.lockedUntil > CURRENT_TIMESTAMP')
-            .getOne();
-        if (!lock?.lockedUntil) {
-            // no lock
-            return true;
-            // eslint-disable-next-line eqeqeq
-        } else if (lock?.lockedBy == userId) {
-            // user can unlock
-            await connection.getRepository(target)
-                .createQueryBuilder(alias)
-                .update()
-                .set({
-                    lockedUntil: null,
-                    lockedBy: null
-                })
-                .where('id = :id', { id: id })
-                .execute();
-            return true;
-        } else {
-            // entity is locked by other user
-            return false;
-        }
     }
 
     static async unlockEntity (connection: Connection, target: ObjectType<Lockable>, alias: string, id: number, userId: number): Promise<Lockable> {
@@ -173,7 +153,8 @@ export class ActionLogger {
         }
         const ret :string[] = [];
         Object.keys(updates).forEach(value => {
-            if (typeof updates[value] === 'object' && !Array.isArray(updates[value]) && updates[value]) {
+            // sometimes updates[value] is an array, e.g. timePeriods that are saved as a simple array in postgres
+            if (updates[value] && typeof updates[value] === 'object' && !Array.isArray(updates[value])) {
                 Object.keys(updates[value]).forEach(subValue => {
                     ret.push(alias + '."' + value + subValue[0].toUpperCase() + subValue.substr(1).toLowerCase() + '"');
                 });
