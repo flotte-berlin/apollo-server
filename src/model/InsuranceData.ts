@@ -57,7 +57,7 @@ export class InsuranceData {
         type: 'money',
         nullable: true
     })
-    projectAllowance: number;
+    projectAllowance: string;
 
     @Column({
         nullable: true
