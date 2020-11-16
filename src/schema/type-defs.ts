@@ -215,6 +215,7 @@ input InsuranceDataUpdateInput {
     maintenanceAgreement: String
     hasFixedRate: Boolean
     fixedRate: Float
+    """
     Projektzuschuss:
     must be of format [+|-][$][0-9]*[.[0-9]*]
     commas are ignored, non numeric values except , and . lead to errors

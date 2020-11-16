@@ -27,4 +27,3 @@ jobs:
     - run: npm ci
     - run: npm install -g gulp
     - run: gulp
-    - run: timeout 1s npm start
