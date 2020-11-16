@@ -163,8 +163,15 @@ type InsuranceData {
     maintenanceAgreement: String
     hasFixedRate: Boolean!
     fixedRate: Float
-    "Projektzuschuss"
-    projectAllowance: Float
+    """
+    Projektzuschuss:
+    is of american format [-]$[0-9]+.[0-9][0-9]
+    commas every three digits and . for decimals with 2 digits after the .
+    There can be a leading  -.
+    There is a currency signe at the first position or second position if - is set.
+    The kind of currency depends on the database.
+    """
+    projectAllowance: String
     notes: String
 }
 
@@ -182,8 +189,15 @@ input InsuranceDataCreateInput {
     maintenanceAgreement: String
     hasFixedRate: Boolean!
     fixedRate: Float
-    "Projektzuschuss"
-    projectAllowance: Float
+    """
+    Projektzuschuss:
+    must be of format [+|-][$][0-9]*[.[0-9]*]
+    commas are ignored, non numeric values except , and . lead to errors
+    There can be a leading + or -.
+    You can pass a currency signe at the first position or second position of + or - is set.
+    The kind of currency depends on the database.
+    """
+    projectAllowance: String
     notes: String
 }
 
@@ -201,8 +215,14 @@ input InsuranceDataUpdateInput {
     maintenanceAgreement: String
     hasFixedRate: Boolean
     fixedRate: Float
-    "Projektzuschuss"
-    projectAllowance: Float
+    Projektzuschuss:
+    must be of format [+|-][$][0-9]*[.[0-9]*]
+    commas are ignored, non numeric values except , and . lead to errors
+    There can be a leading + or -.
+    You can pass a currency signe at the first position or second position of + or - is set.
+    The kind of currency depends on the database.
+    """
+    projectAllowance: String
     notes: String
 }
 
