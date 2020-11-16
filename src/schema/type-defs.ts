@@ -25,6 +25,14 @@ export default gql`
 scalar Date
 "only time hh-mm-ss"
 scalar Time
+"""
+is of american format [-]$[0-9]+.[0-9][0-9]
+commas every three digits and . for decimals with 2 digits after the .
+There can be a leading  -.
+There is a currency signe at the first position or second position if - is set.
+The kind of currency depends on the database.
+"""
+scalar Money
 
 "The CargoBike type is central to the graph. You could call it the root."
 type CargoBike {
@@ -171,7 +179,7 @@ type InsuranceData {
     There is a currency signe at the first position or second position if - is set.
     The kind of currency depends on the database.
     """
-    projectAllowance: String
+    projectAllowance: Money
     notes: String
 }
 
@@ -197,7 +205,7 @@ input InsuranceDataCreateInput {
     You can pass a currency signe at the first position or second position of + or - is set.
     The kind of currency depends on the database.
     """
-    projectAllowance: String
+    projectAllowance: Money
     notes: String
 }
 
@@ -215,6 +223,7 @@ input InsuranceDataUpdateInput {
     maintenanceAgreement: String
     hasFixedRate: Boolean
     fixedRate: Float
+    """
     Projektzuschuss:
     must be of format [+|-][$][0-9]*[.[0-9]*]
     commas are ignored, non numeric values except , and . lead to errors
@@ -222,7 +231,7 @@ input InsuranceDataUpdateInput {
     You can pass a currency signe at the first position or second position of + or - is set.
     The kind of currency depends on the database.
     """
-    projectAllowance: String
+    projectAllowance: Money
     notes: String
 }
 
