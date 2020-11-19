@@ -23,7 +23,7 @@ import { isLocked, isLockedByMe } from '../datasources/db/utils';
 
 export default {
     Query: {
-        providers: (_: any, { offset, limit }: { offset: number, limit: number }, { dataSources, req }: { dataSources: any, req: any }) => {
+        providers: (_: any, { offset, limit }: { offset?: number, limit?: number }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.ReadProvider)) {
                 return dataSources.providerAPI.provider(offset, limit);
             } else {
@@ -37,7 +37,7 @@ export default {
                 return new GraphQLError('Insufficient Permissions');
             }
         },
-        organisations: (_: any, { offset, limit }: { offset: number, limit: number }, { dataSources, req }: { dataSources: any, req: any }) => {
+        organisations: (_: any, { offset, limit }: { offset?: number, limit?: number }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.ReadOrganisation)) {
                 return dataSources.providerAPI.organisations(offset, limit);
             } else {

@@ -23,7 +23,7 @@ import { ContactInformation } from '../../model/ContactInformation';
 import { Engagement } from '../../model/Engagement';
 import { Participant } from '../../model/Participant';
 import { EngagementType } from '../../model/EngagementType';
-import { ActionLogger, deleteEntity, genDateRange, LockUtils } from './utils';
+import { ActionLogger, deleteEntity, genDateRange, getAllEntity, LockUtils } from './utils';
 import { UserInputError } from 'apollo-server-express';
 import { GraphQLError } from 'graphql';
 
@@ -42,13 +42,8 @@ export class ParticipantAPI extends DataSource {
             .getOne();
     }
 
-    async getParticipants (offset: number, limit: number) {
-        return await this.connection.getRepository(Participant)
-            .createQueryBuilder('participant')
-            .select()
-            .offset(offset)
-            .limit(limit)
-            .getMany();
+    async getParticipants (offset?: number, limit?: number) {
+        return await getAllEntity(this.connection, Participant, 'p', offset, limit);
     }
 
     async participantByEngagementId (id: number) {
@@ -84,17 +79,24 @@ export class ParticipantAPI extends DataSource {
             .getMany();
     }
 
-    async engagementByCargoBikeId (offset: number, limit: number, id: number) {
-        return await this.connection.getRepository(Engagement)
-            .createQueryBuilder('engagement')
-            .select()
-            .where('engagement."cargoBikeId" = :id', {
-                id: id
-            })
-            .skip(offset)
-            .take(limit)
-            .orderBy('engagement."dateRange"', 'DESC')
-            .getMany();
+    async engagementByCargoBikeId (id: number, offset?: number, limit?: number) {
+        if (limit === null || offset === null) {
+            return await this.connection.getRepository(Engagement)
+                .createQueryBuilder('engagement')
+                .select()
+                .where('engagement."cargoBikeId" = :id', { id: id })
+                .orderBy('engagement."dateRange"', 'DESC')
+                .getMany();
+        } else {
+            return await this.connection.getRepository(Engagement)
+                .createQueryBuilder('engagement')
+                .select()
+                .where('engagement."cargoBikeId" = :id', { id: id })
+                .skip(offset)
+                .take(limit)
+                .orderBy('engagement."dateRange"', 'DESC')
+                .getMany();
+        }
     }
 
     async currentEngagementByCargoBikeId (id: number) {
@@ -107,13 +109,8 @@ export class ParticipantAPI extends DataSource {
             .getMany();
     }
 
-    async engagements (offset: number, limit: number) {
-        return await this.connection.getRepository(Engagement)
-            .createQueryBuilder('e')
-            .select()
-            .skip(offset)
-            .take(limit)
-            .getMany();
+    async engagements (offset?: number, limit?: number) {
+        return await getAllEntity(this.connection, Engagement, 'e', offset, limit);
     }
 
     async engagementById (id: number) {
@@ -132,13 +129,8 @@ export class ParticipantAPI extends DataSource {
             .getOne();
     }
 
-    async engagementTypes (offset: number, limit: number) {
-        return await this.connection.getRepository(EngagementType)
-            .createQueryBuilder('et')
-            .select()
-            .skip(offset)
-            .take(limit)
-            .getMany();
+    async engagementTypes (offset?: number, limit?: number) {
+        return await getAllEntity(this.connection, Engagement, 'e', offset, limit);
     }
 
     async engagementTypeByEngagementId (id: number) {
