@@ -58,7 +58,7 @@ export default gql`
         """
         dimensionsAndLoad: DimensionsAndLoad!
         bikeEvents(offset: Int, limit: Int): [BikeEvent]
-        equipment(offset: Int!, limit: Int!): [Equipment]
+        equipment(offset: Int, limit: Int): [Equipment]
         "Refers to equipment that is not unique. See kommentierte info tabelle -> Fragen -> Frage 2"
         equipmentType: [EquipmentType]
         "Sticker State"
@@ -71,7 +71,7 @@ export default gql`
         lendingStation: LendingStation
         taxes: Taxes
         currentEngagements: [Engagement]
-        engagement(offset: Int!, limit: Int!): [Engagement]
+        engagement(offset: Int, limit: Int): [Engagement]
         timeFrames: [TimeFrame]
         isLocked: Boolean!
         isLockedByMe: Boolean!
@@ -670,6 +670,8 @@ export default gql`
         name: String!
         isLockedByMe: Boolean!
         isLocked: Boolean!
+        "null if not locked by other user"
+        lockedBy: ID
         lockedUntil: Date
     }
 
@@ -961,40 +963,40 @@ export default gql`
         "Will (eventually) return all properties of cargo bike"
         cargoBikeById(id:ID!): CargoBike
         "returns cargoBikes ordered by name ascending, relations are not loaded, use cargoBikeById instead"
-        cargoBikes(offset: Int!, limit: Int!): [CargoBike!]!
+        cargoBikes(offset: Int, limit: Int): [CargoBike!]!
         engagementById(id: ID!): Engagement
-        engagements(offset: Int!, limit: Int!): [Engagement!]!
+        engagements(offset: Int, limit: Int): [Engagement!]!
         engagementTypeById(id: ID!): EngagementType
-        engagementTypes(offset: Int!, limit: Int!): [EngagementType!]!
+        engagementTypes(offset: Int, limit: Int): [EngagementType!]!
         "equipment by id, will return null if id not found"
         equipmentById(id: ID!): Equipment
-        equipment(offset: Int!, limit: Int!): [Equipment!]!
+        equipment(offset: Int, limit: Int): [Equipment!]!
         equipmentTypeById(id: ID!): EquipmentType
-        equipmentTypes(offset: Int!, limit: Int!): [EquipmentType!]!
+        equipmentTypes(offset: Int, limit: Int): [EquipmentType!]!
         "return null if id not found"
         providerById(id:ID!): Provider
         "Returns providers with pagination"
-        providers(offset: Int!, limit: Int!): [Provider!]!
+        providers(offset: Int, limit: Int): [Provider!]!
         "participant by id"
         participantById(id:ID!):  Participant
-        participants(offset: Int!, limit: Int!): [Participant!]!
+        participants(offset: Int, limit: Int): [Participant!]!
         workshopTypeById(id: ID!): WorkshopType
-        workshopTypes(offset: Int!, limit: Int!): [WorkshopType!]!
+        workshopTypes(offset: Int, limit: Int): [WorkshopType!]!
         workshopById(id: ID!): Workshop
-        workshops(offset: Int!, limit: Int!): [Workshop!]!
+        workshops(offset: Int, limit: Int): [Workshop!]!
         lendingStationById(id:ID!): LendingStation
-        lendingStations(offset: Int!, limit: Int!): [LendingStation!]!
+        lendingStations(offset: Int, limit: Int): [LendingStation!]!
         organisationById(id: ID!): Organisation
-        organisations(offset: Int!, limit: Int!): [Organisation!]!
+        organisations(offset: Int, limit: Int): [Organisation!]!
         timeFrameById(id: ID!): TimeFrame
-        timeFrames(offset: Int!, limit: Int!): [TimeFrame!]!
+        timeFrames(offset: Int, limit: Int): [TimeFrame!]!
         contactInformationById(id: ID!): ContactInformation
-        contactInformation(offset: Int!, limit: Int!): [ContactInformation!]!
+        contactInformation(offset: Int, limit: Int): [ContactInformation!]!
         personById(id: ID!): Person
-        persons(offset: Int!, limit: Int!): [Person!]
-        bikeEventTypes(offset: Int!, limit: Int!): [BikeEventType!]
+        persons(offset: Int, limit: Int): [Person!]
+        bikeEventTypes(offset: Int, limit: Int): [BikeEventType!]
         bikeEventTypeByd(id: ID!): BikeEventType
-        bikeEvents(offset: Int!, limit: Int!): [BikeEvent!]!
+        bikeEvents(offset: Int, limit: Int): [BikeEvent!]!
         bikeEventById(id:ID!): BikeEvent
         "actionLog for current user"
         actionLog: [ActionLog!]

@@ -21,7 +21,7 @@ import { DataSource } from 'apollo-datasource';
 import { Connection, EntityManager, getConnection } from 'typeorm';
 import { WorkshopType } from '../../model/WorkshopType';
 import { Workshop } from '../../model/Workshop';
-import { ActionLogger, deleteEntity, LockUtils } from './utils';
+import { ActionLogger, deleteEntity, getAllEntity, LockUtils } from './utils';
 import { UserInputError } from 'apollo-server-express';
 import { GraphQLError } from 'graphql';
 import { Participant } from '../../model/Participant';
@@ -126,13 +126,8 @@ export class WorkshopAPI extends DataSource {
             .getOne();
     }
 
-    async workshopTypes (offset: number, limit: number) {
-        return await this.connection.getRepository(WorkshopType)
-            .createQueryBuilder('w')
-            .select()
-            .skip(offset)
-            .take(limit)
-            .getMany();
+    async workshopTypes (offset?: number, limit?: number) {
+        return getAllEntity(this.connection, WorkshopType, 'wt', offset, limit);
     }
 
     async workshopById (id: number) {
@@ -148,13 +143,8 @@ export class WorkshopAPI extends DataSource {
      * @param offset
      * @param limit
      */
-    async workshops (offset: number, limit: number) {
-        return await this.connection.getRepository(Workshop)
-            .createQueryBuilder('w')
-            .select()
-            .skip(offset)
-            .take(limit)
-            .getMany();
+    async workshops (offset?: number, limit?: number) {
+        return await getAllEntity(this.connection, Workshop, 'w', offset, limit);
     }
 
     async trainer1ByWorkshopId (id: number) {

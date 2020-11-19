@@ -24,7 +24,7 @@ import { isLocked, isLockedByMe } from '../datasources/db/utils';
 
 export default {
     Query: {
-        contactInformation: (_: any, { offset, limit }: { offset: number, limit: number }, { dataSources, req }: { dataSources: any, req: any }) => {
+        contactInformation: (_: any, { offset, limit }: { offset?: number, limit?: number }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.ReadPerson)) {
                 return dataSources.contactInformationAPI.contactInformation(offset, limit);
             } else {
@@ -45,7 +45,7 @@ export default {
                 return new GraphQLError('Insufficient Permissions');
             }
         },
-        persons: (_: any, { offset, limit }: { offset: number, limit: number }, { dataSources, req }: { dataSources: any, req: any }) => {
+        persons: (_: any, { offset, limit }: { offset?: number, limit?: number }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.ReadPerson)) {
                 return dataSources.contactInformationAPI.persons(offset, limit);
             } else {

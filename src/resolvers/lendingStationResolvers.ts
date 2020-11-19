@@ -31,7 +31,7 @@ export default {
                 return new GraphQLError('Insufficient Permissions');
             }
         },
-        lendingStations: (_: any, { offset, limit }: { offset: number, limit: number }, { dataSources, req }: { dataSources: any, req: any }) => {
+        lendingStations: (_: any, { offset, limit }: { offset?: number, limit?: number }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.ReadLendingStation)) {
                 return dataSources.lendingStationAPI.lendingStations(offset, limit);
             } else {
@@ -45,7 +45,7 @@ export default {
                 return new GraphQLError('Insufficient Permissions');
             }
         },
-        timeFrames: (_: any, { offset, limit }: { offset: number, limit: number }, { dataSources, req }: { dataSources: any, req: any }) => {
+        timeFrames: (_: any, { offset, limit }: { offset?: number, limit?: number }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.ReadTimeFrame)) {
                 return dataSources.lendingStationAPI.timeFrames(offset, limit);
             } else {
