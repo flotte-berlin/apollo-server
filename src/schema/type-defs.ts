@@ -57,7 +57,9 @@ export default gql`
         Does not refer to an extra table in the database.
         """
         dimensionsAndLoad: DimensionsAndLoad!
+        "If offset or limit is not provided, both values are ignored"
         bikeEvents(offset: Int, limit: Int): [BikeEvent]
+        "If offset or limit is not provided, both values are ignored"
         equipment(offset: Int, limit: Int): [Equipment]
         "Refers to equipment that is not unique. See kommentierte info tabelle -> Fragen -> Frage 2"
         equipmentType: [EquipmentType]
@@ -71,6 +73,7 @@ export default gql`
         lendingStation: LendingStation
         taxes: Taxes
         currentEngagements: [Engagement]
+        "If offset or limit is not provided, both values are ignored"
         engagement(offset: Int, limit: Int): [Engagement]
         timeFrames: [TimeFrame]
         isLocked: Boolean!
@@ -962,40 +965,54 @@ export default gql`
     type Query {
         "Will (eventually) return all properties of cargo bike"
         cargoBikeById(id:ID!): CargoBike
-        "returns cargoBikes ordered by name ascending, relations are not loaded, use cargoBikeById instead"
+        "Returns cargoBikes ordered by name ascending. If offset or limit is not provided, both values are ignored."
         cargoBikes(offset: Int, limit: Int): [CargoBike!]!
         engagementById(id: ID!): Engagement
+        "If offset or limit is not provided, both values are ignored"
         engagements(offset: Int, limit: Int): [Engagement!]!
         engagementTypeById(id: ID!): EngagementType
+        "If offset or limit is not provided, both values are ignored"
         engagementTypes(offset: Int, limit: Int): [EngagementType!]!
         "equipment by id, will return null if id not found"
         equipmentById(id: ID!): Equipment
+        "If offset or limit is not provided, both values are ignored"
         equipment(offset: Int, limit: Int): [Equipment!]!
         equipmentTypeById(id: ID!): EquipmentType
+        "If offset or limit is not provided, both values are ignored"
         equipmentTypes(offset: Int, limit: Int): [EquipmentType!]!
         "return null if id not found"
         providerById(id:ID!): Provider
-        "Returns providers with pagination"
+        "Returns providers with pagination. If offset or limit is not provided, both values are ignored"
         providers(offset: Int, limit: Int): [Provider!]!
         "participant by id"
         participantById(id:ID!):  Participant
+        "If offset or limit is not provided, both values are ignored"
         participants(offset: Int, limit: Int): [Participant!]!
         workshopTypeById(id: ID!): WorkshopType
+        "If offset or limit is not provided, both values are ignored"
         workshopTypes(offset: Int, limit: Int): [WorkshopType!]!
         workshopById(id: ID!): Workshop
+        "If offset or limit is not provided, both values are ignored"
         workshops(offset: Int, limit: Int): [Workshop!]!
         lendingStationById(id:ID!): LendingStation
+        "If offset or limit is not provided, both values are ignored"
         lendingStations(offset: Int, limit: Int): [LendingStation!]!
         organisationById(id: ID!): Organisation
+        "If offset or limit is not provided, both values are ignored"
         organisations(offset: Int, limit: Int): [Organisation!]!
         timeFrameById(id: ID!): TimeFrame
+        "If offset or limit is not provided, both values are ignored"
         timeFrames(offset: Int, limit: Int): [TimeFrame!]!
         contactInformationById(id: ID!): ContactInformation
+        "If offset or limit is not provided, both values are ignored"
         contactInformation(offset: Int, limit: Int): [ContactInformation!]!
         personById(id: ID!): Person
+        "If offset or limit is not provided, both values are ignored"
         persons(offset: Int, limit: Int): [Person!]
+        "If offset or limit is not provided, both values are ignored"
         bikeEventTypes(offset: Int, limit: Int): [BikeEventType!]
         bikeEventTypeByd(id: ID!): BikeEventType
+        "If offset or limit is not provided, both values are ignored"
         bikeEvents(offset: Int, limit: Int): [BikeEvent!]!
         bikeEventById(id:ID!): BikeEvent
         "actionLog for current user"
