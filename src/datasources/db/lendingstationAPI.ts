@@ -24,7 +24,7 @@ import { Connection, EntityManager, getConnection } from 'typeorm';
 import { CargoBike } from '../../model/CargoBike';
 import { LendingStation } from '../../model/LendingStation';
 import { TimeFrame } from '../../model/TimeFrame';
-import { ActionLogger, deleteEntity, genDateRange, LockUtils } from './utils';
+import { ActionLogger, deleteEntity, genDateRange, getAllEntity, LockUtils } from './utils';
 
 export class LendingStationAPI extends DataSource {
     connection : Connection
@@ -44,14 +44,8 @@ export class LendingStationAPI extends DataSource {
     /**
      * get all lendingStations
      */
-    async lendingStations (offset: number, limit: number) {
-        return await this.connection.getRepository(LendingStation)
-            .createQueryBuilder('lendingStation')
-            .select()
-            .offset(offset)
-            .limit(limit)
-            .orderBy('name', 'ASC')
-            .getMany() || new GraphQLError('Internal Server Error: could not query data from table lendingStation');
+    async lendingStations (offset?: number, limit?: number) {
+        return await getAllEntity(this.connection, LendingStation, 'ls', offset, limit);
     }
 
     /**
@@ -79,13 +73,8 @@ export class LendingStationAPI extends DataSource {
             .loadOne();
     }
 
-    async timeFrames (offset: number, limit: number) {
-        return await this.connection.getRepository(TimeFrame)
-            .createQueryBuilder('timeframe')
-            .select()
-            .offset(offset)
-            .limit(limit)
-            .getMany() || [];
+    async timeFrames (offset?: number, limit?: number) {
+        return await getAllEntity(this.connection, TimeFrame, 'tf', offset, limit);
     }
 
     async timeFramesByCargoBikeId (id: number) {

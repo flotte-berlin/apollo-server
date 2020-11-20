@@ -26,7 +26,7 @@ import { Equipment } from '../../model/Equipment';
 import { Engagement } from '../../model/Engagement';
 import { Provider } from '../../model/Provider';
 import { TimeFrame } from '../../model/TimeFrame';
-import { ActionLogger, deleteEntity, LockUtils } from './utils';
+import { ActionLogger, deleteEntity, getAllEntity, LockUtils } from './utils';
 import { EquipmentType } from '../../model/EquipmentType';
 import { BikeEventType } from '../../model/BikeEventType';
 import { UserInputError } from 'apollo-server-express';
@@ -42,14 +42,8 @@ export class CargoBikeAPI extends DataSource {
         this.connection = getConnection();
     }
 
-    async getCargoBikes (offset: number, limit: number) {
-        return await this.connection.createQueryBuilder()
-            .select('cargoBike')
-            .from(CargoBike, 'cargoBike')
-            .orderBy('name', 'ASC')
-            .offset(offset)
-            .limit(limit)
-            .getMany();
+    async getCargoBikes (offset?: number, limit?: number) {
+        return await getAllEntity(this.connection, CargoBike, 'cb', offset, limit);
     }
 
     /**
@@ -221,14 +215,22 @@ export class CargoBikeAPI extends DataSource {
             .loadOne();
     }
 
-    async bikeEventsByCargoBikeId (id: number, offset: number = 0, limit:number = 100) {
-        return await this.connection.getRepository(CargoBike)
-            .createQueryBuilder('cb')
-            .skip(offset)
-            .take(limit)
-            .relation(CargoBike, 'bikeEvents')
-            .of(id)
-            .loadMany();
+    async bikeEventsByCargoBikeId (id: number, offset?: number, limit?: number) {
+        if (offset === null || limit === null) {
+            return await this.connection.getRepository(CargoBike)
+                .createQueryBuilder('cb')
+                .relation(CargoBike, 'bikeEvents')
+                .of(id)
+                .loadMany();
+        } else {
+            return await this.connection.getRepository(CargoBike)
+                .createQueryBuilder('cb')
+                .skip(offset)
+                .take(limit)
+                .relation(CargoBike, 'bikeEvents')
+                .of(id)
+                .loadMany();
+        }
     }
 
     async createBikeEventType (bikeEventType: any) {
@@ -267,22 +269,12 @@ export class CargoBikeAPI extends DataSource {
         return await this.bikeEventTypeById(bikeEventType.id);
     }
 
-    async bikeEventTypes (offset: number, limit: number) {
-        return await this.connection.getRepository(BikeEventType)
-            .createQueryBuilder('bet')
-            .select()
-            .skip(offset)
-            .take(limit)
-            .getMany();
+    async bikeEventTypes (offset?: number, limit?: number) {
+        return await getAllEntity(this.connection, BikeEventType, 'bet', offset, limit);
     }
 
-    async bikeEvents (offset: number, limit: number) {
-        return await this.connection.getRepository(BikeEvent)
-            .createQueryBuilder('be')
-            .select()
-            .skip(offset)
-            .take(limit)
-            .getMany();
+    async bikeEvents (offset?: number, limit?: number) {
+        return await getAllEntity(this.connection, BikeEvent, 'be', offset, limit);
     }
 
     async bikeEventTypeById (id: number) {
@@ -343,12 +335,22 @@ export class CargoBikeAPI extends DataSource {
      * @param limit
      * @param id
      */
-    async equipmentByCargoBikeId (offset: number, limit: number, id: number) {
-        return await this.connection.getRepository(Equipment)
-            .createQueryBuilder('equipment')
-            .select()
-            .where('equipment."cargoBikeId" = :id', { id: id })
-            .getMany();
+    async equipmentByCargoBikeId (id: number, offset?: number, limit?: number) {
+        if (offset == null || limit === null) {
+            return await this.connection.getRepository(Equipment)
+                .createQueryBuilder('equipment')
+                .select()
+                .where('equipment."cargoBikeId" = :id', { id: id })
+                .getMany();
+        } else {
+            return await this.connection.getRepository(Equipment)
+                .createQueryBuilder('equipment')
+                .select()
+                .where('equipment."cargoBikeId" = :id', { id: id })
+                .skip(offset)
+                .take(limit)
+                .getMany();
+        }
     }
 
     async createEquipment ({ equipment }: { equipment: any }) {

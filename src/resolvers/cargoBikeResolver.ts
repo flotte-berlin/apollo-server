@@ -30,14 +30,14 @@ export default {
                 return new GraphQLError('Insufficient Permissions');
             }
         },
-        cargoBikes: (_: any, { offset, limit }: { offset: number, limit: number }, { dataSources, req }: { dataSources: any, req: any }) => {
+        cargoBikes: (_: any, { offset, limit }: { offset?: number, limit?: number }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.ReadBike)) {
                 return dataSources.cargoBikeAPI.getCargoBikes(offset, limit);
             } else {
                 return new GraphQLError('Insufficient Permissions');
             }
         },
-        bikeEvents: (_:any, { offset, limit }: { offset: number, limit: number }, { dataSources, req }: { dataSources: any, req: any }) => {
+        bikeEvents: (_:any, { offset, limit }: { offset?: number, limit?: number }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.ReadBikeEvent)) {
                 return dataSources.cargoBikeAPI.bikeEvents(offset, limit);
             } else {
@@ -58,14 +58,14 @@ export default {
                 return new GraphQLError('Insufficient Permissions');
             }
         },
-        bikeEventTypes: (_:any, { offset, limit }: { offset: number, limit: number }, { dataSources, req }: { dataSources: any, req: any }) => {
+        bikeEventTypes: (_:any, { offset, limit }: { offset?: number, limit?: number }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.ReadBikeEvent)) {
                 return dataSources.cargoBikeAPI.bikeEventTypes(offset, limit);
             } else {
                 return new GraphQLError('Insufficient Permissions');
             }
         },
-        equipment: (_:any, { offset, limit }: { offset: number, limit: number }, { dataSources, req }: { dataSources: any, req: any }) => {
+        equipment: (_:any, { offset, limit }: { offset?: number, limit?: number }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.ReadEquipment)) {
                 return dataSources.cargoBikeAPI.getEquipment(offset, limit);
             } else {
@@ -79,7 +79,7 @@ export default {
                 return new GraphQLError('Insufficient Permissions');
             }
         },
-        equipmentTypes: (_:any, { offset, limit }: { offset: number, limit: number }, { dataSources, req }: { dataSources: any, req: any }) => {
+        equipmentTypes: (_:any, { offset, limit }: { offset?: number, limit?: number }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.ReadEquipment)) {
                 return dataSources.cargoBikeAPI.equipmentTypes(offset, limit);
             } else {
@@ -102,23 +102,23 @@ export default {
                 return new GraphQLError('Insufficient Permissions');
             }
         },
-        engagement (parent: any, { offset, limit }: { offset: number, limit: number }, { dataSources, req }: { dataSources: any, req: any }) {
+        engagement (parent: any, { offset, limit }: { offset?: number, limit?: number }, { dataSources, req }: { dataSources: any, req: any }) {
             if (req.permissions.includes(Permission.ReadEngagement)) {
-                return dataSources.participantAPI.engagementByCargoBikeId(offset, limit, parent.id);
+                return dataSources.participantAPI.engagementByCargoBikeId(parent.id, offset, limit);
             } else {
                 return new GraphQLError('Insufficient Permissions');
             }
         },
-        participants (parent: any, { offset, limit }: { offset: number, limit: number }, { dataSources, req }: { dataSources: any, req: any }) { // TODO should be done with engagements
+        participants (parent: any, { offset, limit }: { offset?: number, limit?: number }, { dataSources, req }: { dataSources: any, req: any }) { // TODO should be done with engagements
             if (req.permissions.includes(Permission.ReadParticipant)) {
                 return dataSources.participantAPI.participantsByCargoBikeId(parent.id);
             } else {
                 return new GraphQLError('Insufficient Permissions');
             }
         },
-        equipment (parent: any, { offset, limit }: { offset: number, limit: number }, { dataSources, req }: { dataSources: any, req: any }) {
+        equipment (parent: any, { offset, limit }: { offset?: number, limit?: number }, { dataSources, req }: { dataSources: any, req: any }) {
             if (req.permissions.includes(Permission.ReadEquipment)) {
-                return dataSources.cargoBikeAPI.equipmentByCargoBikeId(offset, limit, parent.id);
+                return dataSources.cargoBikeAPI.equipmentByCargoBikeId(parent.id, offset, limit);
             } else {
                 return new GraphQLError('Insufficient Permissions');
             }
@@ -130,7 +130,7 @@ export default {
                 return new GraphQLError('Insufficient Permissions');
             }
         },
-        bikeEvents (parent: any, { offset, limit }: { offset: number, limit: number }, { dataSources, req }: { dataSources: any, req: any }) {
+        bikeEvents (parent: any, { offset, limit }: { offset?: number, limit?: number }, { dataSources, req }: { dataSources: any, req: any }) {
             if (req.permissions.includes(Permission.ReadBikeEvent)) {
                 return dataSources.cargoBikeAPI.bikeEventsByCargoBikeId(parent.id, offset, limit);
             } else {
@@ -170,6 +170,10 @@ export default {
                 return new GraphQLError('Insufficient Permissions');
             }
         },
+        isLockedByMe: (parent: any, __: any, { req }: { req: any }) => isLockedByMe(parent, { req }),
+        isLocked: (parent: any, __: any, { req }: { req: any }) => isLocked(parent, { req })
+    },
+    EquipmentType: {
         isLockedByMe: (parent: any, __: any, { req }: { req: any }) => isLockedByMe(parent, { req }),
         isLocked: (parent: any, __: any, { req }: { req: any }) => isLocked(parent, { req })
     },

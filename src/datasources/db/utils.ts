@@ -64,6 +64,22 @@ export async function deleteEntity (connection: Connection, target: ObjectType<L
     });
 }
 
+export async function getAllEntity (connection: Connection, target: ObjectType<any>, alias: string, offset?: number, limit?: number) {
+    if (offset === null || limit === null) {
+        return await connection.getRepository(target)
+            .createQueryBuilder(alias)
+            .select()
+            .getMany();
+    } else {
+        return await connection.getRepository(target)
+            .createQueryBuilder(alias)
+            .select()
+            .skip(offset)
+            .take(limit)
+            .getMany();
+    }
+}
+
 export class LockUtils {
     static async findById (connection: Connection, target: ObjectType<Lockable>, alias: string, id: number): Promise<Lockable> {
         return await connection.getRepository(target)

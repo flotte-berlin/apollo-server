@@ -30,7 +30,7 @@ export default {
                 return new GraphQLError('Insufficient Permissions');
             }
         },
-        participants: (_: any, { offset, limit }: { offset: number, limit: number }, { dataSources, req }: { dataSources: any, req: any }) => {
+        participants: (_: any, { offset, limit }: { offset?: number, limit?: number }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.ReadParticipant)) {
                 return dataSources.participantAPI.getParticipants(offset, limit);
             } else {
@@ -44,7 +44,7 @@ export default {
                 return new GraphQLError('Insufficient Permissions');
             }
         },
-        engagements: (_: any, { offset, limit }: { offset: number, limit: number }, { dataSources, req }: { dataSources: any, req: any }) => {
+        engagements: (_: any, { offset, limit }: { offset?: number, limit?: number }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.ReadEngagement)) {
                 return dataSources.participantAPI.engagements(offset, limit);
             } else {
@@ -58,7 +58,7 @@ export default {
                 return new GraphQLError('Insufficient Permissions');
             }
         },
-        engagementTypes: (_: any, { offset, limit }: { offset: number, limit: number }, { dataSources, req }: { dataSources: any, req: any }) => {
+        engagementTypes: (_: any, { offset, limit }: { offset?: number, limit?: number }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.ReadEngagement)) {
                 return dataSources.participantAPI.engagementTypes(offset, limit);
             } else {
