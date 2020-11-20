@@ -24,7 +24,7 @@ import { Organisation } from '../../model/Organisation';
 import { UserInputError } from 'apollo-server-express';
 import { CargoBike } from '../../model/CargoBike';
 import { LendingStation } from '../../model/LendingStation';
-import { ActionLogger, deleteEntity, getAllEntity, LockUtils } from './utils';
+import { ActionLogger, DBUtils, LockUtils } from './utils';
 import { GraphQLError } from 'graphql';
 
 export class ProviderAPI extends DataSource {
@@ -43,7 +43,7 @@ export class ProviderAPI extends DataSource {
     }
 
     async provider (offset?: number, limit?: number) {
-        return await getAllEntity(this.connection, Provider, 'p', offset, limit);
+        return await DBUtils.getAllEntity(this.connection, Provider, 'p', offset, limit);
     }
 
     async providerByOrganisationId (id: number) {
@@ -71,7 +71,7 @@ export class ProviderAPI extends DataSource {
     }
 
     async organisations (offset?: number, limit?: number) {
-        return await getAllEntity(this.connection, Organisation, 'o', offset, limit);
+        return await DBUtils.getAllEntity(this.connection, Organisation, 'o', offset, limit);
     }
 
     async organisationById (id: number) {
@@ -170,7 +170,7 @@ export class ProviderAPI extends DataSource {
     }
 
     async deleteProvider (id: number, userId: number) {
-        return await deleteEntity(this.connection, Provider, 'p', id, userId);
+        return await DBUtils.deleteEntity(this.connection, Provider, 'p', id, userId);
     }
 
     async createOrganisation (organisation: any) {
@@ -213,6 +213,6 @@ export class ProviderAPI extends DataSource {
     }
 
     async deleteOrganisation (id: number, userId: number) {
-        return await deleteEntity(this.connection, Organisation, 'o', id, userId);
+        return await DBUtils.deleteEntity(this.connection, Organisation, 'o', id, userId);
     }
 }

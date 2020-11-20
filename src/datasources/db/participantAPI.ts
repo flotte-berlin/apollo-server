@@ -23,7 +23,7 @@ import { ContactInformation } from '../../model/ContactInformation';
 import { Engagement } from '../../model/Engagement';
 import { Participant } from '../../model/Participant';
 import { EngagementType } from '../../model/EngagementType';
-import { ActionLogger, deleteEntity, genDateRange, getAllEntity, LockUtils } from './utils';
+import { ActionLogger, DBUtils, genDateRange, LockUtils } from './utils';
 import { UserInputError } from 'apollo-server-express';
 import { GraphQLError } from 'graphql';
 
@@ -43,7 +43,7 @@ export class ParticipantAPI extends DataSource {
     }
 
     async getParticipants (offset?: number, limit?: number) {
-        return await getAllEntity(this.connection, Participant, 'p', offset, limit);
+        return await DBUtils.getAllEntity(this.connection, Participant, 'p', offset, limit);
     }
 
     async participantByEngagementId (id: number) {
@@ -110,7 +110,7 @@ export class ParticipantAPI extends DataSource {
     }
 
     async engagements (offset?: number, limit?: number) {
-        return await getAllEntity(this.connection, Engagement, 'e', offset, limit);
+        return await DBUtils.getAllEntity(this.connection, Engagement, 'e', offset, limit);
     }
 
     async engagementById (id: number) {
@@ -130,7 +130,7 @@ export class ParticipantAPI extends DataSource {
     }
 
     async engagementTypes (offset?: number, limit?: number) {
-        return await getAllEntity(this.connection, Engagement, 'e', offset, limit);
+        return await DBUtils.getAllEntity(this.connection, Engagement, 'e', offset, limit);
     }
 
     async engagementTypeByEngagementId (id: number) {
@@ -223,7 +223,7 @@ export class ParticipantAPI extends DataSource {
     }
 
     async deleteParticipant (id: number, userId: number) {
-        return await deleteEntity(this.connection, Participant, 'p', id, userId);
+        return await DBUtils.deleteEntity(this.connection, Participant, 'p', id, userId);
     }
 
     async createEngagement (engagement: any) {
@@ -292,7 +292,7 @@ export class ParticipantAPI extends DataSource {
     }
 
     async deleteEngagement (id: number, userId: number) {
-        return await deleteEntity(this.connection, Engagement, 'e', id, userId);
+        return await DBUtils.deleteEntity(this.connection, Engagement, 'e', id, userId);
     }
 
     async createEngagementType (engagementType: any) {
@@ -334,6 +334,6 @@ export class ParticipantAPI extends DataSource {
     }
 
     async deleteEngagementType (id: number, userId: number) {
-        return await deleteEntity(this.connection, EngagementType, 'et', id, userId);
+        return await DBUtils.deleteEntity(this.connection, EngagementType, 'et', id, userId);
     }
 }
