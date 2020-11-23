@@ -183,7 +183,9 @@ export class CargoBike implements Lockable {
     })
     group: Group;
 
-    @Column()
+    @Column({
+        unique: true
+    })
     name: string;
 
     @OneToMany(type => Equipment, equipment => equipment.cargoBikeId, {

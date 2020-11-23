@@ -18,10 +18,11 @@ This file is part of fLotte-API-Server.
 */
 
 import { Lockable } from './CargoBike';
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn, Unique } from 'typeorm';
 import { ContactInformation } from './ContactInformation';
 
 @Entity()
+@Unique(['firstName', 'name'])
 export class Person implements Lockable {
     @PrimaryGeneratedColumn()
     id: number;
