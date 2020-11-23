@@ -26,7 +26,7 @@ import { Equipment } from '../../model/Equipment';
 import { Engagement } from '../../model/Engagement';
 import { Provider } from '../../model/Provider';
 import { TimeFrame } from '../../model/TimeFrame';
-import { ActionLogger, deleteEntity, getAllEntity, LockUtils } from './utils';
+import { ActionLogger, DBUtils, LockUtils } from './utils';
 import { EquipmentType } from '../../model/EquipmentType';
 import { BikeEventType } from '../../model/BikeEventType';
 import { UserInputError } from 'apollo-server-express';
@@ -43,7 +43,7 @@ export class CargoBikeAPI extends DataSource {
     }
 
     async getCargoBikes (offset?: number, limit?: number) {
-        return await getAllEntity(this.connection, CargoBike, 'cb', offset, limit);
+        return await DBUtils.getAllEntity(this.connection, CargoBike, 'cb', offset, limit);
     }
 
     /**
@@ -192,11 +192,11 @@ export class CargoBikeAPI extends DataSource {
     }
 
     async deleteBikeEventType (id: number, userId: number) {
-        return await deleteEntity(this.connection, BikeEventType, 'bet', id, userId);
+        return await DBUtils.deleteEntity(this.connection, BikeEventType, 'bet', id, userId);
     }
 
     async deleteBikeEvent (id: number, userId: number) {
-        return await deleteEntity(this.connection, BikeEvent, 'be', id, userId);
+        return await DBUtils.deleteEntity(this.connection, BikeEvent, 'be', id, userId);
     }
 
     async cargoBikeByEventId (id: number) {
@@ -270,11 +270,11 @@ export class CargoBikeAPI extends DataSource {
     }
 
     async bikeEventTypes (offset?: number, limit?: number) {
-        return await getAllEntity(this.connection, BikeEventType, 'bet', offset, limit);
+        return await DBUtils.getAllEntity(this.connection, BikeEventType, 'bet', offset, limit);
     }
 
     async bikeEvents (offset?: number, limit?: number) {
-        return await getAllEntity(this.connection, BikeEvent, 'be', offset, limit);
+        return await DBUtils.getAllEntity(this.connection, BikeEvent, 'be', offset, limit);
     }
 
     async bikeEventTypeById (id: number) {
@@ -408,7 +408,7 @@ export class CargoBikeAPI extends DataSource {
     }
 
     async deleteEquipment (id: number, userId: number) {
-        return await deleteEntity(this.connection, Equipment, 'e', id, userId);
+        return await DBUtils.deleteEntity(this.connection, Equipment, 'e', id, userId);
     }
 
     async getEquipment (offset: number, limit: number) {
@@ -462,7 +462,7 @@ export class CargoBikeAPI extends DataSource {
     }
 
     async deleteEquipmentType (id:number, userId: number) {
-        return await deleteEntity(this.connection, EquipmentType, 'et', id, userId);
+        return await DBUtils.deleteEntity(this.connection, EquipmentType, 'et', id, userId);
     }
 
     async equipmentTypeById (id: number) {

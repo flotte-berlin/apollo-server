@@ -36,52 +36,93 @@ export function genDateRange (struct: any) {
 }
 
 /**
- * Can be used in resolvers to specify if entry is locked by other user.
+ * Can be used in resolvers to specify, if entry is locked by other user.
  * Returns true if locked by other user.
  * @param parent
- * @param dataSources
- * @param req user request
+ * @param req
  */
 export function isLocked (parent: any, { req }: { req: any }) {
     return req.userId !== parent.lockedBy && new Date() <= new Date(parent.lockedUntil);
 }
 
+/**
+ * Can be used in resolvers to specify, if entry is locked by the current user.
+ * @param parent
+ * @param req
+ */
 export function isLockedByMe (parent: any, { req }: { req: any }) {
     return req.userId === parent.lockedBy && new Date() <= new Date(parent.lockedUntil);
 }
 
-export async function deleteEntity (connection: Connection, target: ObjectType<Lockable>, alias: string, id: number, userId: number): Promise<Boolean> {
-    return await connection.transaction(async (entityManger: EntityManager) => {
-        if (await LockUtils.isLocked(entityManger, target, alias, id, userId)) {
-            throw new UserInputError('Attempting to delete locked resource');
-        }
-        await ActionLogger.log(entityManger, target, alias, { id: id }, userId, Actions.DELETE);
-        return await entityManger.getRepository(target)
-            .createQueryBuilder(alias)
-            .delete()
-            .where('id = :id', { id: id })
-            .execute().then(value => value.affected === 1);
-    });
-}
+/**
+ * Some utility functions for the database
+ */
+export class DBUtils {
+    /**
+     * Delete any instance of an entity that implements the Lockable interface.
+     * It must implement the interface, so it can be be ensured, that the instance is not locked by another user.
+     * @param connection
+     * @param target
+     * @param alias
+     * @param id
+     * @param userId
+     */
+    static async deleteEntity (connection: Connection, target: ObjectType<Lockable>, alias: string, id: number, userId: number): Promise<Boolean> {
+        return await connection.transaction(async (entityManger: EntityManager) => {
+            if (await LockUtils.isLocked(entityManger, target, alias, id, userId)) {
+                throw new UserInputError('Attempting to delete locked resource');
+            }
+            await ActionLogger.log(entityManger, target, alias, { id: id }, userId, Actions.DELETE);
+            return await entityManger.getRepository(target)
+                .createQueryBuilder(alias)
+                .delete()
+                .where('id = :id', { id: id })
+                .execute().then(value => value.affected === 1);
+        });
+    }
 
-export async function getAllEntity (connection: Connection, target: ObjectType<any>, alias: string, offset?: number, limit?: number) {
-    if (offset === null || limit === null) {
-        return await connection.getRepository(target)
-            .createQueryBuilder(alias)
-            .select()
-            .getMany();
-    } else {
-        return await connection.getRepository(target)
-            .createQueryBuilder(alias)
-            .select()
-            .skip(offset)
-            .take(limit)
-            .getMany();
+    /**
+     * Return all instances of the given entity called target.
+     * When offset or limit is not specified, both values are ignored.
+     * @param connection
+     * @param target
+     * @param alias
+     * @param offset
+     * @param limit
+     */
+    static async getAllEntity (connection: Connection, target: ObjectType<any>, alias: string, offset?: number, limit?: number) {
+        if (offset === null || limit === null) {
+            return await connection.getRepository(target)
+                .createQueryBuilder(alias)
+                .select()
+                .getMany();
+        } else {
+            return await connection.getRepository(target)
+                .createQueryBuilder(alias)
+                .select()
+                .skip(offset)
+                .take(limit)
+                .getMany();
+        }
     }
 }
 
+/**
+ * Some static functions for the locking feature.
+ */
 export class LockUtils {
-    static async findById (connection: Connection, target: ObjectType<Lockable>, alias: string, id: number): Promise<Lockable> {
+    /**
+     * A helper function to find an instance of any entity that implements Lockable.
+     * It will throw an error, if nothing is found.
+     * Using this function only makes sense to use in the context of locking because there is no point in locking
+     * an instance that does not exist.
+     * @param connection
+     * @param target
+     * @param alias
+     * @param id
+     * @private
+     */
+    private static async findById (connection: Connection, target: ObjectType<Lockable>, alias: string, id: number): Promise<Lockable> {
         return await connection.getRepository(target)
             .createQueryBuilder(alias)
             .select()
@@ -91,6 +132,17 @@ export class LockUtils {
             });
     }
 
+    /**
+     * Lock an instance of an entity target that implements the Lockable interface and return that instance.
+     * If lock could not be set, it will still return the entity.
+     * If lock was set or not can be obtained by the field isLockedByMe in the graphql interface,
+     * or the the fields lockedBy and lockedUntil in the database.
+     * @param connection
+     * @param target
+     * @param alias
+     * @param id
+     * @param userId
+     */
     static async lockEntity (connection: Connection, target: ObjectType<Lockable>, alias: string, id: number, userId: number): Promise<Lockable> {
         const lock = await connection.getRepository(target)
             .createQueryBuilder(alias)
@@ -119,6 +171,17 @@ export class LockUtils {
         return await this.findById(connection, target, alias, id);
     }
 
+    /**
+     * Unlock an instance of an entity target that implements the Lockable interface and return that instance.
+     * If lock could not be unset, it will still return the entity.
+     * If lock was set or not can be obtained by the field isLockedByMe in the graphql interface,
+     * or the the fields lockedBy and lockedUntil in the database.
+     * @param connection
+     * @param target
+     * @param alias
+     * @param id
+     * @param userId
+     */
     static async unlockEntity (connection: Connection, target: ObjectType<Lockable>, alias: string, id: number, userId: number): Promise<Lockable> {
         await connection.getRepository(target)
             .createQueryBuilder(alias)
@@ -161,7 +224,18 @@ export class LockUtils {
     }
 }
 
+/**
+ * Some utility function for the logging features.
+ */
 export class ActionLogger {
+    /**
+     * Create array of strings, that can be used to select them form the database.
+     * If you want to avoid logging all old values, for an update, but only the ones that are updated,
+     * use this function. If updates are null, ['*'] will be returned. Use this for delete actions.
+     * @param updates
+     * @param alias
+     * @private
+     */
     private static buildSelect (updates: any, alias: string) : string[] {
         // this hacky shit makes it possible to select subfields like the address or insurance data. Only one layer at the moment
         if (updates === null) {
@@ -181,6 +255,16 @@ export class ActionLogger {
         return ret;
     }
 
+    /**
+     * Insert an entry in the log. The log ist just another entity in the database.
+     * You can only use this in a transaction. So you have to pass an entity manager.
+     * @param em
+     * @param target
+     * @param alias
+     * @param updates
+     * @param userId
+     * @param action
+     */
     static async log (em: EntityManager, target: ObjectType<any>, alias: string, updates: any, userId: number, action: Actions = Actions.UPDATE) {
         const oldValues = await em.getRepository(target).createQueryBuilder(alias)
             .select(this.buildSelect(updates, alias))
