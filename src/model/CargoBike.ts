@@ -192,7 +192,7 @@ export class CargoBike implements Lockable {
         nullable: true,
         eager: true
     })
-    equipment: Equipment[];
+    equipmentIds: number[];
 
     // Equipment that is not unique and is supposed to be selected out of a list e.g. drop down
     @ManyToMany(type => EquipmentType, equipmentType => equipmentType.cargoBikeIds)
