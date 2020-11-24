@@ -115,6 +115,7 @@ export default gql`
         """
         Refers to unique equipment
         When set to null or [], no relations will be added.
+        When specified id is in a relation with another bike, this relation will be deleted.
         """
         equipmentIds: [ID]
         "Sticker State"
@@ -162,6 +163,7 @@ export default gql`
         When set to null, field will be ignored.
         When set to [], all relations will be deleted.
         Else all realtions will be deleted and the specified relations will be added.
+        When specified id is in a relation with another bike, this relation will be deleted.
         """
         equipmentIds: [ID]
         "Sticker State"
