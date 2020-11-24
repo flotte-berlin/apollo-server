@@ -26,7 +26,9 @@ export class Equipment implements Lockable {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column()
+    @Column({
+        unique: true
+    })
     serialNo: string;
 
     @Column()
@@ -37,7 +39,7 @@ export class Equipment implements Lockable {
     })
     description: string;
 
-    @ManyToOne(type => CargoBike, cargoBike => cargoBike.equipment, {
+    @ManyToOne(type => CargoBike, cargoBike => cargoBike.equipmentIds, {
         nullable: true
     })
     @JoinColumn({

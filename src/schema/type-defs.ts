@@ -97,7 +97,6 @@ export default gql`
         numberOfChildren: Int!
         """
         Safety is a custom type, that stores information about security features.
-        TODO: Should this be called Security?
         """
         security: SecurityCreateInput!
         """
@@ -108,8 +107,16 @@ export default gql`
         Does not refer to an extra table in the database.
         """
         dimensionsAndLoad: DimensionsAndLoadCreateInput!
-        "Refers to equipment that is not unique. See kommentierte info tabelle -> Fragen -> Frage 2"
+        """
+        Refers to equipment that is not unique. See kommentierte info tabelle -> Fragen -> Frage 2
+        When set to null or [], no relations will be added.
+        """
         equipmentTypeIds: [ID]
+        """
+        Refers to unique equipment
+        When set to null or [], no relations will be added.
+        """
+        equipmentIds: [ID]
         "Sticker State"
         stickerBikeNameState: StickerBikeNameState
         note: String
@@ -119,7 +126,7 @@ export default gql`
     }
 
     """
-    if you want to add bike to a lending station, create a new timeFrame with to: Date = null
+    If you want to add bike to a lending station, create a new timeFrame with to: Date = null
     """
     input CargoBikeUpdateInput {
         id: ID!
@@ -133,7 +140,6 @@ export default gql`
         numberOfChildren: Int
         """
         Safety is a custom type, that stores information about security features.
-        TODO: Should this be called Security?
         """
         security: SecurityUpdateInput
         """
@@ -146,9 +152,18 @@ export default gql`
         dimensionsAndLoad: DimensionsAndLoadUpdateInput
         """
         Refers to equipment that is not unique. See kommentierte info tabelle -> Fragen -> Frage 2
-        If set, ols relations will be over written. Set [] to delete all
+        When set to null, field will be ignored.
+        When set to [], all relations will be deleted.
+        Else all realtions will be deleted and the specified relations will be added.
         """
         equipmentTypeIds: [ID]
+        """
+        Refers to unique equipment
+        When set to null, field will be ignored.
+        When set to [], all relations will be deleted.
+        Else all realtions will be deleted and the specified relations will be added.
+        """
+        equipmentIds: [ID]
         "Sticker State"
         stickerBikeNameState: StickerBikeNameState
         note: String
@@ -606,7 +621,7 @@ export default gql`
     }
 
     input EquipmentTypeCreateInput {
-        name: String
+        name: String!
         description: String
     }
 

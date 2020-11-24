@@ -99,11 +99,10 @@ export class CargoBikeAPI extends DataSource {
         const keepLock = cargoBike?.keepLock;
         delete cargoBike.keepLock;
         delete cargoBike.lendingStationId;
-        let equipmentTypeIds: any = null;
-        if (cargoBike.equipmentTypeIds) {
-            equipmentTypeIds = cargoBike.equipmentTypeIds;
-            delete cargoBike.equipmentTypeIds;
-        }
+        const equipmentTypeIds = cargoBike?.equipmentTypeIds;
+        delete cargoBike?.equipmentTypeIds;
+        const equipmentIds = cargoBike?.equipmentIds;
+        delete cargoBike?.equipmentIds;
         await this.connection.transaction(async (entityManager: EntityManager) => {
             if (await LockUtils.isLocked(entityManager, CargoBike, 'cb', cargoBike.id, userId)) {
                 throw new GraphQLError('CargoBike locked by other user');
@@ -119,7 +118,12 @@ export class CargoBikeAPI extends DataSource {
                 .createQueryBuilder('cb')
                 .relation(CargoBike, 'equipmentTypeIds')
                 .of(cargoBike.id)
-                .addAndRemove(equipmentTypeIds, await this.equipmentTypeByCargoBikeId(cargoBike.id)); // TODO remove all existing relations
+                .addAndRemove(equipmentTypeIds, await this.equipmentTypeByCargoBikeId(cargoBike.id));
+            equipmentIds && await entityManager.getRepository(CargoBike)
+                .createQueryBuilder('cb')
+                .relation(CargoBike, 'equipmentIds')
+                .of(cargoBike.id)
+                .addAndRemove(equipmentIds, await this.equipmentByCargoBikeId(cargoBike.id));
         });
         !keepLock && await LockUtils.unlockEntity(this.connection, CargoBike, 'cb', cargoBike.id, userId);
         return await this.findCargoBikeById(cargoBike.id);
@@ -144,7 +148,7 @@ export class CargoBikeAPI extends DataSource {
      * created CargoBike and returns created bike with new ID
      * @param param0 cargoBike to be created
      */
-    async createCargoBike ({ cargoBike }: { cargoBike: any }) {
+    async createCargoBike (cargoBike: any) {
         let inserts: any = {};
         await this.connection.transaction(async (entityManager:any) => {
             inserts = await entityManager.getRepository(CargoBike)
@@ -158,6 +162,11 @@ export class CargoBikeAPI extends DataSource {
                 .relation(CargoBike, 'equipmentTypeIds')
                 .of(inserts.identifiers[0].id)
                 .add(cargoBike.equipmentTypeIds);
+            cargoBike?.equipmentIds && await entityManager.getRepository(CargoBike)
+                .createQueryBuilder('cb')
+                .relation(CargoBike, 'equipmentIds')
+                .of(inserts.identifiers[0].id)
+                .add(cargoBike.equipmentIds);
         });
         inserts.generatedMaps[0].id = inserts?.identifiers[0].id;
         return inserts?.generatedMaps[0];
@@ -411,14 +420,8 @@ export class CargoBikeAPI extends DataSource {
         return await DBUtils.deleteEntity(this.connection, Equipment, 'e', id, userId);
     }
 
-    async getEquipment (offset: number, limit: number) {
-        return await this.connection.getRepository(Equipment)
-            .createQueryBuilder('equipment')
-            .leftJoinAndSelect('equipment.cargoBike', 'cargoBike')
-            .orderBy('title', 'ASC')
-            .offset(offset)
-            .limit(limit)
-            .getMany();
+    async getEquipment (offset?: number, limit?: number) {
+        return await DBUtils.getAllEntity(this.connection, Equipment, 'e', offset, limit);
     }
 
     async createEquipmentType (equipmentType: any) {
@@ -473,13 +476,8 @@ export class CargoBikeAPI extends DataSource {
             .getOne();
     }
 
-    async equipmentTypes (offset: number, limit: number) {
-        return await this.connection.getRepository(EquipmentType)
-            .createQueryBuilder('et')
-            .select()
-            .skip(offset)
-            .take(limit)
-            .getMany();
+    async equipmentTypes (offset?: number, limit?: number) {
+        return await DBUtils.getAllEntity(this.connection, EquipmentType, 'et', offset, limit);
     }
 
     async equipmentTypeByCargoBikeId (id: number) {

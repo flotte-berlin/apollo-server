@@ -216,7 +216,7 @@ export default {
     Mutation: {
         createCargoBike: (_: any, { cargoBike }: { cargoBike: any }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.WriteBike)) {
-                return dataSources.cargoBikeAPI.createCargoBike({ cargoBike });
+                return dataSources.cargoBikeAPI.createCargoBike(cargoBike);
             } else {
                 return new GraphQLError('Insufficient Permissions');
             }
