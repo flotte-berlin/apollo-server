@@ -36,6 +36,33 @@ export function genDateRange (struct: any) {
 }
 
 /**
+ * This function prepares the cargoBike struct, to be used in an update or create.
+ * It creates the numrange attributes than can be understood by postgres.
+ * @param from
+ * @param to
+ */
+function genNumRange (from: number, to: number) {
+    if (from === null || from === undefined) {
+        from = to;
+    } else if (to === null || to === undefined) {
+        to = from;
+    }
+    return from ? '[' + from + ',' + to + ']' : null;
+}
+
+export function genBoxDimensions (cargoBike: any) {
+    cargoBike.dimensionsAndLoad.boxLengthRange = genNumRange(cargoBike.dimensionsAndLoad.minBoxLength, cargoBike.dimensionsAndLoad.maxBoxLength);
+    cargoBike.dimensionsAndLoad.boxWidthRange = genNumRange(cargoBike.dimensionsAndLoad.minBoxWidth, cargoBike.dimensionsAndLoad.maxBoxWidth);
+    cargoBike.dimensionsAndLoad.boxHeightRange = genNumRange(cargoBike.dimensionsAndLoad.minBoxHeight, cargoBike.dimensionsAndLoad.maxBoxHeight);
+    // delete this so update cargo bike works
+    delete cargoBike.dimensionsAndLoad.minBoxLength;
+    delete cargoBike.dimensionsAndLoad.maxBoxLength;
+    delete cargoBike.dimensionsAndLoad.minBoxWidth;
+    delete cargoBike.dimensionsAndLoad.maxBoxWidth;
+    delete cargoBike.dimensionsAndLoad.minBoxHeight;
+    delete cargoBike.dimensionsAndLoad.maxBoxHeight;
+}
+/**
  * Can be used in resolvers to specify, if entry is locked by other user.
  * Returns true if locked by other user.
  * @param parent

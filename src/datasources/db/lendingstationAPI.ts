@@ -19,7 +19,6 @@ This file is part of fLotte-API-Server.
 
 import { DataSource } from 'apollo-datasource';
 import { UserInputError } from 'apollo-server-express';
-import { GraphQLError } from 'graphql';
 import { Connection, EntityManager, getConnection } from 'typeorm';
 import { CargoBike } from '../../model/CargoBike';
 import { LendingStation } from '../../model/LendingStation';

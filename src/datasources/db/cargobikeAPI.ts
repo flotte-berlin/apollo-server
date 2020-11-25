@@ -26,7 +26,7 @@ import { Equipment } from '../../model/Equipment';
 import { Engagement } from '../../model/Engagement';
 import { Provider } from '../../model/Provider';
 import { TimeFrame } from '../../model/TimeFrame';
-import { ActionLogger, DBUtils, LockUtils } from './utils';
+import { ActionLogger, DBUtils, genBoxDimensions, LockUtils } from './utils';
 import { EquipmentType } from '../../model/EquipmentType';
 import { BikeEventType } from '../../model/BikeEventType';
 import { UserInputError } from 'apollo-server-express';
@@ -98,11 +98,13 @@ export class CargoBikeAPI extends DataSource {
     async updateCargoBike (cargoBike: any, userId:number) {
         const keepLock = cargoBike?.keepLock;
         delete cargoBike.keepLock;
-        delete cargoBike.lendingStationId;
         const equipmentTypeIds = cargoBike?.equipmentTypeIds;
         delete cargoBike?.equipmentTypeIds;
         const equipmentIds = cargoBike?.equipmentIds;
         delete cargoBike?.equipmentIds;
+        // generate ranges for box dimensions
+        genBoxDimensions(cargoBike);
+
         await this.connection.transaction(async (entityManager: EntityManager) => {
             if (await LockUtils.isLocked(entityManager, CargoBike, 'cb', cargoBike.id, userId)) {
                 throw new GraphQLError('CargoBike locked by other user');
@@ -150,6 +152,7 @@ export class CargoBikeAPI extends DataSource {
      */
     async createCargoBike (cargoBike: any) {
         let inserts: any = {};
+        genBoxDimensions(cargoBike);
         await this.connection.transaction(async (entityManager:any) => {
             inserts = await entityManager.getRepository(CargoBike)
                 .createQueryBuilder('cb')
