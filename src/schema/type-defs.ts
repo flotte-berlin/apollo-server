@@ -115,6 +115,7 @@ export default gql`
         """
         Refers to unique equipment
         When set to null or [], no relations will be added.
+        When specified id is in a relation with another bike, this relation will be deleted.
         """
         equipmentIds: [ID]
         "Sticker State"
@@ -162,6 +163,7 @@ export default gql`
         When set to null, field will be ignored.
         When set to [], all relations will be deleted.
         Else all realtions will be deleted and the specified relations will be added.
+        When specified id is in a relation with another bike, this relation will be deleted.
         """
         equipmentIds: [ID]
         "Sticker State"
@@ -257,13 +259,16 @@ export default gql`
         hasCoverBox: Boolean!
         "cover box can be locked"
         lockable: Boolean!
-        boxLength: Float!
-        boxWidth: Float!
-        boxHeight: Float!
-        maxWeightBox: Float!
-        maxWeightLuggageRack: Float!
-        maxWeightTotal: Float!
-        bikeLength: Float!
+        minBoxLength: Float
+        maxBoxLength: Float
+        minBoxWidth: Float
+        maxBoxWidth: Float
+        minBoxHeight: Float
+        maxBoxHeight: Float
+        maxWeightBox: Float
+        maxWeightLuggageRack: Float
+        maxWeightTotal: Float
+        bikeLength: Float
         bikeWidth: Float
         bikeHeight: Float
         bikeWeight: Float
@@ -272,13 +277,16 @@ export default gql`
     input DimensionsAndLoadCreateInput {
         hasCoverBox: Boolean!
         lockable: Boolean!
-        boxLength: Float!
-        boxWidth: Float!
-        boxHeight: Float!
-        maxWeightBox: Float!
-        maxWeightLuggageRack: Float!
-        maxWeightTotal: Float!
-        bikeLength: Float!
+        minBoxLength: Float
+        maxBoxLength: Float
+        minBoxWidth: Float
+        maxBoxWidth: Float
+        minBoxHeight: Float
+        maxBoxHeight: Float
+        maxWeightBox: Float
+        maxWeightLuggageRack: Float
+        maxWeightTotal: Float
+        bikeLength: Float
         bikeWidth: Float
         bikeHeight: Float
         bikeWeight: Float
@@ -287,9 +295,12 @@ export default gql`
     input DimensionsAndLoadUpdateInput {
         hasCoverBox: Boolean
         lockable: Boolean
-        boxLength: Float
-        boxWidth: Float
-        boxHeight: Float
+        minBoxLength: Float
+        maxBoxLength: Float
+        minBoxWidth: Float
+        maxBoxWidth: Float
+        minBoxHeight: Float
+        maxBoxHeight: Float
         maxWeightBox: Float
         maxWeightLuggageRack: Float
         maxWeightTotal: Float

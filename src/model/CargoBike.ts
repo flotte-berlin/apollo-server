@@ -113,43 +113,50 @@ export class DimensionsAndLoad {
     lockable:boolean;
 
     @Column({
-        type: 'decimal'
+        type: 'numrange',
+        nullable: true
     })
-    boxLength: number;
+    boxLengthRange: string;
 
     @Column({
-        type: 'decimal'
+        type: 'numrange',
+        nullable: true
     })
-    boxWidth: number;
+    boxWidthRange: string;
 
     @Column({
-        type: 'decimal'
+        type: 'numrange',
+        nullable: true
     })
-    boxHeight: number;
+    boxHeightRange: string;
 
     @Column({
-        type: 'decimal'
+        type: 'decimal',
+        nullable: true
     })
-    maxWeightBox: number;
+    maxWeightBox: string;
 
     @Column({
-        type: 'decimal'
+        type: 'decimal',
+        nullable: true
     })
     maxWeightLuggageRack: number;
 
     @Column({
-        type: 'decimal'
+        type: 'decimal',
+        nullable: true
     })
     maxWeightTotal: number;
 
     @Column({
-        type: 'decimal'
+        type: 'decimal',
+        nullable: true
     })
     bikeLength: number;
 
     @Column({
         nullable: true,
-        type: 'decimal'
+        type: 'numrange'
 
     })
     bikeWidth: number;
