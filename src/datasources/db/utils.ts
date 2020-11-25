@@ -36,7 +36,7 @@ export function genDateRange (struct: any) {
 }
 
 /**
- * This function prepares the cargoBike struct, to be used in an update or create.
+ * This function helps prepare the cargoBike struct, to be used in an update or create.
  * It creates the numrange attributes than can be understood by postgres.
  * @param from
  * @param to
@@ -50,6 +50,11 @@ function genNumRange (from: number, to: number) {
     return from ? '[' + from + ',' + to + ']' : null;
 }
 
+/**
+ * This function prepares the cargoBike struct, to be used in an update or create.
+ * It creates the numrange attributes than can be understood by postgres.
+ * @param cargoBike
+ */
 export function genBoxDimensions (cargoBike: any) {
     cargoBike.dimensionsAndLoad.boxLengthRange = genNumRange(cargoBike.dimensionsAndLoad.minBoxLength, cargoBike.dimensionsAndLoad.maxBoxLength);
     cargoBike.dimensionsAndLoad.boxWidthRange = genNumRange(cargoBike.dimensionsAndLoad.minBoxWidth, cargoBike.dimensionsAndLoad.maxBoxWidth);
