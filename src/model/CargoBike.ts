@@ -156,7 +156,7 @@ export class DimensionsAndLoad {
 
     @Column({
         nullable: true,
-        type: 'numrange'
+        type: 'decimal'
 
     })
     bikeWidth: number;

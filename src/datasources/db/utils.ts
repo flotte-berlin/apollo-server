@@ -67,6 +67,7 @@ export function genBoxDimensions (cargoBike: any) {
     delete cargoBike.dimensionsAndLoad.minBoxHeight;
     delete cargoBike.dimensionsAndLoad.maxBoxHeight;
 }
+
 /**
  * Can be used in resolvers to specify, if entry is locked by other user.
  * Returns true if locked by other user.
