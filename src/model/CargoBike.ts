@@ -90,13 +90,19 @@ export class Security {
     adfcCoding: string;
 }
 export class TechnicalEquipment {
-    @Column()
+    @Column({
+        nullable: true
+    })
     bicycleShift: string;
 
-    @Column()
+    @Column({
+        nullable: true
+    })
     isEBike: boolean;
 
-    @Column()
+    @Column({
+        nullable: true
+    })
     hasLightSystem: boolean;
 
     @Column({
@@ -106,10 +112,14 @@ export class TechnicalEquipment {
 }
 
 export class DimensionsAndLoad {
-    @Column()
+    @Column({
+        nullable: true
+    })
     hasCoverBox: boolean;
 
-    @Column()
+    @Column({
+        nullable: true
+    })
     lockable:boolean;
 
     @Column({
