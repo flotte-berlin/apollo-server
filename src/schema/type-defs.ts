@@ -935,13 +935,26 @@ export default gql`
         loanTimes: [String!]
     }
 
+    type DateRange{
+        from: Date!
+        "will be infinity of not omitted"
+        to: Date
+    }
+    
+    input DateRangeInput {
+        "format YYYY-MM-dd"
+        from: Date!
+        """
+        format YYYY-MM-dd
+        will be infinity of not omitted
+        """
+        to: Date
+    }
+    
     "(dt. Zeitscheibe) When was a bike where"
     type TimeFrame {
         id: ID!
-        "format YYYY-MM-dd"
-        from: Date!
-        "format YYYY-MM-dd"
-        to: Date
+        dateRange: DateRange!
         note: String
         lendingStation: LendingStation!
         cargoBike: CargoBike!
@@ -953,8 +966,7 @@ export default gql`
     }
 
     input TimeFrameCreateInput {
-        from: Date!
-        to: Date
+        dateRange: DateRangeInput!
         note: String
         lendingStationId: ID!
         cargoBikeId: ID!
@@ -962,8 +974,7 @@ export default gql`
 
     input TimeFrameUpdateInput {
         id: ID!
-        from: Date
-        to: Date
+        dateRange: DateRangeInput
         note: String
         lendingStationId: ID
         cargoBikeId: ID

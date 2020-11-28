@@ -23,16 +23,15 @@ import { ActionLog, Actions } from '../../model/ActionLog';
 import { UserInputError } from 'apollo-server-express';
 
 export function genDateRange (struct: any) {
-    if (struct.to === undefined) {
-        struct.to = '';
-    }
-    struct.dateRange = '[' + struct.from + ',' + struct.to + ')';
-    if (struct.from === undefined) {
+    if (!struct.dateRange || !struct.dateRange.from) {
         delete struct.dateRange;
+        return;
+    } else if (!struct.dateRange?.to) {
+        struct.dateRange.to = '';
+    } else if (struct.dateRange.to === struct.dateRange.from) {
+        throw new UserInputError('Date Range can not be empty, provide different dates.');
     }
-    // delete these keys, so the struct can be used to update the engagement entity
-    delete struct.from;
-    delete struct.to;
+    struct.dateRange = '[' + struct.dateRange.from + ',' + struct.dateRange.to + ')';
 }
 
 /**
