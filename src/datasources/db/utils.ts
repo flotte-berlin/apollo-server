@@ -40,13 +40,33 @@ export function genDateRange (struct: any) {
  * @param from
  * @param to
  */
-function genNumRange (from: number, to: number) {
-    if (from === null || from === undefined) {
-        from = to;
-    } else if (to === null || to === undefined) {
-        to = from;
+function genNumRange (range: { min: number, max: number}) :string {
+    if (!range || (!range.max && !range.min)) {
+        return null;
+    } else if (range.min === null || range.min === undefined) {
+        range.min = range.max;
+    } else if (range.max === null || range.max === undefined) {
+        range.max = range.min;
     }
-    return from ? '[' + from + ',' + to + ']' : null;
+    if (range.min < 0) {
+        throw new UserInputError('Minimal value must be greater or equal to 0');
+    }
+    return range.min ? '[' + range.min + ',' + range.max + ']' : null;
+}
+
+export function minNumRange (parent: string) {
+    if (!parent || parent === 'empty') {
+        return null;
+    }
+    return (parent).split(',')[0].replace('[', '');
+}
+
+export function maxNumRange (parent: string) {
+    if (!parent || parent === 'empty') {
+        return null;
+    }
+    const str = (parent).split(',')[1].replace(']', '');
+    return (str.length > 0) ? str : null;
 }
 
 /**
@@ -55,16 +75,10 @@ function genNumRange (from: number, to: number) {
  * @param cargoBike
  */
 export function genBoxDimensions (cargoBike: any) {
-    cargoBike.dimensionsAndLoad.boxLengthRange = genNumRange(cargoBike.dimensionsAndLoad.minBoxLength, cargoBike.dimensionsAndLoad.maxBoxLength);
-    cargoBike.dimensionsAndLoad.boxWidthRange = genNumRange(cargoBike.dimensionsAndLoad.minBoxWidth, cargoBike.dimensionsAndLoad.maxBoxWidth);
-    cargoBike.dimensionsAndLoad.boxHeightRange = genNumRange(cargoBike.dimensionsAndLoad.minBoxHeight, cargoBike.dimensionsAndLoad.maxBoxHeight);
-    // delete this so update cargo bike works
-    delete cargoBike.dimensionsAndLoad.minBoxLength;
-    delete cargoBike.dimensionsAndLoad.maxBoxLength;
-    delete cargoBike.dimensionsAndLoad.minBoxWidth;
-    delete cargoBike.dimensionsAndLoad.maxBoxWidth;
-    delete cargoBike.dimensionsAndLoad.minBoxHeight;
-    delete cargoBike.dimensionsAndLoad.maxBoxHeight;
+    if (!cargoBike.dimensionsAndLoad) { return; }
+    cargoBike.dimensionsAndLoad.boxLengthRange = genNumRange(cargoBike.dimensionsAndLoad.boxLengthRange);
+    cargoBike.dimensionsAndLoad.boxWidthRange = genNumRange(cargoBike.dimensionsAndLoad.boxWidthRange);
+    cargoBike.dimensionsAndLoad.boxHeightRange = genNumRange(cargoBike.dimensionsAndLoad.boxHeightRange);
 }
 
 /**

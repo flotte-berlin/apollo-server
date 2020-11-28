@@ -33,6 +33,7 @@ export default gql`
     The kind of currency depends on the database.
     """
     scalar Money
+    
     "The CargoBike type is central to the graph. You could call it the root."
     type CargoBike {
         id: ID!
@@ -266,17 +267,28 @@ export default gql`
         notes: String
     }
 
+    type NumRange {
+        min: Float
+        max: Float
+    }
+    
+    """
+    If min or max is omitted, the omitted value will be the same as the other given value
+    So if you pass one as null, both values with be over written with null.
+    """
+    input NumRangeInput {
+        min: Float
+        max: Float
+    }
+    
     "How are the dimensions and how much weight can handle a bike. This data is merged in the CargoBike table and the BikeModel table."
     type DimensionsAndLoad {
         hasCoverBox: Boolean
         "cover box can be locked"
         lockable: Boolean
-        minBoxLength: Float
-        maxBoxLength: Float
-        minBoxWidth: Float
-        maxBoxWidth: Float
-        minBoxHeight: Float
-        maxBoxHeight: Float
+        boxLengthRange: NumRange
+        boxWidthRange: NumRange
+        boxHeightRange: NumRange
         maxWeightBox: Float
         maxWeightLuggageRack: Float
         maxWeightTotal: Float
@@ -289,12 +301,9 @@ export default gql`
     input DimensionsAndLoadCreateInput {
         hasCoverBox: Boolean
         lockable: Boolean
-        minBoxLength: Float
-        maxBoxLength: Float
-        minBoxWidth: Float
-        maxBoxWidth: Float
-        minBoxHeight: Float
-        maxBoxHeight: Float
+        boxLengthRange: NumRangeInput
+        boxWidthRange: NumRangeInput
+        boxHeightRange: NumRangeInput
         maxWeightBox: Float
         maxWeightLuggageRack: Float
         maxWeightTotal: Float
@@ -307,12 +316,9 @@ export default gql`
     input DimensionsAndLoadUpdateInput {
         hasCoverBox: Boolean
         lockable: Boolean
-        minBoxLength: Float
-        maxBoxLength: Float
-        minBoxWidth: Float
-        maxBoxWidth: Float
-        minBoxHeight: Float
-        maxBoxHeight: Float
+        boxLengthRange: NumRangeInput
+        boxWidthRange: NumRangeInput
+        boxHeightRange: NumRangeInput
         maxWeightBox: Float
         maxWeightLuggageRack: Float
         maxWeightTotal: Float
