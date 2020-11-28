@@ -38,7 +38,8 @@ export default gql`
         id: ID!
         "see column A in info tabelle"
         group: Group
-        name: String
+        name: String!
+        state: BikeState
         modelName: String
         numberOfWheels: Int
         forCargo: Boolean
@@ -84,12 +85,22 @@ export default gql`
     }
 
     """
+    Status of the CargoBike. More fields will be added, or removed.
+    """
+    enum BikeState {
+        ACTIVE
+        INACTIVE
+        INPREPARATION
+    }
+    
+    """
     if you want to add bike to a lending station, create a new timeFrame with to: Date = null
     """
     input CargoBikeCreateInput {
         "see column A in info tabelle"
         group: Group!
         name: String!
+        state: BikeState
         modelName: String!
         numberOfWheels: Int!
         forCargo: Boolean!
@@ -134,6 +145,7 @@ export default gql`
         "see column A in info tabelle"
         group: Group
         name: String
+        state: BikeState
         modelName: String
         numberOfWheels: Int
         forCargo: Boolean

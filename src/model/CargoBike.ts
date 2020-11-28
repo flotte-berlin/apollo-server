@@ -30,7 +30,6 @@ import {
     DeleteDateColumn
 } from 'typeorm';
 import { Provider } from './Provider';
-import { Participant } from './Participant';
 import { InsuranceData } from './InsuranceData';
 import { TimeFrame } from './TimeFrame';
 import { Taxes } from './Taxes';
@@ -204,6 +203,11 @@ export class CargoBike implements Lockable {
         unique: true
     })
     name: string;
+
+    @Column({
+        nullable: true
+    })
+    state: string;
 
     @OneToMany(type => Equipment, equipment => equipment.cargoBikeId, {
         nullable: true,
