@@ -5,20 +5,7 @@ This file is part of fLotte-API-Server.
 
     fLotte-API-Server is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
-    the Free Soexport function minNumRange (parent: string) {
-    if (!parent || parent === 'empty') {
-        return null;
-    }
-    return (parent).split(',')[0].replace('[', '');
-}
-
-export function maxNumRange (parent: string) {
-    if (!parent || parent === 'empty') {
-        return null;
-    }
-    const str = (parent).split(',')[1].replace(']', '');
-    return (str.length > 0) ? str : null;
-}ftware Foundation, either version 3 of the License, or
+    the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
     fLotte-API-Server is distributed in the hope that it will be useful,
