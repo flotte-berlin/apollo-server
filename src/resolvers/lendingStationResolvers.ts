@@ -105,11 +105,11 @@ export default {
         }
     },
     DateRange: {
-        from (parent: any) {
-            return (parent as string).split(',')[0].replace('[', '');
+        from (parent: string) {
+            return parent.split(',')[0].replace('[', '');
         },
         to (parent: string) {
-            const str = (parent as string).split(',')[1].replace(')', '');
+            const str = parent.split(',')[1].replace(')', '');
             return (str.length > 0) ? str : null;
         }
     },

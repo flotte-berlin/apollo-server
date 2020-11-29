@@ -31,14 +31,13 @@ export function genDateRange (struct: any) {
     } else if (struct.dateRange.to === struct.dateRange.from) {
         throw new UserInputError('Date Range can not be empty, provide different dates.');
     }
-    struct.dateRange = '[' + struct.dateRange.from + ',' + struct.dateRange.to + ')';
+    struct.dateRange = `[${struct.dateRange.from},${struct.dateRange.to})`;
 }
 
 /**
  * This function helps prepare the cargoBike struct, to be used in an update or create.
  * It creates the numrange attributes than can be understood by postgres.
- * @param from
- * @param to
+ * @param range
  */
 function genNumRange (range: { min: number, max: number}) :string {
     if (!range || (!range.max && !range.min)) {
@@ -51,7 +50,7 @@ function genNumRange (range: { min: number, max: number}) :string {
     if (range.min < 0) {
         throw new UserInputError('Minimal value must be greater or equal to 0');
     }
-    return range.min ? '[' + range.min + ',' + range.max + ']' : null;
+    return `[${range.min},${range.max}]`;
 }
 
 /**
@@ -277,10 +276,10 @@ export class ActionLogger {
             // sometimes updates[value] is an array, e.g. timePeriods that are saved as a simple array in postgres
             if (updates[value] && typeof updates[value] === 'object' && !Array.isArray(updates[value])) {
                 Object.keys(updates[value]).forEach(subValue => {
-                    ret.push(alias + '."' + value + subValue[0].toUpperCase() + subValue.substr(1).toLowerCase() + '"');
+                    ret.push(`${alias}."${value}${subValue[0].toUpperCase()}${subValue.substr(1).toLowerCase()}"`);
                 });
             } else {
-                ret.push(alias + '."' + value + '"');
+                ret.push(`${alias}."${value}"`);
             }
         });
         return ret;
