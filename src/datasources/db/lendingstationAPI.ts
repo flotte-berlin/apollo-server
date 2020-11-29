@@ -183,10 +183,7 @@ export class LendingStationAPI extends DataSource {
 
     async createTimeFrame (timeFrame: any) {
         return await this.connection.transaction(async (entityManager: EntityManager) => {
-            if (timeFrame.to === undefined) {
-                timeFrame.to = '';
-            }
-            timeFrame.dateRange = '[' + timeFrame.from + ',' + timeFrame.to + ')';
+            genDateRange(timeFrame);
             // checking for overlapping time frames
             const overlapping = await entityManager.getRepository(TimeFrame)
                 .createQueryBuilder('timeframe')

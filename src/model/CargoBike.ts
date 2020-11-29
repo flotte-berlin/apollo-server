@@ -30,7 +30,6 @@ import {
     DeleteDateColumn
 } from 'typeorm';
 import { Provider } from './Provider';
-import { Participant } from './Participant';
 import { InsuranceData } from './InsuranceData';
 import { TimeFrame } from './TimeFrame';
 import { Taxes } from './Taxes';
@@ -90,13 +89,19 @@ export class Security {
     adfcCoding: string;
 }
 export class TechnicalEquipment {
-    @Column()
+    @Column({
+        nullable: true
+    })
     bicycleShift: string;
 
-    @Column()
+    @Column({
+        nullable: true
+    })
     isEBike: boolean;
 
-    @Column()
+    @Column({
+        nullable: true
+    })
     hasLightSystem: boolean;
 
     @Column({
@@ -106,10 +111,14 @@ export class TechnicalEquipment {
 }
 
 export class DimensionsAndLoad {
-    @Column()
+    @Column({
+        nullable: true
+    })
     hasCoverBox: boolean;
 
-    @Column()
+    @Column({
+        nullable: true
+    })
     lockable:boolean;
 
     @Column({
@@ -156,7 +165,7 @@ export class DimensionsAndLoad {
 
     @Column({
         nullable: true,
-        type: 'numrange'
+        type: 'decimal'
 
     })
     bikeWidth: number;
@@ -194,6 +203,11 @@ export class CargoBike implements Lockable {
         unique: true
     })
     name: string;
+
+    @Column({
+        nullable: true
+    })
+    state: string;
 
     @OneToMany(type => Equipment, equipment => equipment.cargoBikeId, {
         nullable: true,

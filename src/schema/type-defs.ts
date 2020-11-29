@@ -33,12 +33,14 @@ export default gql`
     The kind of currency depends on the database.
     """
     scalar Money
+    
     "The CargoBike type is central to the graph. You could call it the root."
     type CargoBike {
         id: ID!
         "see column A in info tabelle"
         group: Group
-        name: String
+        name: String!
+        state: BikeState
         modelName: String
         numberOfWheels: Int
         forCargo: Boolean
@@ -56,7 +58,7 @@ export default gql`
         """
         Does not refer to an extra table in the database.
         """
-        dimensionsAndLoad: DimensionsAndLoad!
+        dimensionsAndLoad: DimensionsAndLoad
         "If offset or limit is not provided, both values are ignored"
         bikeEvents(offset: Int, limit: Int): [BikeEvent]
         "If offset or limit is not provided, both values are ignored"
@@ -69,7 +71,7 @@ export default gql`
         provider: Provider
         "all participants currently engaged with the cargoBike"
         participants:  [Participant]
-        insuranceData: InsuranceData!
+        insuranceData: InsuranceData
         lendingStation: LendingStation
         taxes: Taxes
         currentEngagements: [Engagement]
@@ -84,12 +86,22 @@ export default gql`
     }
 
     """
+    Status of the CargoBike. More fields will be added, or removed.
+    """
+    enum BikeState {
+        ACTIVE
+        INACTIVE
+        INPREPARATION
+    }
+    
+    """
     if you want to add bike to a lending station, create a new timeFrame with to: Date = null
     """
     input CargoBikeCreateInput {
         "see column A in info tabelle"
         group: Group!
         name: String!
+        state: BikeState
         modelName: String!
         numberOfWheels: Int!
         forCargo: Boolean!
@@ -102,11 +114,11 @@ export default gql`
         """
         Does not refer to an extra table in the database.
         """
-        technicalEquipment: TechnicalEquipmentCreateInput!
+        technicalEquipment: TechnicalEquipmentCreateInput
         """
         Does not refer to an extra table in the database.
         """
-        dimensionsAndLoad: DimensionsAndLoadCreateInput!
+        dimensionsAndLoad: DimensionsAndLoadCreateInput
         """
         Refers to equipment that is not unique. See kommentierte info tabelle -> Fragen -> Frage 2
         When set to null or [], no relations will be added.
@@ -122,8 +134,8 @@ export default gql`
         stickerBikeNameState: StickerBikeNameState
         note: String
         providerId: ID
-        insuranceData: InsuranceDataCreateInput!
-        taxes: TaxesCreateInput!
+        insuranceData: InsuranceDataCreateInput
+        taxes: TaxesCreateInput
     }
 
     """
@@ -134,6 +146,7 @@ export default gql`
         "see column A in info tabelle"
         group: Group
         name: String
+        state: BikeState
         modelName: String
         numberOfWheels: Int
         forCargo: Boolean
@@ -180,15 +193,15 @@ export default gql`
         """
         Eventually, this field will become an enum or a separate data table and user can choose from a pool of insurance companies.
         """
-        name: String!
-        benefactor: String!
-        billing: String!
-        noPnP: String!
+        name: String
+        benefactor: String
+        billing: String
+        noPnP: String
         "eg. Anbieter, flotte, eigenleistung"
-        maintenanceResponsible: String!
-        maintenanceBenefactor: String!
+        maintenanceResponsible: String
+        maintenanceBenefactor: String
         maintenanceAgreement: String
-        hasFixedRate: Boolean!
+        hasFixedRate: Boolean
         fixedRate: Float
         """
         Projektzuschuss:
@@ -206,15 +219,15 @@ export default gql`
         """
         Eventually, this field will become an enum or a separate data table and user can choose from a pool of insurance companies.
         """
-        name: String!
-        benefactor: String!
-        billing: String!
-        noPnP: String!
+        name: String
+        benefactor: String
+        billing: String
+        noPnP: String
         "eg. Anbieter, flotte, eigenleistung"
-        maintenanceResponsible: String!
-        maintenanceBenefactor: String!
+        maintenanceResponsible: String
+        maintenanceBenefactor: String
         maintenanceAgreement: String
-        hasFixedRate: Boolean!
+        hasFixedRate: Boolean
         fixedRate: Float
         """
         Projektzuschuss:
@@ -254,17 +267,28 @@ export default gql`
         notes: String
     }
 
+    type NumRange {
+        min: Float
+        max: Float
+    }
+    
+    """
+    If min or max is omitted, the omitted value will be the same as the other given value
+    So if you pass one as null, both values with be over written with null.
+    """
+    input NumRangeInput {
+        min: Float
+        max: Float
+    }
+    
     "How are the dimensions and how much weight can handle a bike. This data is merged in the CargoBike table and the BikeModel table."
     type DimensionsAndLoad {
-        hasCoverBox: Boolean!
+        hasCoverBox: Boolean
         "cover box can be locked"
-        lockable: Boolean!
-        minBoxLength: Float
-        maxBoxLength: Float
-        minBoxWidth: Float
-        maxBoxWidth: Float
-        minBoxHeight: Float
-        maxBoxHeight: Float
+        lockable: Boolean
+        boxLengthRange: NumRange
+        boxWidthRange: NumRange
+        boxHeightRange: NumRange
         maxWeightBox: Float
         maxWeightLuggageRack: Float
         maxWeightTotal: Float
@@ -275,14 +299,11 @@ export default gql`
     }
 
     input DimensionsAndLoadCreateInput {
-        hasCoverBox: Boolean!
-        lockable: Boolean!
-        minBoxLength: Float
-        maxBoxLength: Float
-        minBoxWidth: Float
-        maxBoxWidth: Float
-        minBoxHeight: Float
-        maxBoxHeight: Float
+        hasCoverBox: Boolean
+        lockable: Boolean
+        boxLengthRange: NumRangeInput
+        boxWidthRange: NumRangeInput
+        boxHeightRange: NumRangeInput
         maxWeightBox: Float
         maxWeightLuggageRack: Float
         maxWeightTotal: Float
@@ -295,12 +316,9 @@ export default gql`
     input DimensionsAndLoadUpdateInput {
         hasCoverBox: Boolean
         lockable: Boolean
-        minBoxLength: Float
-        maxBoxLength: Float
-        minBoxWidth: Float
-        maxBoxWidth: Float
-        minBoxHeight: Float
-        maxBoxHeight: Float
+        boxLengthRange: NumRangeInput
+        boxWidthRange: NumRangeInput
+        boxHeightRange: NumRangeInput
         maxWeightBox: Float
         maxWeightLuggageRack: Float
         maxWeightTotal: Float
@@ -316,16 +334,16 @@ export default gql`
     So no id needed for mutation. One Mutation for the CargoBike will be enough.
     """
     type TechnicalEquipment {
-        bicycleShift: String!
-        isEBike: Boolean!
-        hasLightSystem: Boolean!
+        bicycleShift: String
+        isEBike: Boolean
+        hasLightSystem: Boolean
         specialFeatures: String
     }
 
     input TechnicalEquipmentCreateInput {
-        bicycleShift: String!
-        isEBike: Boolean!
-        hasLightSystem: Boolean!
+        bicycleShift: String
+        isEBike: Boolean
+        hasLightSystem: Boolean
         specialFeatures: String
     }
 
@@ -563,12 +581,12 @@ export default gql`
     }
 
     type Taxes {
-        costCenter: String!
+        costCenter: String
         organisationArea: OrganisationArea
     }
 
     input TaxesCreateInput {
-        costCenter: String!
+        costCenter: String
         organisationArea: OrganisationArea
     }
 
@@ -643,7 +661,7 @@ export default gql`
         keepLock: Boolean
     }
 
-    "An Event is a point in time, when the state of the bike somehow changed."
+    "An Event is a point in time concerning one cargo bike of an event type. For example a chain swap."
     type BikeEvent {
         id: ID!
         bikeEventType: BikeEventType!
@@ -923,13 +941,26 @@ export default gql`
         loanTimes: [String!]
     }
 
+    type DateRange{
+        from: Date!
+        "will be infinity of not omitted"
+        to: Date
+    }
+    
+    input DateRangeInput {
+        "format YYYY-MM-dd"
+        from: Date!
+        """
+        format YYYY-MM-dd
+        will be infinity of not omitted
+        """
+        to: Date
+    }
+    
     "(dt. Zeitscheibe) When was a bike where"
     type TimeFrame {
         id: ID!
-        "format YYYY-MM-dd"
-        from: Date!
-        "format YYYY-MM-dd"
-        to: Date
+        dateRange: DateRange!
         note: String
         lendingStation: LendingStation!
         cargoBike: CargoBike!
@@ -941,8 +972,7 @@ export default gql`
     }
 
     input TimeFrameCreateInput {
-        from: Date!
-        to: Date
+        dateRange: DateRangeInput!
         note: String
         lendingStationId: ID!
         cargoBikeId: ID!
@@ -950,8 +980,7 @@ export default gql`
 
     input TimeFrameUpdateInput {
         id: ID!
-        from: Date
-        to: Date
+        dateRange: DateRangeInput
         note: String
         lendingStationId: ID
         cargoBikeId: ID

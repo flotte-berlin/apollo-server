@@ -23,45 +23,48 @@ import { ActionLog, Actions } from '../../model/ActionLog';
 import { UserInputError } from 'apollo-server-express';
 
 export function genDateRange (struct: any) {
-    if (struct.to === undefined) {
-        struct.to = '';
-    }
-    struct.dateRange = '[' + struct.from + ',' + struct.to + ')';
-    if (struct.from === undefined) {
+    if (!struct.dateRange || !struct.dateRange.from) {
         delete struct.dateRange;
+        return;
+    } else if (!struct.dateRange?.to) {
+        struct.dateRange.to = '';
+    } else if (struct.dateRange.to === struct.dateRange.from) {
+        throw new UserInputError('Date Range can not be empty, provide different dates.');
     }
-    // delete these keys, so the struct can be used to update the engagement entity
-    delete struct.from;
-    delete struct.to;
+    struct.dateRange = `[${struct.dateRange.from},${struct.dateRange.to})`;
+}
+
+/**
+ * This function helps prepare the cargoBike struct, to be used in an update or create.
+ * It creates the numrange attributes than can be understood by postgres.
+ * @param range
+ */
+function genNumRange (range: { min: number, max: number}) :string {
+    if (!range || (!range.max && !range.min)) {
+        return null;
+    } else if (range.min === null || range.min === undefined) {
+        range.min = range.max;
+    } else if (range.max === null || range.max === undefined) {
+        range.max = range.min;
+    }
+    if (range.min < 0) {
+        throw new UserInputError('Minimal value must be greater or equal to 0');
+    }
+    return `[${range.min},${range.max}]`;
 }
 
 /**
  * This function prepares the cargoBike struct, to be used in an update or create.
  * It creates the numrange attributes than can be understood by postgres.
- * @param from
- * @param to
+ * @param cargoBike
  */
-function genNumRange (from: number, to: number) {
-    if (from === null || from === undefined) {
-        from = to;
-    } else if (to === null || to === undefined) {
-        to = from;
-    }
-    return from ? '[' + from + ',' + to + ']' : null;
+export function genBoxDimensions (cargoBike: any) {
+    if (!cargoBike.dimensionsAndLoad) { return; }
+    cargoBike.dimensionsAndLoad.boxLengthRange = genNumRange(cargoBike.dimensionsAndLoad.boxLengthRange);
+    cargoBike.dimensionsAndLoad.boxWidthRange = genNumRange(cargoBike.dimensionsAndLoad.boxWidthRange);
+    cargoBike.dimensionsAndLoad.boxHeightRange = genNumRange(cargoBike.dimensionsAndLoad.boxHeightRange);
 }
 
-export function genBoxDimensions (cargoBike: any) {
-    cargoBike.dimensionsAndLoad.boxLengthRange = genNumRange(cargoBike.dimensionsAndLoad.minBoxLength, cargoBike.dimensionsAndLoad.maxBoxLength);
-    cargoBike.dimensionsAndLoad.boxWidthRange = genNumRange(cargoBike.dimensionsAndLoad.minBoxWidth, cargoBike.dimensionsAndLoad.maxBoxWidth);
-    cargoBike.dimensionsAndLoad.boxHeightRange = genNumRange(cargoBike.dimensionsAndLoad.minBoxHeight, cargoBike.dimensionsAndLoad.maxBoxHeight);
-    // delete this so update cargo bike works
-    delete cargoBike.dimensionsAndLoad.minBoxLength;
-    delete cargoBike.dimensionsAndLoad.maxBoxLength;
-    delete cargoBike.dimensionsAndLoad.minBoxWidth;
-    delete cargoBike.dimensionsAndLoad.maxBoxWidth;
-    delete cargoBike.dimensionsAndLoad.minBoxHeight;
-    delete cargoBike.dimensionsAndLoad.maxBoxHeight;
-}
 /**
  * Can be used in resolvers to specify, if entry is locked by other user.
  * Returns true if locked by other user.
@@ -273,10 +276,10 @@ export class ActionLogger {
             // sometimes updates[value] is an array, e.g. timePeriods that are saved as a simple array in postgres
             if (updates[value] && typeof updates[value] === 'object' && !Array.isArray(updates[value])) {
                 Object.keys(updates[value]).forEach(subValue => {
-                    ret.push(alias + '."' + value + subValue[0].toUpperCase() + subValue.substr(1).toLowerCase() + '"');
+                    ret.push(`${alias}."${value}${subValue[0].toUpperCase()}${subValue.substr(1).toLowerCase()}"`);
                 });
             } else {
-                ret.push(alias + '."' + value + '"');
+                ret.push(`${alias}."${value}"`);
             }
         });
         return ret;

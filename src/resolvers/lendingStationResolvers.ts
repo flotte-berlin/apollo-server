@@ -104,14 +104,15 @@ export default {
             return parent.loanTimes ? parent.loanTimes : [];
         }
     },
+    DateRange: {
+        from (parent: string) {
+            return parent.replace(/^\[(.*),.*\)$/, '$1');
+        },
+        to (parent: string) {
+            return parent.replace(/^\[.*,(.*)\)$/, '$1');
+        }
+    },
     TimeFrame: {
-        from (parent: any) {
-            return (parent.dateRange as string).split(',')[0].replace('[', '');
-        },
-        to (parent: any) {
-            const str = (parent.dateRange as string).split(',')[1].replace(')', '');
-            return (str.length > 0) ? str : null;
-        },
         cargoBike (parent: any, __: any, { dataSources, req }: { dataSources: any, req: any }) {
             if (req.permissions.includes(Permission.ReadBike)) {
                 return dataSources.cargoBikeAPI.cargoBikeByTimeFrameId(parent.id);

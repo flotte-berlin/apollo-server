@@ -161,45 +161,12 @@ export default {
         isLockedByMe: (parent: any, __: any, { req }: { req: any }) => isLockedByMe(parent, { req }),
         isLocked: (parent: any, __: any, { req }: { req: any }) => isLocked(parent, { req })
     },
-    DimensionsAndLoad: {
-        minBoxLength: (parent: any) => {
-            if (!parent.boxLengthRange || parent.boxLengthRange === 'empty') {
-                return null;
-            }
-            return parent.boxLengthRange ? (parent.boxLengthRange as string).split(',')[0].replace('[', '') : null;
+    NumRange: {
+        min: (parent: string) => {
+            return parent.replace(/^\[(.*),.*]$/, '$1');
         },
-        maxBoxLength: (parent: any) => {
-            if (!parent.boxLengthRange || parent.boxLengthRange === 'empty') {
-                return null;
-            }
-            const str = (parent.boxLengthRange as string).split(',')[1].replace(']', '');
-            return (str.length > 0) ? str : null;
-        },
-        minBoxWidth: (parent: any) => {
-            if (!parent.boxWidthRange || parent.boxWidthRange === 'empty') {
-                return null;
-            }
-            return parent.boxWidthRange ? (parent.boxWidthRange as string).split(',')[0].replace('[', '') : null;
-        },
-        maxBoxWidth: (parent: any) => {
-            if (!parent.boxWidthRange || parent.boxWidthRange === 'empty') {
-                return null;
-            }
-            const str = (parent.boxWidthRange as string).split(',')[1].replace(']', '');
-            return (str.length > 0) ? str : null;
-        },
-        minBoxHeight: (parent: any) => {
-            if (!parent.boxHeightRange || parent.boxHeightRange === 'empty') {
-                return null;
-            }
-            return parent.boxHeightRange ? (parent.boxHeightRange as string).split(',')[0].replace('[', '') : null;
-        },
-        maxBoxHeight: (parent: any) => {
-            if (!parent.boxHeightRange || parent.boxHeightRange === 'empty') {
-                return null;
-            }
-            const str = (parent.boxHeightRange as string).split(',')[1].replace(']', '');
-            return (str.length > 0) ? str : null;
+        max: (parent: string) => {
+            return parent.replace(/^\[.*,(.*)]$/, '$1');
         }
     },
     Equipment: {
