@@ -106,11 +106,10 @@ export default {
     },
     DateRange: {
         from (parent: string) {
-            return parent.split(',')[0].replace('[', '');
+            return parent.replace(/^\[(.*),.*\)$/, '$1');
         },
         to (parent: string) {
-            const str = parent.split(',')[1].replace(')', '');
-            return (str.length > 0) ? str : null;
+            return parent.replace(/^\[.*,(.*)\)$/, '$1');
         }
     },
     TimeFrame: {

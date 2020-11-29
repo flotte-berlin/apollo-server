@@ -163,10 +163,10 @@ export default {
     },
     NumRange: {
         min: (parent: string) => {
-            return parent.split(',')[0].replace('[', '');
+            return parent.replace(/^\[(.*),.*]$/, '$1');
         },
         max: (parent: string) => {
-            return parent.split(',')[1].replace(']', '');
+            return parent.replace(/^\[.*,(.*)]$/, '$1');
         }
     },
     Equipment: {
