@@ -179,7 +179,7 @@ export class ParticipantAPI extends DataSource {
                 .values([participant])
                 .returning('*')
                 .execute();
-            await entityManager.getRepository(Participant)
+            participant.workshopIds && await entityManager.getRepository(Participant)
                 .createQueryBuilder('w')
                 .relation(Participant, 'workshopIds')
                 .of(participant.id)
@@ -211,8 +211,8 @@ export class ParticipantAPI extends DataSource {
                 .update()
                 .set({ ...participant })
                 .where('id = :id', { id: participant.id })
-                .execute().then(value => { if (value.affected !== 1) { throw new GraphQLError('ID not found'); } });
-            await entityManager.getRepository(Participant)
+                .execute().then(value => { if (value.affected !== 1) { throw new UserInputError('ID not found'); } });
+            workshops && await entityManager.getRepository(Participant)
                 .createQueryBuilder('w')
                 .relation(Participant, 'workshopIds')
                 .of(participant.id)

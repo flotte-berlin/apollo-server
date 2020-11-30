@@ -550,8 +550,7 @@ export default gql`
     type Engagement {
         id: ID!
         engagementType: EngagementType!
-        from: Date!
-        to: Date
+        dateRange: DateRange!
         participant: Participant!
         cargoBike: CargoBike!
         isLocked: Boolean!
@@ -563,18 +562,14 @@ export default gql`
 
     input EngagementCreateInput {
         engagementTypeId: ID!
-        "will use CURRENT_DATE if not set"
-        from: Date
-        "will use infinit if not set"
-        to: Date
+        dateRange: DateRangeInput
         participantId: ID!
         cargoBikeId: ID!
     }
     input EngagementUpdateInput {
         id: ID!
         engagementTypeId: ID
-        from: Date
-        to: Date
+        dateRange: DateRangeInput
         participantId: ID
         cargoBikeId: ID
         keepLock: Boolean
