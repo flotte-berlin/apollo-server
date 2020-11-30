@@ -65,7 +65,9 @@ export interface Lockable {
 }
 
 export class Security {
-    @Column()
+    @Column({
+        nullable: true
+    })
     frameNumber: string;
 
     @Column({
@@ -190,9 +192,6 @@ export class CargoBike implements Lockable {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @DeleteDateColumn()
-    deleteDate: Date;
-
     @Column({
         type: 'enum',
         enum: Group
@@ -268,19 +267,32 @@ export class CargoBike implements Lockable {
     })
     description: string;
 
-    @Column()
+    @Column({
+        nullable: true
+    })
     modelName: string;
 
-    @Column()
+    @Column({
+        nullable: true
+    })
     numberOfWheels: number;
 
-    @Column()
+    @Column({
+        type: 'boolean',
+        nullable: true
+    })
     forCargo: boolean;
 
-    @Column()
+    @Column({
+        type: 'boolean',
+        nullable: true
+    })
     forChildren: boolean;
 
-    @Column()
+    @Column({
+        type: 'int',
+        nullable: true
+    })
     numberOfChildren: number;
 
     @Column(type => TechnicalEquipment)
@@ -290,6 +302,7 @@ export class CargoBike implements Lockable {
     dimensionsAndLoad: DimensionsAndLoad;
 
     @Column({
+        type: 'int',
         nullable: true
     })
     lockedBy: number;
