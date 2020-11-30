@@ -45,12 +45,12 @@ export default gql`
         numberOfWheels: Int
         forCargo: Boolean
         forChildren: Boolean
-        numberOfChildren: Int!
+        numberOfChildren: Int
         """
         Safety is a custom type, that stores information about security features.
         TODO: Should this be called Security?
         """
-        security: Security!
+        security: Security
         """
         Does not refer to an extra table in the database.
         """
@@ -102,15 +102,15 @@ export default gql`
         group: Group!
         name: String!
         state: BikeState
-        modelName: String!
-        numberOfWheels: Int!
-        forCargo: Boolean!
-        forChildren: Boolean!
-        numberOfChildren: Int!
+        modelName: String
+        numberOfWheels: Int
+        forCargo: Boolean
+        forChildren: Boolean
+        numberOfChildren: Int
         """
         Safety is a custom type, that stores information about security features.
         """
-        security: SecurityCreateInput!
+        security: SecurityCreateInput
         """
         Does not refer to an extra table in the database.
         """
@@ -360,7 +360,7 @@ export default gql`
     So no id needed for mutation. One Mutation for the CargoBike will be enough.
     """
     type Security {
-        frameNumber: String!
+        frameNumber: String
         keyNumberFrameLock: String
         keyNumberAXAChain: String
         policeCoding: String
@@ -368,7 +368,7 @@ export default gql`
     }
 
     input SecurityCreateInput {
-        frameNumber: String!
+        frameNumber: String
         keyNumberFrameLock: String
         keyNumberAXAChain: String
         policeCoding: String
@@ -550,8 +550,7 @@ export default gql`
     type Engagement {
         id: ID!
         engagementType: EngagementType!
-        from: Date!
-        to: Date
+        dateRange: DateRange!
         participant: Participant!
         cargoBike: CargoBike!
         isLocked: Boolean!
@@ -563,18 +562,14 @@ export default gql`
 
     input EngagementCreateInput {
         engagementTypeId: ID!
-        "will use CURRENT_DATE if not set"
-        from: Date
-        "will use infinit if not set"
-        to: Date
+        dateRange: DateRangeInput
         participantId: ID!
         cargoBikeId: ID!
     }
     input EngagementUpdateInput {
         id: ID!
         engagementTypeId: ID
-        from: Date
-        to: Date
+        dateRange: DateRangeInput
         participantId: ID
         cargoBikeId: ID
         keepLock: Boolean

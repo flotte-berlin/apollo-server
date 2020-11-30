@@ -113,13 +113,6 @@ export default {
                 return new GraphQLError('Insufficient Permissions');
             }
         },
-        from (parent: any) {
-            return (parent.dateRange as string).split(',')[0].replace('[', '');
-        },
-        to (parent: any) {
-            const str = (parent.dateRange as string).split(',')[1].replace(')', '');
-            return (str.length > 0) ? str : null;
-        },
         isLockedByMe: (parent: any, __: any, { req }: { req: any }) => isLockedByMe(parent, { req }),
         isLocked: (parent: any, __: any, { req }: { req: any }) => isLocked(parent, { req })
     },
