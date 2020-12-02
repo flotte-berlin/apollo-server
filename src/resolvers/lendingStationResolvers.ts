@@ -99,11 +99,6 @@ export default {
         isLockedByMe: (parent: any, __: any, { req }: { req: any }) => isLockedByMe(parent, { req }),
         isLocked: (parent: any, __: any, { req }: { req: any }) => isLocked(parent, { req })
     },
-    LoanPeriod: {
-        loanTimes  (parent: any) {
-            return parent.loanTimes ? parent.loanTimes : [];
-        }
-    },
     DateRange: {
         from (parent: string) {
             return parent.replace(/^\[(.*),.*\)$/, '$1');

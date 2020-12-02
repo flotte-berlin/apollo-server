@@ -21,8 +21,10 @@ import { gql } from 'apollo-server-express';
 
 export default gql`
 
-    "timestamp object YYYY-MM-ddThh:mm:ss.sssZ"
+    "date object YYYY-MM-dd"
     scalar Date
+    "timestamp object YYYY-MM-ddThh:mm:ss.sssZ"
+    scalar DateTime
     "only time hh-mm-ss"
     scalar Time
     """
@@ -82,7 +84,7 @@ export default gql`
         isLockedByMe: Boolean!
         "null if not locked by other user"
         lockedBy: ID
-        lockedUntil: Date
+        lockedUntil: DateTime
     }
 
     """
@@ -429,7 +431,7 @@ export default gql`
         isLockedByMe: Boolean!
         "null if not locked by other user"
         lockedBy: ID
-        lockedUntil: Date
+        lockedUntil: DateTime
     }
 
     input ParticipantCreateInput {
@@ -482,7 +484,7 @@ export default gql`
         isLockedByMe: Boolean!
         "null if not locked by other user"
         lockedBy: ID
-        lockedUntil: Date
+        lockedUntil: DateTime
     }
 
     input WorkshopCreateInput {
@@ -512,7 +514,7 @@ export default gql`
         isLockedByMe: Boolean!
         "null if not locked by other user"
         lockedBy: ID
-        lockedUntil: Date
+        lockedUntil: DateTime
     }
 
     input WorkshopTypeCreateInput {
@@ -532,7 +534,7 @@ export default gql`
         isLockedByMe: Boolean!
         "null if not locked by other user"
         lockedBy: ID
-        lockedUntil: Date
+        lockedUntil: DateTime
     }
 
     input EngagementTypeCreateInput {
@@ -557,7 +559,7 @@ export default gql`
         isLockedByMe: Boolean!
         "null if not locked by other user"
         lockedBy: ID
-        lockedUntil: Date
+        lockedUntil: DateTime
     }
 
     input EngagementCreateInput {
@@ -609,7 +611,7 @@ export default gql`
         isLockedByMe: Boolean!
         "null if not locked by other user"
         lockedBy: ID
-        lockedUntil: Date
+        lockedUntil: DateTime
     }
 
     input EquipmentCreateInput {
@@ -641,7 +643,7 @@ export default gql`
         isLockedByMe: Boolean!
         "null if not locked by other user"
         lockedBy: ID
-        lockedUntil: Date
+        lockedUntil: DateTime
     }
 
     input EquipmentTypeCreateInput {
@@ -674,7 +676,7 @@ export default gql`
         isLockedByMe: Boolean!
         "null if not locked by other user"
         lockedBy: ID
-        lockedUntil: Date
+        lockedUntil: DateTime
     }
 
     input BikeEventCreateInput {
@@ -714,7 +716,7 @@ export default gql`
         isLocked: Boolean!
         "null if not locked by other user"
         lockedBy: ID
-        lockedUntil: Date
+        lockedUntil: DateTime
     }
 
     input BikeEventTypeUpdateInput {
@@ -734,7 +736,7 @@ export default gql`
         isLockedByMe: Boolean!
         "null if not locked by other user"
         lockedBy: ID
-        lockedUntil: Date
+        lockedUntil: DateTime
     }
 
     "(dt. Anbieter)"
@@ -768,7 +770,7 @@ export default gql`
         isLockedByMe: Boolean!
         "null if not locked by other user"
         lockedBy: ID
-        lockedUntil: Date
+        lockedUntil: DateTime
     }
 
     input PersonCreateInput {
@@ -795,7 +797,7 @@ export default gql`
         isLockedByMe: Boolean!
         "null if not locked by other user"
         lockedBy: ID
-        lockedUntil: Date
+        lockedUntil: DateTime
     }
 
     input ContactInformationCreateInput {
@@ -835,7 +837,7 @@ export default gql`
         isLockedByMe: Boolean!
         "null if not locked by other user"
         lockedBy: ID
-        lockedUntil: Date
+        lockedUntil: DateTime
     }
 
     input OrganisationCreateInput {
@@ -879,7 +881,7 @@ export default gql`
         isLockedByMe: Boolean!
         "null if not locked by other user"
         lockedBy: ID
-        lockedUntil: Date
+        lockedUntil: DateTime
     }
 
     """
@@ -913,13 +915,13 @@ export default gql`
     """
     type LoanPeriod {
         generalRemark: String
-        "notes for each day of the week, starting on Monday"
-        notes: [String]
-        """
-        Loan times from and until for each day of the week.
-        Starting with Monday from, Monday to, Tuesday from, ..., Sunday to
-        """
-        loanTimes: [String]
+        mo: String
+        tu: String
+        we: String
+        th: String
+        fr: String
+        sa: String
+        su: String
     }
 
     """
@@ -927,13 +929,13 @@ export default gql`
     """
     input LoanPeriodInput {
         generalRemark: String
-        "notes for each day of the week, starting on Monday"
-        notes: [String!]
-        """
-        Loan times from and until for each day of the week.
-        Starting with Monday from, Monday to, Tuesday from, ..., Sunday to
-        """
-        loanTimes: [String!]
+        mo: String
+        tu: String
+        we: String
+        th: String
+        fr: String
+        sa: String
+        su: String
     }
 
     type DateRange{
@@ -963,7 +965,7 @@ export default gql`
         isLockedByMe: Boolean!
         "null if not locked by other user"
         lockedBy: ID
-        lockedUntil: Date
+        lockedUntil: DateTime
     }
 
     input TimeFrameCreateInput {
@@ -1138,23 +1140,23 @@ export default gql`
         """
         createParticipant(participant: ParticipantCreateInput!): Participant!
         lockParticipant(id: ID!): Participant!
-        unlockParticipant(id: ID!): Boolean
+        unlockParticipant(id: ID!): Participant
         updateParticipant(participant: ParticipantUpdateInput!): Participant!
         deleteParticipant(id: ID!): Boolean!
         createWorkshopType(workshopType: WorkshopTypeCreateInput!): WorkshopType!
         lockWorkshopType(id: ID!): WorkshopType!
-        unlockWorkshopType(id: ID!): Boolean!
+        unlockWorkshopType(id: ID!): WorkshopType!
         updateWorkshopType(workshopType: WorkshopTypeUpdateInput!): WorkshopType!
         deleteWorkshopType(id: ID!): Boolean!
         createWorkshop(workshop: WorkshopCreateInput!): Workshop!
         lockWorkshop(id: ID!): Workshop!
-        unlockWorkshop(id: ID!): Boolean!
+        unlockWorkshop(id: ID!): Workshop!
         updateWorkshop(workshop: WorkshopUpdateInput!): Workshop!
         deleteWorkshop(id: ID!): Boolean!
         "create new contactInfo"
         createContactInformation(contactInformation: ContactInformationCreateInput!): ContactInformation!
         lockContactInformation(id: ID!): ContactInformation!
-        unlockContactInformation(id: ID!): Boolean!
+        unlockContactInformation(id: ID!): ContactInformation!
         updateContactInformation(contactInformation: ContactInformationUpdateInput!): ContactInformation!
         deleteContactInformation(id: ID!): Boolean!
         createPerson(person: PersonCreateInput!): Person!
@@ -1165,22 +1167,22 @@ export default gql`
         "create Engagement"
         createEngagement(engagement: EngagementCreateInput): Engagement!
         lockEngagement(id: ID!): Engagement!
-        unlockEngagement(id: ID!): Boolean!
+        unlockEngagement(id: ID!): Engagement!
         updateEngagement(engagement: EngagementUpdateInput!): Engagement!
         deleteEngagement(id: ID!): Boolean!
         createEngagementType(engagementType: EngagementTypeCreateInput!): EngagementType!
         lockEngagementType(id: ID!): EngagementType!
-        unlockEngagementType(id: ID!): Boolean!
+        unlockEngagementType(id: ID!): EngagementType!
         updateEngagementType(engagementType: EngagementTypeUpdateInput!): EngagementType!
         deleteEngagementType(id: ID!): Boolean!
         createProvider(provider: ProviderCreateInput!): Provider!
         lockProvider(id: ID!): Provider!
-        unlockProvider(id: ID!): Boolean!
+        unlockProvider(id: ID!): Provider!
         updateProvider(provider: ProviderUpdateInput!): Provider!
         deleteProvider(id: ID!): Boolean!
         createOrganisation(organisation: OrganisationCreateInput!): Organisation!
         lockOrganisation(id: ID!): Organisation!
-        unlockOrganisation(id: ID!): Boolean!
+        unlockOrganisation(id: ID!): Organisation!
         updateOrganisation(organisation: OrganisationUpdateInput!): Organisation!
         deleteOrganisation(id: ID!): Boolean!
     }
