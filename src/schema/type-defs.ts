@@ -1138,23 +1138,23 @@ export default gql`
         """
         createParticipant(participant: ParticipantCreateInput!): Participant!
         lockParticipant(id: ID!): Participant!
-        unlockParticipant(id: ID!): Boolean
+        unlockParticipant(id: ID!): Participant
         updateParticipant(participant: ParticipantUpdateInput!): Participant!
         deleteParticipant(id: ID!): Boolean!
         createWorkshopType(workshopType: WorkshopTypeCreateInput!): WorkshopType!
         lockWorkshopType(id: ID!): WorkshopType!
-        unlockWorkshopType(id: ID!): Boolean!
+        unlockWorkshopType(id: ID!): WorkshopType!
         updateWorkshopType(workshopType: WorkshopTypeUpdateInput!): WorkshopType!
         deleteWorkshopType(id: ID!): Boolean!
         createWorkshop(workshop: WorkshopCreateInput!): Workshop!
         lockWorkshop(id: ID!): Workshop!
-        unlockWorkshop(id: ID!): Boolean!
+        unlockWorkshop(id: ID!): Workshop!
         updateWorkshop(workshop: WorkshopUpdateInput!): Workshop!
         deleteWorkshop(id: ID!): Boolean!
         "create new contactInfo"
         createContactInformation(contactInformation: ContactInformationCreateInput!): ContactInformation!
         lockContactInformation(id: ID!): ContactInformation!
-        unlockContactInformation(id: ID!): Boolean!
+        unlockContactInformation(id: ID!): ContactInformation!
         updateContactInformation(contactInformation: ContactInformationUpdateInput!): ContactInformation!
         deleteContactInformation(id: ID!): Boolean!
         createPerson(person: PersonCreateInput!): Person!
@@ -1165,22 +1165,22 @@ export default gql`
         "create Engagement"
         createEngagement(engagement: EngagementCreateInput): Engagement!
         lockEngagement(id: ID!): Engagement!
-        unlockEngagement(id: ID!): Boolean!
+        unlockEngagement(id: ID!): Engagement!
         updateEngagement(engagement: EngagementUpdateInput!): Engagement!
         deleteEngagement(id: ID!): Boolean!
         createEngagementType(engagementType: EngagementTypeCreateInput!): EngagementType!
         lockEngagementType(id: ID!): EngagementType!
-        unlockEngagementType(id: ID!): Boolean!
+        unlockEngagementType(id: ID!): EngagementType!
         updateEngagementType(engagementType: EngagementTypeUpdateInput!): EngagementType!
         deleteEngagementType(id: ID!): Boolean!
         createProvider(provider: ProviderCreateInput!): Provider!
         lockProvider(id: ID!): Provider!
-        unlockProvider(id: ID!): Boolean!
+        unlockProvider(id: ID!): Provider!
         updateProvider(provider: ProviderUpdateInput!): Provider!
         deleteProvider(id: ID!): Boolean!
         createOrganisation(organisation: OrganisationCreateInput!): Organisation!
         lockOrganisation(id: ID!): Organisation!
-        unlockOrganisation(id: ID!): Boolean!
+        unlockOrganisation(id: ID!): Organisation!
         updateOrganisation(organisation: OrganisationUpdateInput!): Organisation!
         deleteOrganisation(id: ID!): Boolean!
     }
