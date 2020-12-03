@@ -29,16 +29,9 @@ export class Participant implements Lockable {
     id: number;
 
     @Column({
-        type: 'date',
-        default: () => 'CURRENT_DATE'
+        type: 'daterange'
     })
-    start: Date;
-
-    @Column({
-        type: 'date',
-        nullable: true
-    })
-    end: Date;
+    dateRange: Date[];
 
     @OneToOne(type => ContactInformation, contactInformation => contactInformation.participantId, {
         nullable: false
