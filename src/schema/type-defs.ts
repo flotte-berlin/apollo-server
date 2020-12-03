@@ -40,7 +40,7 @@ export default gql`
     type CargoBike {
         id: ID!
         "see column A in info tabelle"
-        group: Group
+        group: Group!
         name: String!
         state: BikeState
         modelName: String
