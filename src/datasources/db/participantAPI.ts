@@ -26,6 +26,7 @@ import { EngagementType } from '../../model/EngagementType';
 import { ActionLogger, DBUtils, genDateRange, LockUtils } from './utils';
 import { UserInputError } from 'apollo-server-express';
 import { GraphQLError } from 'graphql';
+import { ResourceLockedError } from '../../errors/ResourceLockedError';
 
 export class ParticipantAPI extends DataSource {
     connection : Connection
@@ -202,7 +203,7 @@ export class ParticipantAPI extends DataSource {
         delete participant.keepLock;
         await this.connection.transaction(async (entityManager: EntityManager) => {
             if (await LockUtils.isLocked(entityManager, Participant, 'p', participant.id, userId)) {
-                throw new UserInputError('Attempting to update locked resource');
+                throw new ResourceLockedError('Participant', 'Attempting to update locked resource');
             }
             genDateRange(participant);
             const workshops = participant.workshopIds;
@@ -288,7 +289,7 @@ export class ParticipantAPI extends DataSource {
         genDateRange(engagement);
         await this.connection.transaction(async (entityManager: EntityManager) => {
             if (await LockUtils.isLocked(entityManager, Engagement, 'e', engagement.id, userId)) {
-                throw new GraphQLError('Engagement is locked by other user');
+                throw new ResourceLockedError('Engagement');
             }
             await ActionLogger.log(entityManager, Engagement, 'e', engagement, userId);
             // check for overlapping engagements
@@ -356,7 +357,7 @@ export class ParticipantAPI extends DataSource {
         delete engagementType.keepLock;
         await this.connection.transaction(async (entityManager: EntityManager) => {
             if (await LockUtils.isLocked(entityManager, EngagementType, 'et', engagementType.id, userId)) {
-                throw new GraphQLError('EngagementType is locked by other user');
+                throw new ResourceLockedError('EngagementType');
             }
             await ActionLogger.log(entityManager, EngagementType, 'et', engagementType, userId);
             await entityManager.getRepository(EngagementType)

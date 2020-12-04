@@ -20,7 +20,6 @@ This file is part of fLotte-API-Server.
 import { DataSource } from 'apollo-datasource';
 import { Connection, EntityManager, getConnection } from 'typeorm';
 import { CargoBike } from '../../model/CargoBike';
-import { GraphQLError } from 'graphql';
 import { BikeEvent } from '../../model/BikeEvent';
 import { Equipment } from '../../model/Equipment';
 import { Engagement } from '../../model/Engagement';
@@ -29,8 +28,9 @@ import { TimeFrame } from '../../model/TimeFrame';
 import { ActionLogger, DBUtils, genBoxDimensions, LockUtils } from './utils';
 import { EquipmentType } from '../../model/EquipmentType';
 import { BikeEventType } from '../../model/BikeEventType';
-import { UserInputError } from 'apollo-server-express';
 import { Actions } from '../../model/ActionLog';
+import { ResourceLockedError } from '../../errors/ResourceLockedError';
+import { NotFoundError } from '../../errors/NotFoundError';
 
 /**
  * extended datasource to feed resolvers with data about cargoBikes
@@ -83,10 +83,16 @@ export class CargoBikeAPI extends DataSource {
     }
 
     async lockCargoBike (id: number, userId: number) {
+        if (!await this.connection.getRepository(CargoBike).findOne(id)) {
+            throw new NotFoundError('CargoBike', 'id', id);
+        }
         return await LockUtils.lockEntity(this.connection, CargoBike, 'cb', id, userId);
     }
 
     async unlockCargoBike (id: number, userId: number) {
+        if (!await this.connection.getRepository(CargoBike).findOne(id)) {
+            throw new NotFoundError('CargoBike', 'id', id);
+        }
         return await LockUtils.unlockEntity(this.connection, CargoBike, 'cb', id, userId);
     }
 
@@ -107,7 +113,7 @@ export class CargoBikeAPI extends DataSource {
 
         await this.connection.transaction(async (entityManager: EntityManager) => {
             if (await LockUtils.isLocked(entityManager, CargoBike, 'cb', cargoBike.id, userId)) {
-                throw new GraphQLError('CargoBike locked by other user');
+                throw new ResourceLockedError('CargoBike');
             }
             await ActionLogger.log(entityManager, CargoBike, 'cb', cargoBike, userId);
             await entityManager.getRepository(CargoBike)
@@ -116,11 +122,13 @@ export class CargoBikeAPI extends DataSource {
                 .set({ ...cargoBike })
                 .where('id = :id', { id: cargoBike.id })
                 .execute();
+
             equipmentTypeIds && await entityManager.getRepository(CargoBike)
                 .createQueryBuilder('cb')
                 .relation(CargoBike, 'equipmentTypeIds')
                 .of(cargoBike.id)
                 .addAndRemove(equipmentTypeIds, await this.equipmentTypeByCargoBikeId(cargoBike.id));
+
             equipmentIds && await entityManager.getRepository(CargoBike)
                 .createQueryBuilder('cb')
                 .relation(CargoBike, 'equipmentIds')
@@ -134,7 +142,7 @@ export class CargoBikeAPI extends DataSource {
     async deleteCargoBike (id: number, userId: number) {
         return await this.connection.transaction(async (entityManager: EntityManager) => {
             if (await LockUtils.isLocked(entityManager, CargoBike, 'cb', id, userId)) {
-                throw new UserInputError('Attempting to soft delete locked resource');
+                throw new ResourceLockedError('CargoBike', 'Attempting to soft delete locked resource');
             }
             await ActionLogger.log(entityManager, CargoBike, 'bg', { id: id }, userId, Actions.SOFT_DELETE);
             return await entityManager.getRepository(CargoBike)
@@ -189,7 +197,7 @@ export class CargoBikeAPI extends DataSource {
         delete bikeEvent.keepLock;
         await this.connection.transaction(async (entityManager: EntityManager) => {
             if (await LockUtils.isLocked(entityManager, BikeEvent, 'be', bikeEvent.id, userId)) {
-                throw new GraphQLError('BikeEvent locked by other user');
+                throw new ResourceLockedError('BikeEvents');
             }
             await ActionLogger.log(entityManager, BikeEvent, 'be', bikeEvent, userId);
             await entityManager.getRepository(BikeEvent)
@@ -267,7 +275,7 @@ export class CargoBikeAPI extends DataSource {
         delete bikeEventType.keepLock;
         await this.connection.transaction(async (entityManager: EntityManager) => {
             if (await LockUtils.isLocked(entityManager, BikeEventType, 'bet', bikeEventType.id, userId)) {
-                throw new GraphQLError('BikeEventType locked by other user');
+                throw new ResourceLockedError('BikeEventType');
             }
             await ActionLogger.log(entityManager, BikeEventType, 'bet', bikeEventType, userId);
             await entityManager.getRepository(BikeEventType)
@@ -405,7 +413,7 @@ export class CargoBikeAPI extends DataSource {
         delete equipment.keepLock;
         await this.connection.transaction(async (entityManager: EntityManager) => {
             if (await LockUtils.isLocked(entityManager, Equipment, 'equipment', equipment.id, userId)) {
-                return new GraphQLError('Equipment is locked by other user');
+                throw new ResourceLockedError('Equipment');
             }
             await ActionLogger.log(entityManager, Equipment, 'e', equipment, userId);
             await entityManager.getRepository(Equipment)
@@ -453,7 +461,7 @@ export class CargoBikeAPI extends DataSource {
         delete equipmentType.keepLock;
         await this.connection.transaction(async (entityManager: EntityManager) => {
             if (await LockUtils.isLocked(entityManager, EquipmentType, 'et', equipmentType.id, userId)) {
-                throw new GraphQLError('EquipmentType is locked by other user');
+                throw new ResourceLockedError('EquipmentType');
             }
             await ActionLogger.log(entityManager, EquipmentType, 'et', equipmentType, userId);
             await entityManager.getRepository(EquipmentType)
