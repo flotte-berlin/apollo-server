@@ -24,6 +24,7 @@ import { Person } from '../../model/Person';
 import { ActionLogger, DBUtils, LockUtils } from './utils';
 import { GraphQLError } from 'graphql';
 import { LendingStation } from '../../model/LendingStation';
+import { ResourceLockedError } from '../../errors/ResourceLockedError';
 
 export class ContactInformationAPI extends DataSource {
     connection : Connection
@@ -68,7 +69,7 @@ export class ContactInformationAPI extends DataSource {
         delete person.keepLock;
         await this.connection.transaction(async (entityManger: EntityManager) => {
             if (await LockUtils.isLocked(entityManger, Person, 'p', person.id, userId)) {
-                throw new GraphQLError('Person is locker by another user');
+                throw new ResourceLockedError('Person');
             }
             await ActionLogger.log(entityManger, Person, 'p', person, userId);
             await entityManger.getRepository(Person)
@@ -146,7 +147,7 @@ export class ContactInformationAPI extends DataSource {
         delete contactInformation.keepLock;
         await this.connection.transaction(async (entityManager: EntityManager) => {
             if (await LockUtils.isLocked(entityManager, ContactInformation, 'ci', contactInformation.id, userId)) {
-                throw new GraphQLError('ContactInformation is locked by other user');
+                throw new ResourceLockedError('ContactInformation');
             }
             await ActionLogger.log(entityManager, ContactInformation, 'ci', contactInformation, userId);
             await entityManager.getRepository(ContactInformation)
