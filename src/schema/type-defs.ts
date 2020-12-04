@@ -828,7 +828,6 @@ export default gql`
         registeredAt: String
         provider: Provider
         contactInformation: ContactInformation
-        otherData: String
         isLocked: Boolean!
         isLockedByMe: Boolean!
         "null if not locked by other user"
@@ -844,7 +843,6 @@ export default gql`
         "If Club, at what court registered"
         registeredAt: String
         contactInformationId: ID
-        otherData: String
     }
 
     input OrganisationUpdateInput {
@@ -856,7 +854,6 @@ export default gql`
         "If Club, at what court registered"
         registeredAt: String
         contactInformationId: ID
-        otherData: String
         keepLock: Boolean
     }
 
