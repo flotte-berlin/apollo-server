@@ -17,10 +17,10 @@ This file is part of fLotte-API-Server.
     along with fLotte-API-Server.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { GraphQLError } from 'graphql';
 import { Permission } from '../datasources/userserver/permission';
 import { Person } from '../model/Person';
 import { isLocked, isLockedByMe } from '../datasources/db/utils';
+import { PermissionError } from '../errors/PermissionError';
 
 export default {
     Query: {
@@ -28,28 +28,28 @@ export default {
             if (req.permissions.includes(Permission.ReadPerson)) {
                 return dataSources.contactInformationAPI.contactInformation(offset, limit);
             } else {
-                return new GraphQLError('Insufficient Permissions');
+                throw new PermissionError();
             }
         },
         contactInformationById: (_: any, { id }: { id: number }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.ReadPerson)) {
                 return dataSources.contactInformationAPI.contactInformationById(id);
             } else {
-                return new GraphQLError('Insufficient Permissions');
+                throw new PermissionError();
             }
         },
         personById: (_: any, { id }: { id: number }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.ReadPerson)) {
                 return dataSources.contactInformationAPI.personById(id);
             } else {
-                return new GraphQLError('Insufficient Permissions');
+                throw new PermissionError();
             }
         },
         persons: (_: any, { offset, limit }: { offset: number, limit: number }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.ReadPerson)) {
                 return dataSources.contactInformationAPI.persons(offset, limit);
             } else {
-                return new GraphQLError('Insufficient Permissions');
+                throw new PermissionError();
             }
         }
     },
@@ -58,7 +58,7 @@ export default {
             if (req.permissions.includes(Permission.ReadPerson)) {
                 return dataSources.contactInformationAPI.contactInformationByPersonId(parent.id);
             } else {
-                return new GraphQLError('Insufficient Permissions');
+                throw new PermissionError();
             }
         },
         isLockedByMe: (parent: any, __: any, { req }: { req: any }) => isLockedByMe(parent, { req }),
@@ -69,7 +69,7 @@ export default {
             if (req.permissions.includes(Permission.ReadPerson)) {
                 return dataSources.contactInformationAPI.personByContactInformationId(parent.id);
             } else {
-                return new GraphQLError('Insufficient Permissions');
+                throw new PermissionError();
             }
         },
         isLockedByMe: (parent: any, __: any, { req }: { req: any }) => isLockedByMe(parent, { req }),
@@ -80,70 +80,70 @@ export default {
             if (req.permissions.includes(Permission.WritePerson)) {
                 return dataSources.contactInformationAPI.createPerson(person);
             } else {
-                return new GraphQLError('Insufficient Permissions');
+                throw new PermissionError();
             }
         },
         lockPerson: (_: any, { id }: { id: number }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.WritePerson)) {
                 return dataSources.contactInformationAPI.lockPerson(id, req.userId);
             } else {
-                return new GraphQLError('Insufficient Permissions');
+                throw new PermissionError();
             }
         },
         unlockPerson: (_: any, { id }: { id: number }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.WritePerson)) {
                 return dataSources.contactInformationAPI.unlockPerson(id, req.userId);
             } else {
-                return new GraphQLError('Insufficient Permissions');
+                throw new PermissionError();
             }
         },
         updatePerson: (_: any, { person }: { person: any }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.WritePerson)) {
                 return dataSources.contactInformationAPI.updatePerson(person, req.userId);
             } else {
-                return new GraphQLError('Insufficient Permissions');
+                throw new PermissionError();
             }
         },
         deletePerson: (_: any, { id }: { id: number }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.DeletePerson)) {
                 return dataSources.contactInformationAPI.deletePerson(id, req.userId);
             } else {
-                return new GraphQLError('Insufficient Permissions');
+                throw new PermissionError();
             }
         },
         createContactInformation: (_: any, { contactInformation }: { contactInformation: any }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.WritePerson)) {
                 return dataSources.contactInformationAPI.createContactInformation(contactInformation);
             } else {
-                return new GraphQLError('Insufficient Permissions');
+                throw new PermissionError();
             }
         },
         lockContactInformation: (_: any, { id }: { id: number }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.WritePerson)) {
                 return dataSources.contactInformationAPI.lockContactInformation(id, req.userId);
             } else {
-                return new GraphQLError('Insufficient Permissions');
+                throw new PermissionError();
             }
         },
         unlockContactInformation: (_: any, { id }: { id: number }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.WritePerson)) {
                 return dataSources.contactInformationAPI.unlockContactInformation(id, req.userId);
             } else {
-                return new GraphQLError('Insufficient Permissions');
+                throw new PermissionError();
             }
         },
         updateContactInformation: (_: any, { contactInformation }: { contactInformation: any }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.WritePerson)) {
                 return dataSources.contactInformationAPI.updateContactInformation(contactInformation, req.userId);
             } else {
-                return new GraphQLError('Insufficient Permissions');
+                throw new PermissionError();
             }
         },
         deleteContactInformation: (_: any, { id }: { id: number }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.DeletePerson)) {
                 return dataSources.contactInformationAPI.deleteContactInformation(id, req.userId);
             } else {
-                return new GraphQLError('Insufficient Permissions');
+                throw new PermissionError();
             }
         }
     }

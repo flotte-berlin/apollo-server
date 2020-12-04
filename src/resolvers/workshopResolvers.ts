@@ -18,9 +18,9 @@ This file is part of fLotte-API-Server.
 */
 
 import { Permission } from '../datasources/userserver/permission';
-import { GraphQLError } from 'graphql';
 import { isLocked, isLockedByMe } from '../datasources/db/utils';
 import { Participant } from '../model/Participant';
+import { PermissionError } from '../errors/PermissionError';
 
 export default {
     Query: {
@@ -28,28 +28,28 @@ export default {
             if (req.permissions.includes(Permission.ReadWorkshop)) {
                 return dataSources.workshopAPI.workshopTypeById(id);
             } else {
-                return new GraphQLError('Insufficient Permissions');
+                throw new PermissionError();
             }
         },
         workshopTypes: (_: any, { offset, limit }: { offset: number, limit: number }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.ReadWorkshop)) {
                 return dataSources.workshopAPI.workshopTypes(offset, limit);
             } else {
-                return new GraphQLError('Insufficient Permissions');
+                throw new PermissionError();
             }
         },
         workshopById: (_: any, { id }: { id: number }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.ReadWorkshop)) {
                 return dataSources.workshopAPI.workshopById(id);
             } else {
-                return new GraphQLError('Insufficient Permissions');
+                throw new PermissionError();
             }
         },
         workshops: (_: any, { offset, limit }: { offset: number, limit: number }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.ReadWorkshop)) {
                 return dataSources.workshopAPI.workshops(offset, limit);
             } else {
-                return new GraphQLError('Insufficient Permissions');
+                throw new PermissionError();
             }
         }
     },
@@ -58,21 +58,21 @@ export default {
             if (req.permissions.includes(Permission.ReadParticipant)) {
                 return dataSources.workshopAPI.trainer1ByWorkshopId(parent.id);
             } else {
-                return new GraphQLError('Insufficient Permissions');
+                throw new PermissionError();
             }
         },
         trainer2: (parent: any, __:any, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.ReadParticipant)) {
                 return dataSources.workshopAPI.trainer2ByWorkshopId(parent.id);
             } else {
-                return new GraphQLError('Insufficient Permissions');
+                throw new PermissionError();
             }
         },
-        participants (parent: any, _: any, { dataSources, req }: { dataSources: any; req: any }): Promise<Participant[]> | GraphQLError {
+        participants (parent: any, _: any, { dataSources, req }: { dataSources: any; req: any }): Promise<Participant[]> {
             if (req.permissions.includes(Permission.ReadParticipant)) {
                 return dataSources.workshopAPI.participantsByWorkshopId(parent.id);
             } else {
-                return new GraphQLError('Insufficient Permissions');
+                throw new PermissionError();
             }
         },
         isLockedByMe: (parent: any, __: any, { req }: { req: any }) => isLockedByMe(parent, { req }),
@@ -87,70 +87,70 @@ export default {
             if (req.permissions.includes(Permission.WriteWorkshop)) {
                 return dataSources.workshopAPI.createWorkshop(workshop);
             } else {
-                return new GraphQLError('Insufficient Permissions');
+                throw new PermissionError();
             }
         },
         lockWorkshop: (_: any, { id }: { id: number }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.WriteWorkshop)) {
                 return dataSources.workshopAPI.lockWorkshop(id, req.userId);
             } else {
-                return new GraphQLError('Insufficient Permissions');
+                throw new PermissionError();
             }
         },
         unlockWorkshop: (_: any, { id }: { id: number }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.WriteWorkshop)) {
                 return dataSources.workshopAPI.unlockWorkshop(id, req.userId);
             } else {
-                return new GraphQLError('Insufficient Permissions');
+                throw new PermissionError();
             }
         },
         updateWorkshop: (_: any, { workshop }: { workshop: number }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.WriteWorkshop)) {
                 return dataSources.workshopAPI.updateWorkshop(workshop, req.userId);
             } else {
-                return new GraphQLError('Insufficient Permissions');
+                throw new PermissionError();
             }
         },
         deleteWorkshop: (_: any, { id }: { id: number }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.DeleteWorkshop)) {
                 return dataSources.workshopAPI.deleteWorkshop(id, req.userId);
             } else {
-                return new GraphQLError('Insufficient Permissions');
+                throw new PermissionError();
             }
         },
         createWorkshopType: (_: any, { workshopType }: { workshopType: any }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.WriteWorkshopType)) {
                 return dataSources.workshopAPI.createWorkshopType(workshopType);
             } else {
-                return new GraphQLError('Insufficient Permissions');
+                throw new PermissionError();
             }
         },
         lockWorkshopType: (_: any, { id }: { id: number }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.WriteWorkshopType)) {
                 return dataSources.workshopAPI.lockWorkshopType(id, req.userId);
             } else {
-                return new GraphQLError('Insufficient Permissions');
+                throw new PermissionError();
             }
         },
         unlockWorkshopType: (_: any, { id }: { id: number }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.WriteWorkshopType)) {
                 return dataSources.workshopAPI.unlockWorkshopType(id, req.userId);
             } else {
-                return new GraphQLError('Insufficient Permissions');
+                throw new PermissionError();
             }
         },
         updateWorkshopType: (_: any, { workshopType }: { workshopType: any }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.WriteWorkshopType)) {
                 return dataSources.workshopAPI.updateWorkshopType(workshopType, req.userId);
             } else {
-                return new GraphQLError('Insufficient Permissions');
+                throw new PermissionError();
             }
         },
         deleteWorkshopType: (_: any, { id }: { id: number }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.DeleteWorkshopType)) {
                 return dataSources.workshopAPI.deleteWorkshopType(id, req.userId);
             } else {
-                return new GraphQLError('Insufficient Permissions');
+                throw new PermissionError();
             }
         }
     }
