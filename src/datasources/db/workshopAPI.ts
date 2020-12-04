@@ -21,7 +21,7 @@ import { DataSource } from 'apollo-datasource';
 import { Connection, EntityManager, getConnection } from 'typeorm';
 import { WorkshopType } from '../../model/WorkshopType';
 import { Workshop } from '../../model/Workshop';
-import { ActionLogger, deleteEntity, LockUtils } from './utils';
+import { ActionLogger, DBUtils, LockUtils } from './utils';
 import { UserInputError } from 'apollo-server-express';
 import { GraphQLError } from 'graphql';
 import { Participant } from '../../model/Participant';
@@ -73,7 +73,7 @@ export class WorkshopAPI extends DataSource {
     }
 
     async deleteWorkshop (id: number, userId: number) {
-        return await deleteEntity(this.connection, Workshop, 'w', id, userId);
+        return await DBUtils.deleteEntity(this.connection, Workshop, 'w', id, userId);
     }
 
     async createWorkshopType (workshopType: any) {
@@ -115,7 +115,7 @@ export class WorkshopAPI extends DataSource {
     }
 
     async deleteWorkshopType (id: number, userId: number) {
-        return await deleteEntity(this.connection, WorkshopType, 'wt', id, userId);
+        return await DBUtils.deleteEntity(this.connection, WorkshopType, 'wt', id, userId);
     }
 
     async workshopTypeById (id: number) {
@@ -126,13 +126,8 @@ export class WorkshopAPI extends DataSource {
             .getOne();
     }
 
-    async workshopTypes (offset: number, limit: number) {
-        return await this.connection.getRepository(WorkshopType)
-            .createQueryBuilder('w')
-            .select()
-            .skip(offset)
-            .take(limit)
-            .getMany();
+    async workshopTypes (offset?: number, limit?: number) {
+        return DBUtils.getAllEntity(this.connection, WorkshopType, 'wt', offset, limit);
     }
 
     async workshopById (id: number) {
@@ -148,13 +143,8 @@ export class WorkshopAPI extends DataSource {
      * @param offset
      * @param limit
      */
-    async workshops (offset: number, limit: number) {
-        return await this.connection.getRepository(Workshop)
-            .createQueryBuilder('w')
-            .select()
-            .skip(offset)
-            .take(limit)
-            .getMany();
+    async workshops (offset?: number, limit?: number) {
+        return await DBUtils.getAllEntity(this.connection, Workshop, 'w', offset, limit);
     }
 
     async trainer1ByWorkshopId (id: number) {

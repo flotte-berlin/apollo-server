@@ -24,7 +24,7 @@ import { Organisation } from '../../model/Organisation';
 import { UserInputError } from 'apollo-server-express';
 import { CargoBike } from '../../model/CargoBike';
 import { LendingStation } from '../../model/LendingStation';
-import { ActionLogger, deleteEntity, LockUtils } from './utils';
+import { ActionLogger, DBUtils, LockUtils } from './utils';
 import { GraphQLError } from 'graphql';
 
 export class ProviderAPI extends DataSource {
@@ -42,13 +42,8 @@ export class ProviderAPI extends DataSource {
             .getOne();
     }
 
-    async provider (offset: number, limit: number) {
-        return await this.connection.getRepository(Provider)
-            .createQueryBuilder('provider')
-            .select()
-            .skip(offset)
-            .take(limit)
-            .getMany();
+    async provider (offset?: number, limit?: number) {
+        return await DBUtils.getAllEntity(this.connection, Provider, 'p', offset, limit);
     }
 
     async providerByOrganisationId (id: number) {
@@ -75,13 +70,8 @@ export class ProviderAPI extends DataSource {
             .loadOne();
     }
 
-    async organisations (offset: number, limit: number) {
-        return await this.connection.getRepository(Organisation)
-            .createQueryBuilder('o')
-            .select()
-            .skip(offset)
-            .limit(limit)
-            .getMany();
+    async organisations (offset?: number, limit?: number) {
+        return await DBUtils.getAllEntity(this.connection, Organisation, 'o', offset, limit);
     }
 
     async organisationById (id: number) {
@@ -180,7 +170,7 @@ export class ProviderAPI extends DataSource {
     }
 
     async deleteProvider (id: number, userId: number) {
-        return await deleteEntity(this.connection, Provider, 'p', id, userId);
+        return await DBUtils.deleteEntity(this.connection, Provider, 'p', id, userId);
     }
 
     async createOrganisation (organisation: any) {
@@ -223,6 +213,6 @@ export class ProviderAPI extends DataSource {
     }
 
     async deleteOrganisation (id: number, userId: number) {
-        return await deleteEntity(this.connection, Organisation, 'o', id, userId);
+        return await DBUtils.deleteEntity(this.connection, Organisation, 'o', id, userId);
     }
 }

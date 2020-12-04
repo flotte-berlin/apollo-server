@@ -26,7 +26,9 @@ export class WorkshopType implements Lockable {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column()
+    @Column({
+        unique: true
+    })
     name: string;
 
     @OneToMany(type => Workshop, workshop => workshop.workshopTypeId)

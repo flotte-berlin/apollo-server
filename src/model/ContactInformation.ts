@@ -42,9 +42,7 @@ export class ContactInformation implements Lockable {
     })
     participantId: number;
 
-    @Column(type => {
-        return Address;
-    })
+    @Column(type => { return Address; })
     address: Address;
 
     @Column({

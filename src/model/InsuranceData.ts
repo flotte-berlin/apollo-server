@@ -20,22 +20,34 @@ This file is part of fLotte-API-Server.
 import { Column } from 'typeorm';
 
 export class InsuranceData {
-    @Column()
+    @Column({
+        nullable: true
+    })
     name: string;
 
-    @Column()
+    @Column({
+        nullable: true
+    })
     benefactor: string;
 
-    @Column()
+    @Column({
+        nullable: true
+    })
     billing: string;
 
-    @Column()
+    @Column({
+        nullable: true
+    })
     noPnP: string;
 
-    @Column()
+    @Column({
+        nullable: true
+    })
     maintenanceResponsible: string;
 
-    @Column()
+    @Column({
+        nullable: true
+    })
     maintenanceBenefactor: string;
 
     @Column({

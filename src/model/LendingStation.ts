@@ -34,6 +34,12 @@ export class LoanPeriod {
     })
     from: Date;
 
+    @Column({
+        nullable: true,
+        type: 'text'
+    })
+    generalRemark: string;
+
     /**
      * validity for loanPeriods
      */
@@ -44,10 +50,39 @@ export class LoanPeriod {
     to: Date;
 
     @Column({
-        type: 'simple-array',
         nullable: true
     })
-    loanTimes: string[];
+    mo: string;
+
+    @Column({
+        nullable: true
+    })
+    tu: string;
+
+    @Column({
+        nullable: true
+    })
+    we: string;
+
+    @Column({
+        nullable: true
+    })
+    th: string;
+
+    @Column({
+        nullable: true
+    })
+    fr: string;
+
+    @Column({
+        nullable: true
+    })
+    sa: string;
+
+    @Column({
+        nullable: true
+    })
+    su: string;
 }
 
 @Entity()

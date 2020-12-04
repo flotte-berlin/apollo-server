@@ -25,7 +25,9 @@ export enum OrganisationArea {
     ZB = 'ZB'
 }
 export class Taxes {
-    @Column()
+    @Column({
+        nullable: true
+    })
     costCenter: string;
 
     @Column({

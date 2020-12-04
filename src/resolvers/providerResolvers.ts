@@ -23,7 +23,7 @@ import { PermissionError } from '../errors/PermissionError';
 
 export default {
     Query: {
-        providers: (_: any, { offset, limit }: { offset: number, limit: number }, { dataSources, req }: { dataSources: any, req: any }) => {
+        providers: (_: any, { offset, limit }: { offset?: number, limit?: number }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.ReadProvider)) {
                 return dataSources.providerAPI.provider(offset, limit);
             } else {
@@ -37,7 +37,7 @@ export default {
                 throw new PermissionError();
             }
         },
-        organisations: (_: any, { offset, limit }: { offset: number, limit: number }, { dataSources, req }: { dataSources: any, req: any }) => {
+        organisations: (_: any, { offset, limit }: { offset?: number, limit?: number }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.ReadOrganisation)) {
                 return dataSources.providerAPI.organisations(offset, limit);
             } else {

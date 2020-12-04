@@ -31,7 +31,7 @@ export default {
                 throw new PermissionError();
             }
         },
-        workshopTypes: (_: any, { offset, limit }: { offset: number, limit: number }, { dataSources, req }: { dataSources: any, req: any }) => {
+        workshopTypes: (_: any, { offset, limit }: { offset?: number, limit?: number }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.ReadWorkshop)) {
                 return dataSources.workshopAPI.workshopTypes(offset, limit);
             } else {
@@ -45,7 +45,7 @@ export default {
                 throw new PermissionError();
             }
         },
-        workshops: (_: any, { offset, limit }: { offset: number, limit: number }, { dataSources, req }: { dataSources: any, req: any }) => {
+        workshops: (_: any, { offset, limit }: { offset?: number, limit?: number }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.ReadWorkshop)) {
                 return dataSources.workshopAPI.workshops(offset, limit);
             } else {

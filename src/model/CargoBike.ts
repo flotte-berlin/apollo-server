@@ -30,7 +30,6 @@ import {
     DeleteDateColumn
 } from 'typeorm';
 import { Provider } from './Provider';
-import { Participant } from './Participant';
 import { InsuranceData } from './InsuranceData';
 import { TimeFrame } from './TimeFrame';
 import { Taxes } from './Taxes';
@@ -66,7 +65,9 @@ export interface Lockable {
 }
 
 export class Security {
-    @Column()
+    @Column({
+        nullable: true
+    })
     frameNumber: string;
 
     @Column({
@@ -90,13 +91,19 @@ export class Security {
     adfcCoding: string;
 }
 export class TechnicalEquipment {
-    @Column()
+    @Column({
+        nullable: true
+    })
     bicycleShift: string;
 
-    @Column()
+    @Column({
+        nullable: true
+    })
     isEBike: boolean;
 
-    @Column()
+    @Column({
+        nullable: true
+    })
     hasLightSystem: boolean;
 
     @Column({
@@ -106,44 +113,55 @@ export class TechnicalEquipment {
 }
 
 export class DimensionsAndLoad {
-    @Column()
+    @Column({
+        nullable: true
+    })
     hasCoverBox: boolean;
 
-    @Column()
+    @Column({
+        nullable: true
+    })
     lockable:boolean;
 
     @Column({
-        type: 'decimal'
+        type: 'numrange',
+        nullable: true
     })
-    boxLength: number;
+    boxLengthRange: string;
 
     @Column({
-        type: 'decimal'
+        type: 'numrange',
+        nullable: true
     })
-    boxWidth: number;
+    boxWidthRange: string;
 
     @Column({
-        type: 'decimal'
+        type: 'numrange',
+        nullable: true
     })
-    boxHeight: number;
+    boxHeightRange: string;
 
     @Column({
-        type: 'decimal'
+        type: 'decimal',
+        nullable: true
     })
-    maxWeightBox: number;
+    maxWeightBox: string;
 
     @Column({
-        type: 'decimal'
+        type: 'decimal',
+        nullable: true
     })
     maxWeightLuggageRack: number;
 
     @Column({
-        type: 'decimal'
+        type: 'decimal',
+        nullable: true
     })
     maxWeightTotal: number;
 
     @Column({
-        type: 'decimal'
+        type: 'decimal',
+        nullable: true
     })
     bikeLength: number;
 
@@ -174,23 +192,27 @@ export class CargoBike implements Lockable {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @DeleteDateColumn()
-    deleteDate: Date;
-
     @Column({
         type: 'enum',
         enum: Group
     })
     group: Group;
 
-    @Column()
+    @Column({
+        unique: true
+    })
     name: string;
+
+    @Column({
+        nullable: true
+    })
+    state: string;
 
     @OneToMany(type => Equipment, equipment => equipment.cargoBikeId, {
         nullable: true,
         eager: true
     })
-    equipment: Equipment[];
+    equipmentIds: number[];
 
     // Equipment that is not unique and is supposed to be selected out of a list e.g. drop down
     @ManyToMany(type => EquipmentType, equipmentType => equipmentType.cargoBikeIds)
@@ -245,19 +267,32 @@ export class CargoBike implements Lockable {
     })
     description: string;
 
-    @Column()
+    @Column({
+        nullable: true
+    })
     modelName: string;
 
-    @Column()
+    @Column({
+        nullable: true
+    })
     numberOfWheels: number;
 
-    @Column()
+    @Column({
+        type: 'boolean',
+        nullable: true
+    })
     forCargo: boolean;
 
-    @Column()
+    @Column({
+        type: 'boolean',
+        nullable: true
+    })
     forChildren: boolean;
 
-    @Column()
+    @Column({
+        type: 'int',
+        nullable: true
+    })
     numberOfChildren: number;
 
     @Column(type => TechnicalEquipment)
@@ -267,6 +302,7 @@ export class CargoBike implements Lockable {
     dimensionsAndLoad: DimensionsAndLoad;
 
     @Column({
+        type: 'int',
         nullable: true
     })
     lockedBy: number;
