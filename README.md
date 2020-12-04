@@ -45,6 +45,6 @@ POSTGRES_CONNECTION_URL=postgres://username:password@host:port/database_name
 ```
 - __RPC_HOST__ is used for the connection with the [flotte-user-management server](https://github.com/fLotte-meets-HWR-DB/flotte-user-management).
 - __NODE_ENV__ will not check authentication if set to development
-- __POSTGRES_CONNECTION_URL__ for connection with the postgres database
+- __DATABASE_URL__ for connection with the postgres database
 
 If the API server cannot connect to the [flotte-user-management server](https://github.com/fLotte-meets-HWR-DB/flotte-user-management) or the postgres data base. It will try to reconnect in an endless loop.

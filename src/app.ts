@@ -62,9 +62,8 @@ require('dotenv').config();
 export const userAPI = new UserServerAPI(process.env.RPC_HOST);
 
 export function getConnectionOptions (): ConnectionOptions {
-    return {
-        // @ts-ignore
-        type: process.env.DATABASE_TYPE,
+    const ret = {
+        type: (!process.env.DATABASE_TYPE) ? 'postgres' : process.env.DATABASE_TYPE,
         url: process.env.DATABASE_URL,
         database: process.env.DATABASE_NAME,
         entities: [
@@ -89,6 +88,11 @@ export function getConnectionOptions (): ConnectionOptions {
         synchronize: true,
         logging: false
     };
+    if (ret.database === undefined) {
+        delete ret.database;
+    }
+    // @ts-ignore
+    return ret;
 }
 
 export async function getApp (connOptions: ConnectionOptions) {
