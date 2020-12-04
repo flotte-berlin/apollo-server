@@ -22,10 +22,9 @@ import { Connection, EntityManager, getConnection } from 'typeorm';
 import { WorkshopType } from '../../model/WorkshopType';
 import { Workshop } from '../../model/Workshop';
 import { ActionLogger, DBUtils, LockUtils } from './utils';
-import { UserInputError } from 'apollo-server-express';
-import { GraphQLError } from 'graphql';
 import { Participant } from '../../model/Participant';
 import { ResourceLockedError } from '../../errors/ResourceLockedError';
+import { NotFoundError } from '../../errors/NotFoundError';
 
 export class WorkshopAPI extends DataSource {
     connection: Connection
@@ -67,7 +66,11 @@ export class WorkshopAPI extends DataSource {
                 .set({ ...workshop })
                 .where('id = :id', { id: workshop.id })
                 .execute()
-                .then(value => { if (value.affected !== 1) { throw new GraphQLError('ID not found'); } });
+                .then(value => {
+                    if (value.affected !== 1) {
+                        throw new NotFoundError('Workshop', 'id', workshop.id);
+                    }
+                });
         });
         !keepLock && await this.unlockWorkshop(workshop.id, userId);
         return await this.workshopById(workshop.id);
@@ -109,7 +112,11 @@ export class WorkshopAPI extends DataSource {
                 .set({ ...workshopType })
                 .where('id = :id', { id: workshopType.id })
                 .execute()
-                .then(value => { if (value.affected !== 1) { throw new GraphQLError('ID not found'); } });
+                .then(value => {
+                    if (value.affected !== 1) {
+                        throw new NotFoundError('WorkshopType', 'id', workshopType.id);
+                    }
+                });
         });
         !keepLock && await this.unlockWorkshopType(workshopType.id, userId);
         return await this.workshopTypeById(workshopType.id);

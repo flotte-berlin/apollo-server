@@ -30,6 +30,7 @@ import { EquipmentType } from '../../model/EquipmentType';
 import { BikeEventType } from '../../model/BikeEventType';
 import { Actions } from '../../model/ActionLog';
 import { ResourceLockedError } from '../../errors/ResourceLockedError';
+import { NotFoundError } from '../../errors/NotFoundError';
 
 /**
  * extended datasource to feed resolvers with data about cargoBikes
@@ -82,10 +83,16 @@ export class CargoBikeAPI extends DataSource {
     }
 
     async lockCargoBike (id: number, userId: number) {
+        if (!await this.connection.getRepository(CargoBike).findOne(id)) {
+            throw new NotFoundError('CargoBike', 'id', id);
+        }
         return await LockUtils.lockEntity(this.connection, CargoBike, 'cb', id, userId);
     }
 
     async unlockCargoBike (id: number, userId: number) {
+        if (!await this.connection.getRepository(CargoBike).findOne(id)) {
+            throw new NotFoundError('CargoBike', 'id', id);
+        }
         return await LockUtils.unlockEntity(this.connection, CargoBike, 'cb', id, userId);
     }
 
@@ -115,11 +122,13 @@ export class CargoBikeAPI extends DataSource {
                 .set({ ...cargoBike })
                 .where('id = :id', { id: cargoBike.id })
                 .execute();
+
             equipmentTypeIds && await entityManager.getRepository(CargoBike)
                 .createQueryBuilder('cb')
                 .relation(CargoBike, 'equipmentTypeIds')
                 .of(cargoBike.id)
                 .addAndRemove(equipmentTypeIds, await this.equipmentTypeByCargoBikeId(cargoBike.id));
+
             equipmentIds && await entityManager.getRepository(CargoBike)
                 .createQueryBuilder('cb')
                 .relation(CargoBike, 'equipmentIds')

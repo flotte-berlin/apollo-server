@@ -22,9 +22,9 @@ import { Connection, EntityManager, getConnection } from 'typeorm';
 import { ContactInformation } from '../../model/ContactInformation';
 import { Person } from '../../model/Person';
 import { ActionLogger, DBUtils, LockUtils } from './utils';
-import { GraphQLError } from 'graphql';
 import { LendingStation } from '../../model/LendingStation';
 import { ResourceLockedError } from '../../errors/ResourceLockedError';
+import { NotFoundError } from '../../errors/NotFoundError';
 
 export class ContactInformationAPI extends DataSource {
     connection : Connection
@@ -77,7 +77,11 @@ export class ContactInformationAPI extends DataSource {
                 .update()
                 .set({ ...person })
                 .where('id = :id', { id: person.id })
-                .execute().then(value => { if (value.affected !== 1) { throw new GraphQLError('Id not found'); } });
+                .execute().then(value => {
+                    if (value.affected !== 1) {
+                        throw new NotFoundError('Person', 'id', person.id);
+                    }
+                });
         });
         !keepLock && await this.unlockPerson(person.id, userId);
         return this.personById(person.id);

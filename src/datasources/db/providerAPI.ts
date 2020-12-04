@@ -25,8 +25,8 @@ import { UserInputError } from 'apollo-server-express';
 import { CargoBike } from '../../model/CargoBike';
 import { LendingStation } from '../../model/LendingStation';
 import { ActionLogger, DBUtils, LockUtils } from './utils';
-import { GraphQLError } from 'graphql';
 import { ResourceLockedError } from '../../errors/ResourceLockedError';
+import { NotFoundError } from '../../errors/NotFoundError';
 
 export class ProviderAPI extends DataSource {
     connection : Connection
@@ -159,7 +159,11 @@ export class ProviderAPI extends DataSource {
                 .update()
                 .set({ ...provider })
                 .where('id = :id', { id: provider.id })
-                .execute().then(value => { if (value.affected !== 1) { throw new GraphQLError('ID not found'); } });
+                .execute().then(value => {
+                    if (value.affected !== 1) {
+                        throw new NotFoundError('Provider', 'id', provider.id);
+                    }
+                });
             await entityManager.getRepository(Provider)
                 .createQueryBuilder('p')
                 .relation(Provider, 'cargoBikeIds')

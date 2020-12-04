@@ -22,6 +22,7 @@ import { Lockable } from '../../model/CargoBike';
 import { ActionLog, Actions } from '../../model/ActionLog';
 import { UserInputError } from 'apollo-server-express';
 import { ResourceLockedError } from '../../errors/ResourceLockedError';
+import { NotFoundError } from '../../errors/NotFoundError';
 
 export function genDateRange (struct: any) {
     if (!struct.dateRange || !struct.dateRange.from) {
@@ -159,7 +160,7 @@ export class LockUtils {
             .select()
             .where(alias + '.id = :id', { id: id })
             .getOne().catch(() => {
-                throw new UserInputError('ID not found');
+                throw new NotFoundError(target.name, 'id', id);
             });
     }
 
@@ -302,7 +303,7 @@ export class ActionLogger {
             .where('id = :id', { id: updates.id })
             .getRawOne().then(value => {
                 if (value === undefined) {
-                    throw new UserInputError('Id not found');
+                    throw new NotFoundError(target.name, 'id', updates.id);
                 }
                 return value;
             }); // use getRawOne to also get ids of related entities
