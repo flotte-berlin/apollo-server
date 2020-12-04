@@ -34,6 +34,12 @@ export class LoanPeriod {
     })
     from: Date;
 
+    @Column({
+        nullable: true,
+        type: 'text'
+    })
+    generalRemark: string;
+
     /**
      * validity for loanPeriods
      */
