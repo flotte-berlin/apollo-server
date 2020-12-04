@@ -17,9 +17,9 @@ This file is part of fLotte-API-Server.
     along with fLotte-API-Server.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { GraphQLError } from 'graphql';
 import { Permission } from '../datasources/userserver/permission';
 import { isLocked, isLockedByMe } from '../datasources/db/utils';
+import { PermissionError } from '../errors/PermissionError';
 
 export default {
     Query: {
@@ -27,42 +27,42 @@ export default {
             if (req.permissions.includes(Permission.ReadParticipant)) {
                 return dataSources.participantAPI.getParticipantById(id);
             } else {
-                return new GraphQLError('Insufficient Permissions');
+                throw new PermissionError();
             }
         },
         participants: (_: any, { offset, limit }: { offset?: number, limit?: number }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.ReadParticipant)) {
                 return dataSources.participantAPI.getParticipants(offset, limit);
             } else {
-                return new GraphQLError('Insufficient Permissions');
+                throw new PermissionError();
             }
         },
         engagementById: (_: any, { id }: { id: number }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.ReadEngagement)) {
                 return dataSources.participantAPI.engagementById(id);
             } else {
-                return new GraphQLError('Insufficient Permissions');
+                throw new PermissionError();
             }
         },
         engagements: (_: any, { offset, limit }: { offset?: number, limit?: number }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.ReadEngagement)) {
                 return dataSources.participantAPI.engagements(offset, limit);
             } else {
-                return new GraphQLError('Insufficient Permissions');
+                throw new PermissionError();
             }
         },
         engagementTypeById: (_: any, { id }: { id: number }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.ReadEngagement)) {
                 return dataSources.participantAPI.engagementTypeById(id);
             } else {
-                return new GraphQLError('Insufficient Permissions');
+                throw new PermissionError();
             }
         },
         engagementTypes: (_: any, { offset, limit }: { offset?: number, limit?: number }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.ReadEngagement)) {
                 return dataSources.participantAPI.engagementTypes(offset, limit);
             } else {
-                return new GraphQLError('Insufficient Permissions');
+                throw new PermissionError();
             }
         }
     },
@@ -71,21 +71,21 @@ export default {
             if (req.permissions.includes(Permission.ReadEngagement)) {
                 return dataSources.participantAPI.engagementByParticipantId(parent.id);
             } else {
-                return new GraphQLError('Insufficient Permissions');
+                throw new PermissionError();
             }
         },
         contactInformation (parent: any, _: any, { dataSources, req }: { dataSources: any, req: any }) {
             if (req.permissions.includes(Permission.ReadPerson)) {
                 return (dataSources.participantAPI.contactInformationByParticipantId(parent.id));
             } else {
-                return new GraphQLError('Insufficient Permissions');
+                throw new PermissionError();
             }
         },
         workshops (parent: any, _: any, { dataSources, req }: { dataSources: any, req: any }) {
             if (req.permissions.includes(Permission.ReadWorkshop)) {
                 return (dataSources.participantAPI.workshopsByParticipantId(parent.id));
             } else {
-                return new GraphQLError('Insufficient Permissions');
+                throw new PermissionError();
             }
         },
         isLockedByMe: (parent: any, __: any, { req }: { req: any }) => isLockedByMe(parent, { req }),
@@ -96,21 +96,21 @@ export default {
             if (req.permissions.includes(Permission.ReadBike)) {
                 return dataSources.cargoBikeAPI.findCargoBikeByEngagementId(parent.id);
             } else {
-                return new GraphQLError('Insufficient Permissions');
+                throw new PermissionError();
             }
         },
         participant (parent: any, _: any, { dataSources, req }: { dataSources: any, req: any }) {
             if (req.permissions.includes(Permission.ReadParticipant)) {
                 return dataSources.participantAPI.participantByEngagementId(parent.id);
             } else {
-                return new GraphQLError('Insufficient Permissions');
+                throw new PermissionError();
             }
         },
         engagementType (parent: any, _: any, { dataSources, req }: { dataSources: any; req: any }) {
             if (req.permissions.includes(Permission.ReadEngagement)) {
                 return dataSources.participantAPI.engagementTypeByEngagementId(parent.id);
             } else {
-                return new GraphQLError('Insufficient Permissions');
+                throw new PermissionError();
             }
         },
         isLockedByMe: (parent: any, __: any, { req }: { req: any }) => isLockedByMe(parent, { req }),
@@ -121,105 +121,105 @@ export default {
             if (req.permissions.includes(Permission.WriteParticipant)) {
                 return dataSources.participantAPI.createParticipant(participant);
             } else {
-                return new GraphQLError('Insufficient Permissions');
+                throw new PermissionError();
             }
         },
         lockParticipant: (_: any, { id }: { id: number }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.WriteParticipant)) {
                 return dataSources.participantAPI.lockParticipant(id, req.userId);
             } else {
-                return new GraphQLError('Insufficient Permissions');
+                throw new PermissionError();
             }
         },
         unlockParticipant: (_: any, { id }: { id: number }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.WriteParticipant)) {
                 return dataSources.participantAPI.unlockeParticipant(id, req.userId);
             } else {
-                return new GraphQLError('Insufficient Permissions');
+                throw new PermissionError();
             }
         },
         updateParticipant: (_: any, { participant }: { participant: any }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.WriteParticipant)) {
                 return dataSources.participantAPI.updateParticipant(participant, req.userId);
             } else {
-                return new GraphQLError('Insufficient Permissions');
+                throw new PermissionError();
             }
         },
         deleteParticipant: (_: any, { id }: { id: number }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.DeleteParticipant)) {
                 return dataSources.participantAPI.deleteParticipant(id, req.userId);
             } else {
-                return new GraphQLError('Insufficient Permissions');
+                throw new PermissionError();
             }
         },
         createEngagement: (_: any, { engagement }: { engagement: any }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.WriteEngagement)) {
                 return dataSources.participantAPI.createEngagement(engagement);
             } else {
-                return new GraphQLError('Insufficient Permissions');
+                throw new PermissionError();
             }
         },
         lockEngagement: (_: any, { id }: { id: number }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.WriteEngagement)) {
                 return dataSources.participantAPI.lockEngagement(id, req.userId);
             } else {
-                return new GraphQLError('Insufficient Permissions');
+                throw new PermissionError();
             }
         },
         unlockEngagement: (_: any, { id }: {id: number }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.WriteEngagement)) {
                 return dataSources.participantAPI.unlockEngagement(id, req.userId);
             } else {
-                return new GraphQLError('Insufficient Permissions');
+                throw new PermissionError();
             }
         },
         updateEngagement: (_: any, { engagement }: { engagement: any }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.WriteEngagement)) {
                 return dataSources.participantAPI.updateEngagement(engagement, req.userId);
             } else {
-                return new GraphQLError('Insufficient Permissions');
+                throw new PermissionError();
             }
         },
         deleteEngagement: (_: any, { id }: {id: number }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.DeleteEngagement)) {
                 return dataSources.participantAPI.deleteEngagement(id, req.userId);
             } else {
-                return new GraphQLError('Insufficient Permissions');
+                throw new PermissionError();
             }
         },
         createEngagementType: (_: any, { engagementType }: { engagementType: any }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.WriteEngagementType)) {
                 return dataSources.participantAPI.createEngagementType(engagementType);
             } else {
-                return new GraphQLError('Insufficient Permissions');
+                throw new PermissionError();
             }
         },
         lockEngagementType: (_: any, { id }: { id: number }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.WriteEngagementType)) {
                 return dataSources.participantAPI.lockEngagementType(id, req.userId);
             } else {
-                return new GraphQLError('Insufficient Permissions');
+                throw new PermissionError();
             }
         },
         unlockEngagementType: (_: any, { id }: {id: number }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.WriteEngagementType)) {
                 return dataSources.participantAPI.unlockEngagementType(id, req.userId);
             } else {
-                return new GraphQLError('Insufficient Permissions');
+                throw new PermissionError();
             }
         },
         updateEngagementType: (_: any, { engagementType }: { engagementType: any }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.WriteEngagementType)) {
                 return dataSources.participantAPI.updateEngagementType(engagementType, req.userId);
             } else {
-                return new GraphQLError('Insufficient Permissions');
+                throw new PermissionError();
             }
         },
         deleteEngagementType: (_: any, { id }: { id: number }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.DeleteEngagementType)) {
                 return dataSources.participantAPI.deleteEngagementType(id, req.userId);
             } else {
-                return new GraphQLError('Insufficient Permissions');
+                throw new PermissionError();
             }
         }
     }

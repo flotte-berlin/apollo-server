@@ -18,7 +18,7 @@ This file is part of fLotte-API-Server.
 */
 
 import { Permission } from '../datasources/userserver/permission';
-import { GraphQLError } from 'graphql';
+import { PermissionError } from '../errors/PermissionError';
 
 export default {
     Query: {
@@ -26,21 +26,21 @@ export default {
             if (req.permissions.includes(Permission.ReadActionLog)) {
                 return dataSources.actionLogAPI.actionLogByUserId(req.userId);
             } else {
-                return new GraphQLError('Insufficient Permissions');
+                throw new PermissionError();
             }
         },
         actionLogByUser: (_: any, { id }: {id: number}, { dataSources, req }:{dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.ReadActionLogAll)) {
                 return dataSources.actionLogAPI.actionLogByUserId(id);
             } else {
-                return new GraphQLError('Insufficient Permissions');
+                throw new PermissionError();
             }
         },
         actionLogAll: (_: any, __: any, { dataSources, req }:{dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.ReadActionLogAll)) {
                 return dataSources.actionLogAPI.actionLogAll();
             } else {
-                return new GraphQLError('Insufficient Permissions');
+                throw new PermissionError();
             }
         }
     }
