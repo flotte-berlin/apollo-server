@@ -25,6 +25,7 @@ import { LendingStation } from '../../model/LendingStation';
 import { TimeFrame } from '../../model/TimeFrame';
 import { ActionLogger, genDateRange, DBUtils, LockUtils } from './utils';
 import { ResourceLockedError } from '../../errors/ResourceLockedError';
+import { NotFoundError } from '../../errors/NotFoundError';
 
 export class LendingStationAPI extends DataSource {
     connection : Connection
@@ -247,7 +248,7 @@ export class LendingStationAPI extends DataSource {
                 .set({ ...timeFrame })
                 .where('id = :id', { id: timeFrame.id })
                 .execute()
-                .then(value => { if (value.affected !== 1) { throw new UserInputError('ID not found'); } });
+                .then(value => { if (value.affected !== 1) { throw new NotFoundError('TimeFrame', 'id', timeFrame.id); } });
         });
         !keepLock && await this.unlockTimeFrame(timeFrame.id, userId);
         return this.timeFrameById(timeFrame.id);
