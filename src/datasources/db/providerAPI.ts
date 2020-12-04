@@ -179,15 +179,17 @@ export class ProviderAPI extends DataSource {
     }
 
     async createOrganisation (organisation: any) {
-        let inserts: any = null;
+        let createdOrganisation: any = null;
         await this.connection.transaction(async (entityManager: EntityManager) => {
-            inserts = await entityManager.getRepository(Organisation)
+            const result = await entityManager.getRepository(Organisation)
                 .createQueryBuilder('o')
                 .insert()
                 .values([organisation])
                 .execute();
+            createdOrganisation = await entityManager.getRepository(Organisation).findOne(result.identifiers[0].id);
         });
-        return inserts.generatedMaps[0];
+
+        return createdOrganisation;
     }
 
     async lockOrganisation (id: number, userId: number) {
