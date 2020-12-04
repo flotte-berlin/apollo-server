@@ -21,7 +21,7 @@ import { DataSource } from 'apollo-datasource';
 import { Connection, EntityManager, getConnection } from 'typeorm';
 import { ContactInformation } from '../../model/ContactInformation';
 import { Person } from '../../model/Person';
-import { ActionLogger, deleteEntity, LockUtils } from './utils';
+import { ActionLogger, DBUtils, LockUtils } from './utils';
 import { GraphQLError } from 'graphql';
 import { LendingStation } from '../../model/LendingStation';
 
@@ -32,13 +32,8 @@ export class ContactInformationAPI extends DataSource {
         this.connection = getConnection();
     }
 
-    async contactInformation (offset: number, limit: number) {
-        return await this.connection.getRepository(ContactInformation)
-            .createQueryBuilder('ci')
-            .select()
-            .offset(offset)
-            .limit(limit)
-            .getMany();
+    async contactInformation (offset?: number, limit?: number) {
+        return await DBUtils.getAllEntity(this.connection, ContactInformation, 'ci', offset, limit);
     }
 
     async contactInformationById (id: number) {
@@ -88,16 +83,11 @@ export class ContactInformationAPI extends DataSource {
     }
 
     async deletePerson (id: number, userId: number) {
-        return await deleteEntity(this.connection, Person, 'p', id, userId);
+        return await DBUtils.deleteEntity(this.connection, Person, 'p', id, userId);
     }
 
-    async persons (offset: number, limit: number) {
-        return await this.connection.getRepository(Person)
-            .createQueryBuilder('person')
-            .select()
-            .skip(offset)
-            .take(limit)
-            .getMany();
+    async persons (offset?: number, limit?: number) {
+        return await DBUtils.getAllEntity(this.connection, Person, 'p', offset, limit);
     }
 
     async personById (id: number) {
@@ -171,7 +161,7 @@ export class ContactInformationAPI extends DataSource {
     }
 
     async deleteContactInformation (id: number, userId: number) {
-        return await deleteEntity(this.connection, ContactInformation, 'ci', id, userId);
+        return await DBUtils.deleteEntity(this.connection, ContactInformation, 'ci', id, userId);
     }
 
     async contactInformationByPersonId (id: number) {

@@ -23,7 +23,7 @@ import { ContactInformation } from '../../model/ContactInformation';
 import { Engagement } from '../../model/Engagement';
 import { Participant } from '../../model/Participant';
 import { EngagementType } from '../../model/EngagementType';
-import { ActionLogger, deleteEntity, genDateRange, LockUtils } from './utils';
+import { ActionLogger, DBUtils, genDateRange, LockUtils } from './utils';
 import { UserInputError } from 'apollo-server-express';
 import { GraphQLError } from 'graphql';
 
@@ -42,13 +42,8 @@ export class ParticipantAPI extends DataSource {
             .getOne();
     }
 
-    async getParticipants (offset: number, limit: number) {
-        return await this.connection.getRepository(Participant)
-            .createQueryBuilder('participant')
-            .select()
-            .offset(offset)
-            .limit(limit)
-            .getMany();
+    async getParticipants (offset?: number, limit?: number) {
+        return await DBUtils.getAllEntity(this.connection, Participant, 'p', offset, limit);
     }
 
     async participantByEngagementId (id: number) {
@@ -84,17 +79,24 @@ export class ParticipantAPI extends DataSource {
             .getMany();
     }
 
-    async engagementByCargoBikeId (offset: number, limit: number, id: number) {
-        return await this.connection.getRepository(Engagement)
-            .createQueryBuilder('engagement')
-            .select()
-            .where('engagement."cargoBikeId" = :id', {
-                id: id
-            })
-            .skip(offset)
-            .take(limit)
-            .orderBy('engagement."dateRange"', 'DESC')
-            .getMany();
+    async engagementByCargoBikeId (id: number, offset?: number, limit?: number) {
+        if (limit === null || offset === null) {
+            return await this.connection.getRepository(Engagement)
+                .createQueryBuilder('engagement')
+                .select()
+                .where('engagement."cargoBikeId" = :id', { id: id })
+                .orderBy('engagement."dateRange"', 'DESC')
+                .getMany();
+        } else {
+            return await this.connection.getRepository(Engagement)
+                .createQueryBuilder('engagement')
+                .select()
+                .where('engagement."cargoBikeId" = :id', { id: id })
+                .skip(offset)
+                .take(limit)
+                .orderBy('engagement."dateRange"', 'DESC')
+                .getMany();
+        }
     }
 
     async currentEngagementByCargoBikeId (id: number) {
@@ -107,13 +109,8 @@ export class ParticipantAPI extends DataSource {
             .getMany();
     }
 
-    async engagements (offset: number, limit: number) {
-        return await this.connection.getRepository(Engagement)
-            .createQueryBuilder('e')
-            .select()
-            .skip(offset)
-            .take(limit)
-            .getMany();
+    async engagements (offset?: number, limit?: number) {
+        return await DBUtils.getAllEntity(this.connection, Engagement, 'e', offset, limit);
     }
 
     async engagementById (id: number) {
@@ -132,13 +129,8 @@ export class ParticipantAPI extends DataSource {
             .getOne();
     }
 
-    async engagementTypes (offset: number, limit: number) {
-        return await this.connection.getRepository(EngagementType)
-            .createQueryBuilder('et')
-            .select()
-            .skip(offset)
-            .take(limit)
-            .getMany();
+    async engagementTypes (offset?: number, limit?: number) {
+        return await DBUtils.getAllEntity(this.connection, EngagementType, 'et', offset, limit);
     }
 
     async engagementTypeByEngagementId (id: number) {
@@ -178,6 +170,7 @@ export class ParticipantAPI extends DataSource {
      * @param participant to be created
      */
     async createParticipant (participant: any) {
+        genDateRange(participant);
         let inserts: any;
         await this.connection.transaction(async (entityManager: EntityManager) => {
             inserts = await entityManager.getRepository(Participant)
@@ -187,7 +180,7 @@ export class ParticipantAPI extends DataSource {
                 .values([participant])
                 .returning('*')
                 .execute();
-            await entityManager.getRepository(Participant)
+            participant.workshopIds && await entityManager.getRepository(Participant)
                 .createQueryBuilder('w')
                 .relation(Participant, 'workshopIds')
                 .of(participant.id)
@@ -209,8 +202,9 @@ export class ParticipantAPI extends DataSource {
         delete participant.keepLock;
         await this.connection.transaction(async (entityManager: EntityManager) => {
             if (await LockUtils.isLocked(entityManager, Participant, 'p', participant.id, userId)) {
-                throw new GraphQLError('Participant is locked by another user');
+                throw new UserInputError('Attempting to update locked resource');
             }
+            genDateRange(participant);
             const workshops = participant.workshopIds;
             delete participant.workshopIds;
             await ActionLogger.log(entityManager, Participant, 'p', participant, userId);
@@ -219,8 +213,19 @@ export class ParticipantAPI extends DataSource {
                 .update()
                 .set({ ...participant })
                 .where('id = :id', { id: participant.id })
-                .execute().then(value => { if (value.affected !== 1) { throw new GraphQLError('ID not found'); } });
-            await entityManager.getRepository(Participant)
+                .execute().then(value => { if (value.affected !== 1) { throw new UserInputError('ID not found'); } });
+            // check for engagements before or after dateRange
+            const engagements = await entityManager.getRepository(Engagement)
+                .createQueryBuilder('e')
+                .select()
+                .where('e."participantId" = :pid', { pid: participant.id })
+                .andWhere('not :pdr @> e."dateRange"', { pdr: participant.dateRange })
+                .getMany();
+            if (engagements.length !== 0) {
+                throw new UserInputError('Engagements with ids: ' + engagements.map((e) => { return `${e.id} ,`; }) + ' are are outside of dataRange');
+            }
+            // add and remove workshop relations
+            workshops && await entityManager.getRepository(Participant)
                 .createQueryBuilder('w')
                 .relation(Participant, 'workshopIds')
                 .of(participant.id)
@@ -231,7 +236,7 @@ export class ParticipantAPI extends DataSource {
     }
 
     async deleteParticipant (id: number, userId: number) {
-        return await deleteEntity(this.connection, Participant, 'p', id, userId);
+        return await DBUtils.deleteEntity(this.connection, Participant, 'p', id, userId);
     }
 
     async createEngagement (engagement: any) {
@@ -248,6 +253,16 @@ export class ParticipantAPI extends DataSource {
                 .getMany();
             if (overlapping.length > 0) {
                 throw new UserInputError('Engagements with ids: ' + overlapping.map((e) => { return e.id + ', '; }) + 'are overlapping');
+            }
+            // check if participant is active
+            const participant = await entityManager.getRepository(Participant)
+                .createQueryBuilder('p')
+                .select()
+                .where('p.id = :pid', { pid: engagement.participantId })
+                .andWhere('not p."dateRange" @> :edr', { edr: engagement.dateRange })
+                .getOne();
+            if (participant) {
+                throw new UserInputError('Participant ist not active in the specified dateRange');
             }
             inserts = await entityManager.getRepository(Engagement)
                 .createQueryBuilder('engagement')
@@ -288,6 +303,20 @@ export class ParticipantAPI extends DataSource {
             if (overlapping.length > 0) {
                 throw new UserInputError('Engagements with ids: ' + overlapping.map((e) => { return e.id + ', '; }) + 'are overlapping');
             }
+            // check if participant is active
+            if (engagement.dateRange && engagement.participantId) {
+                const participant = await entityManager.getRepository(Participant)
+                    .createQueryBuilder('p')
+                    .select()
+                    .where('p.id = :pid', { pid: engagement.participantId })
+                    .andWhere('not p."dateRange" @> :edr', { edr: engagement.dateRange })
+                    .getOne();
+                if (participant) {
+                    throw new UserInputError('Participant ist not active in the specified dateRange');
+                }
+            } else if (engagement.dateRange || engagement.dateRange) {
+                throw new UserInputError('Please specify participantId adn the dateRange');
+            }
             await entityManager.getRepository(Engagement)
                 .createQueryBuilder('engagement')
                 .update()
@@ -300,7 +329,7 @@ export class ParticipantAPI extends DataSource {
     }
 
     async deleteEngagement (id: number, userId: number) {
-        return await deleteEntity(this.connection, Engagement, 'e', id, userId);
+        return await DBUtils.deleteEntity(this.connection, Engagement, 'e', id, userId);
     }
 
     async createEngagementType (engagementType: any) {
@@ -342,6 +371,6 @@ export class ParticipantAPI extends DataSource {
     }
 
     async deleteEngagementType (id: number, userId: number) {
-        return await deleteEntity(this.connection, EngagementType, 'et', id, userId);
+        return await DBUtils.deleteEntity(this.connection, EngagementType, 'et', id, userId);
     }
 }

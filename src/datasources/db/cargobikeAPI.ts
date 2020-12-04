@@ -26,7 +26,7 @@ import { Equipment } from '../../model/Equipment';
 import { Engagement } from '../../model/Engagement';
 import { Provider } from '../../model/Provider';
 import { TimeFrame } from '../../model/TimeFrame';
-import { ActionLogger, deleteEntity, LockUtils } from './utils';
+import { ActionLogger, DBUtils, genBoxDimensions, LockUtils } from './utils';
 import { EquipmentType } from '../../model/EquipmentType';
 import { BikeEventType } from '../../model/BikeEventType';
 import { UserInputError } from 'apollo-server-express';
@@ -42,14 +42,8 @@ export class CargoBikeAPI extends DataSource {
         this.connection = getConnection();
     }
 
-    async getCargoBikes (offset: number, limit: number) {
-        return await this.connection.createQueryBuilder()
-            .select('cargoBike')
-            .from(CargoBike, 'cargoBike')
-            .orderBy('name', 'ASC')
-            .offset(offset)
-            .limit(limit)
-            .getMany();
+    async getCargoBikes (offset?: number, limit?: number) {
+        return await DBUtils.getAllEntity(this.connection, CargoBike, 'cb', offset, limit);
     }
 
     /**
@@ -104,12 +98,13 @@ export class CargoBikeAPI extends DataSource {
     async updateCargoBike (cargoBike: any, userId:number) {
         const keepLock = cargoBike?.keepLock;
         delete cargoBike.keepLock;
-        delete cargoBike.lendingStationId;
-        let equipmentTypeIds: any = null;
-        if (cargoBike.equipmentTypeIds) {
-            equipmentTypeIds = cargoBike.equipmentTypeIds;
-            delete cargoBike.equipmentTypeIds;
-        }
+        const equipmentTypeIds = cargoBike?.equipmentTypeIds;
+        delete cargoBike?.equipmentTypeIds;
+        const equipmentIds = cargoBike?.equipmentIds;
+        delete cargoBike?.equipmentIds;
+        // generate ranges for box dimensions
+        genBoxDimensions(cargoBike);
+
         await this.connection.transaction(async (entityManager: EntityManager) => {
             if (await LockUtils.isLocked(entityManager, CargoBike, 'cb', cargoBike.id, userId)) {
                 throw new GraphQLError('CargoBike locked by other user');
@@ -125,7 +120,12 @@ export class CargoBikeAPI extends DataSource {
                 .createQueryBuilder('cb')
                 .relation(CargoBike, 'equipmentTypeIds')
                 .of(cargoBike.id)
-                .addAndRemove(equipmentTypeIds, await this.equipmentTypeByCargoBikeId(cargoBike.id)); // TODO remove all existing relations
+                .addAndRemove(equipmentTypeIds, await this.equipmentTypeByCargoBikeId(cargoBike.id));
+            equipmentIds && await entityManager.getRepository(CargoBike)
+                .createQueryBuilder('cb')
+                .relation(CargoBike, 'equipmentIds')
+                .of(cargoBike.id)
+                .addAndRemove(equipmentIds, await this.equipmentByCargoBikeId(cargoBike.id));
         });
         !keepLock && await LockUtils.unlockEntity(this.connection, CargoBike, 'cb', cargoBike.id, userId);
         return await this.findCargoBikeById(cargoBike.id);
@@ -150,8 +150,9 @@ export class CargoBikeAPI extends DataSource {
      * created CargoBike and returns created bike with new ID
      * @param param0 cargoBike to be created
      */
-    async createCargoBike ({ cargoBike }: { cargoBike: any }) {
+    async createCargoBike (cargoBike: any) {
         let inserts: any = {};
+        genBoxDimensions(cargoBike);
         await this.connection.transaction(async (entityManager:any) => {
             inserts = await entityManager.getRepository(CargoBike)
                 .createQueryBuilder('cb')
@@ -164,6 +165,11 @@ export class CargoBikeAPI extends DataSource {
                 .relation(CargoBike, 'equipmentTypeIds')
                 .of(inserts.identifiers[0].id)
                 .add(cargoBike.equipmentTypeIds);
+            cargoBike?.equipmentIds && await entityManager.getRepository(CargoBike)
+                .createQueryBuilder('cb')
+                .relation(CargoBike, 'equipmentIds')
+                .of(inserts.identifiers[0].id)
+                .add(cargoBike.equipmentIds);
         });
         inserts.generatedMaps[0].id = inserts?.identifiers[0].id;
         return inserts?.generatedMaps[0];
@@ -198,11 +204,11 @@ export class CargoBikeAPI extends DataSource {
     }
 
     async deleteBikeEventType (id: number, userId: number) {
-        return await deleteEntity(this.connection, BikeEventType, 'bet', id, userId);
+        return await DBUtils.deleteEntity(this.connection, BikeEventType, 'bet', id, userId);
     }
 
     async deleteBikeEvent (id: number, userId: number) {
-        return await deleteEntity(this.connection, BikeEvent, 'be', id, userId);
+        return await DBUtils.deleteEntity(this.connection, BikeEvent, 'be', id, userId);
     }
 
     async cargoBikeByEventId (id: number) {
@@ -221,14 +227,22 @@ export class CargoBikeAPI extends DataSource {
             .loadOne();
     }
 
-    async bikeEventsByCargoBikeId (id: number, offset: number = 0, limit:number = 100) {
-        return await this.connection.getRepository(CargoBike)
-            .createQueryBuilder('cb')
-            .skip(offset)
-            .take(limit)
-            .relation(CargoBike, 'bikeEvents')
-            .of(id)
-            .loadMany();
+    async bikeEventsByCargoBikeId (id: number, offset?: number, limit?: number) {
+        if (offset === null || limit === null) {
+            return await this.connection.getRepository(CargoBike)
+                .createQueryBuilder('cb')
+                .relation(CargoBike, 'bikeEvents')
+                .of(id)
+                .loadMany();
+        } else {
+            return await this.connection.getRepository(CargoBike)
+                .createQueryBuilder('cb')
+                .skip(offset)
+                .take(limit)
+                .relation(CargoBike, 'bikeEvents')
+                .of(id)
+                .loadMany();
+        }
     }
 
     async createBikeEventType (bikeEventType: any) {
@@ -267,22 +281,12 @@ export class CargoBikeAPI extends DataSource {
         return await this.bikeEventTypeById(bikeEventType.id);
     }
 
-    async bikeEventTypes (offset: number, limit: number) {
-        return await this.connection.getRepository(BikeEventType)
-            .createQueryBuilder('bet')
-            .select()
-            .skip(offset)
-            .take(limit)
-            .getMany();
+    async bikeEventTypes (offset?: number, limit?: number) {
+        return await DBUtils.getAllEntity(this.connection, BikeEventType, 'bet', offset, limit);
     }
 
-    async bikeEvents (offset: number, limit: number) {
-        return await this.connection.getRepository(BikeEvent)
-            .createQueryBuilder('be')
-            .select()
-            .skip(offset)
-            .take(limit)
-            .getMany();
+    async bikeEvents (offset?: number, limit?: number) {
+        return await DBUtils.getAllEntity(this.connection, BikeEvent, 'be', offset, limit);
     }
 
     async bikeEventTypeById (id: number) {
@@ -343,12 +347,22 @@ export class CargoBikeAPI extends DataSource {
      * @param limit
      * @param id
      */
-    async equipmentByCargoBikeId (offset: number, limit: number, id: number) {
-        return await this.connection.getRepository(Equipment)
-            .createQueryBuilder('equipment')
-            .select()
-            .where('equipment."cargoBikeId" = :id', { id: id })
-            .getMany();
+    async equipmentByCargoBikeId (id: number, offset?: number, limit?: number) {
+        if (offset == null || limit === null) {
+            return await this.connection.getRepository(Equipment)
+                .createQueryBuilder('equipment')
+                .select()
+                .where('equipment."cargoBikeId" = :id', { id: id })
+                .getMany();
+        } else {
+            return await this.connection.getRepository(Equipment)
+                .createQueryBuilder('equipment')
+                .select()
+                .where('equipment."cargoBikeId" = :id', { id: id })
+                .skip(offset)
+                .take(limit)
+                .getMany();
+        }
     }
 
     async createEquipment ({ equipment }: { equipment: any }) {
@@ -406,17 +420,11 @@ export class CargoBikeAPI extends DataSource {
     }
 
     async deleteEquipment (id: number, userId: number) {
-        return await deleteEntity(this.connection, Equipment, 'e', id, userId);
+        return await DBUtils.deleteEntity(this.connection, Equipment, 'e', id, userId);
     }
 
-    async getEquipment (offset: number, limit: number) {
-        return await this.connection.getRepository(Equipment)
-            .createQueryBuilder('equipment')
-            .leftJoinAndSelect('equipment.cargoBike', 'cargoBike')
-            .orderBy('title', 'ASC')
-            .offset(offset)
-            .limit(limit)
-            .getMany();
+    async getEquipment (offset?: number, limit?: number) {
+        return await DBUtils.getAllEntity(this.connection, Equipment, 'e', offset, limit);
     }
 
     async createEquipmentType (equipmentType: any) {
@@ -460,7 +468,7 @@ export class CargoBikeAPI extends DataSource {
     }
 
     async deleteEquipmentType (id:number, userId: number) {
-        return await deleteEntity(this.connection, EquipmentType, 'et', id, userId);
+        return await DBUtils.deleteEntity(this.connection, EquipmentType, 'et', id, userId);
     }
 
     async equipmentTypeById (id: number) {
@@ -471,13 +479,8 @@ export class CargoBikeAPI extends DataSource {
             .getOne();
     }
 
-    async equipmentTypes (offset: number, limit: number) {
-        return await this.connection.getRepository(EquipmentType)
-            .createQueryBuilder('et')
-            .select()
-            .skip(offset)
-            .take(limit)
-            .getMany();
+    async equipmentTypes (offset?: number, limit?: number) {
+        return await DBUtils.getAllEntity(this.connection, EquipmentType, 'et', offset, limit);
     }
 
     async equipmentTypeByCargoBikeId (id: number) {

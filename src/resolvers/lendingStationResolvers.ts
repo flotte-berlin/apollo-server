@@ -31,7 +31,7 @@ export default {
                 throw new PermissionError();
             }
         },
-        lendingStations: (_: any, { offset, limit }: { offset: number, limit: number }, { dataSources, req }: { dataSources: any, req: any }) => {
+        lendingStations: (_: any, { offset, limit }: { offset?: number, limit?: number }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.ReadLendingStation)) {
                 return dataSources.lendingStationAPI.lendingStations(offset, limit);
             } else {
@@ -45,7 +45,7 @@ export default {
                 throw new PermissionError();
             }
         },
-        timeFrames: (_: any, { offset, limit }: { offset: number, limit: number }, { dataSources, req }: { dataSources: any, req: any }) => {
+        timeFrames: (_: any, { offset, limit }: { offset?: number, limit?: number }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.ReadTimeFrame)) {
                 return dataSources.lendingStationAPI.timeFrames(offset, limit);
             } else {
@@ -99,19 +99,15 @@ export default {
         isLockedByMe: (parent: any, __: any, { req }: { req: any }) => isLockedByMe(parent, { req }),
         isLocked: (parent: any, __: any, { req }: { req: any }) => isLocked(parent, { req })
     },
-    LoanPeriod: {
-        loanTimes  (parent: any) {
-            return parent.loanTimes ? parent.loanTimes : [];
+    DateRange: {
+        from (parent: string) {
+            return parent.replace(/^\[(.*),.*\)$/, '$1');
+        },
+        to (parent: string) {
+            return parent.replace(/^\[.*,(.*)\)$/, '$1');
         }
     },
     TimeFrame: {
-        from (parent: any) {
-            return (parent.dateRange as string).split(',')[0].replace('[', '');
-        },
-        to (parent: any) {
-            const str = (parent.dateRange as string).split(',')[1].replace(')', '');
-            return (str.length > 0) ? str : null;
-        },
         cargoBike (parent: any, __: any, { dataSources, req }: { dataSources: any, req: any }) {
             if (req.permissions.includes(Permission.ReadBike)) {
                 return dataSources.cargoBikeAPI.cargoBikeByTimeFrameId(parent.id);

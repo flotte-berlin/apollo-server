@@ -19,12 +19,11 @@ This file is part of fLotte-API-Server.
 
 import { DataSource } from 'apollo-datasource';
 import { UserInputError } from 'apollo-server-express';
-import { GraphQLError } from 'graphql';
 import { Connection, EntityManager, getConnection } from 'typeorm';
 import { CargoBike } from '../../model/CargoBike';
 import { LendingStation } from '../../model/LendingStation';
 import { TimeFrame } from '../../model/TimeFrame';
-import { ActionLogger, deleteEntity, genDateRange, LockUtils } from './utils';
+import { ActionLogger, genDateRange, DBUtils, LockUtils } from './utils';
 
 export class LendingStationAPI extends DataSource {
     connection : Connection
@@ -44,14 +43,8 @@ export class LendingStationAPI extends DataSource {
     /**
      * get all lendingStations
      */
-    async lendingStations (offset: number, limit: number) {
-        return await this.connection.getRepository(LendingStation)
-            .createQueryBuilder('lendingStation')
-            .select()
-            .offset(offset)
-            .limit(limit)
-            .orderBy('name', 'ASC')
-            .getMany() || new GraphQLError('Internal Server Error: could not query data from table lendingStation');
+    async lendingStations (offset?: number, limit?: number) {
+        return await DBUtils.getAllEntity(this.connection, LendingStation, 'ls', offset, limit);
     }
 
     /**
@@ -79,13 +72,8 @@ export class LendingStationAPI extends DataSource {
             .loadOne();
     }
 
-    async timeFrames (offset: number, limit: number) {
-        return await this.connection.getRepository(TimeFrame)
-            .createQueryBuilder('timeframe')
-            .select()
-            .offset(offset)
-            .limit(limit)
-            .getMany() || [];
+    async timeFrames (offset?: number, limit?: number) {
+        return await DBUtils.getAllEntity(this.connection, TimeFrame, 'tf', offset, limit);
     }
 
     async timeFramesByCargoBikeId (id: number) {
@@ -190,15 +178,12 @@ export class LendingStationAPI extends DataSource {
     }
 
     async deleteLendingStationById (id: number, userId: number) {
-        return await deleteEntity(this.connection, LendingStation, 'ls', id, userId);
+        return await DBUtils.deleteEntity(this.connection, LendingStation, 'ls', id, userId);
     }
 
     async createTimeFrame (timeFrame: any) {
         return await this.connection.transaction(async (entityManager: EntityManager) => {
-            if (timeFrame.to === undefined) {
-                timeFrame.to = '';
-            }
-            timeFrame.dateRange = '[' + timeFrame.from + ',' + timeFrame.to + ')';
+            genDateRange(timeFrame);
             // checking for overlapping time frames
             const overlapping = await entityManager.getRepository(TimeFrame)
                 .createQueryBuilder('timeframe')
@@ -268,6 +253,6 @@ export class LendingStationAPI extends DataSource {
     }
 
     async deleteTimeFrame (id: number, userId: number) {
-        return await deleteEntity(this.connection, TimeFrame, 'tf', id, userId);
+        return await DBUtils.deleteEntity(this.connection, TimeFrame, 'tf', id, userId);
     }
 }

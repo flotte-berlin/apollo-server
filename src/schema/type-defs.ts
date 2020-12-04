@@ -21,101 +21,28 @@ import { gql } from 'apollo-server-express';
 
 export default gql`
 
-    "timestamp object YYYY-MM-ddThh:mm:ss.sssZ"
+    "date object YYYY-MM-dd"
     scalar Date
+    "timestamp object YYYY-MM-ddThh:mm:ss.sssZ"
+    scalar DateTime
     "only time hh-mm-ss"
     scalar Time
-
+    """
+    is of american format [-]$[0-9]+.[0-9][0-9]
+    commas every three digits and . for decimals with 2 digits after the .
+    There can be a leading  -.
+    There is a currency signe at the first position or second position if - is set.
+    The kind of currency depends on the database.
+    """
+    scalar Money
+    
     "The CargoBike type is central to the graph. You could call it the root."
     type CargoBike {
         id: ID!
         "see column A in info tabelle"
-        group: Group
-        name: String
-        modelName: String
-        numberOfWheels: Int
-        forCargo: Boolean
-        forChildren: Boolean
-        numberOfChildren: Int!
-        """
-        Safety is a custom type, that stores information about security features.
-        TODO: Should this be called Security?
-        """
-        security: Security!
-        """
-        Does not refer to an extra table in the database.
-        """
-        technicalEquipment: TechnicalEquipment
-        """
-        Does not refer to an extra table in the database.
-        """
-        dimensionsAndLoad: DimensionsAndLoad!
-        bikeEvents(offset: Int, limit: Int): [BikeEvent]
-        equipment(offset: Int!, limit: Int!): [Equipment]
-        "Refers to equipment that is not unique. See kommentierte info tabelle -> Fragen -> Frage 2"
-        equipmentType: [EquipmentType]
-        "Sticker State"
-        stickerBikeNameState: StickerBikeNameState
-        note: String
-        provider: Provider
-        "all participants currently engaged with the cargoBike"
-        participants:  [Participant]
-        insuranceData: InsuranceData!
-        lendingStation: LendingStation
-        taxes: Taxes
-        currentEngagements: [Engagement]
-        engagement(offset: Int!, limit: Int!): [Engagement]
-        timeFrames: [TimeFrame]
-        isLocked: Boolean!
-        isLockedByMe: Boolean!
-        "null if not locked by other user"
-        lockedBy: ID
-        lockedUntil: Date
-    }
-
-    """
-    if you want to add bike to a lending station, create a new timeFrame with to: Date = null
-    """
-    input CargoBikeCreateInput {
-        "see column A in info tabelle"
         group: Group!
         name: String!
-        modelName: String!
-        numberOfWheels: Int!
-        forCargo: Boolean!
-        forChildren: Boolean!
-        numberOfChildren: Int!
-        """
-        Safety is a custom type, that stores information about security features.
-        TODO: Should this be called Security?
-        """
-        security: SecurityCreateInput!
-        """
-        Does not refer to an extra table in the database.
-        """
-        technicalEquipment: TechnicalEquipmentCreateInput!
-        """
-        Does not refer to an extra table in the database.
-        """
-        dimensionsAndLoad: DimensionsAndLoadCreateInput!
-        "Refers to equipment that is not unique. See kommentierte info tabelle -> Fragen -> Frage 2"
-        equipmentTypeIds: [ID]
-        "Sticker State"
-        stickerBikeNameState: StickerBikeNameState
-        note: String
-        providerId: ID
-        insuranceData: InsuranceDataCreateInput!
-        taxes: TaxesCreateInput!
-    }
-
-    """
-    if you want to add bike to a lending station, create a new timeFrame with to: Date = null
-    """
-    input CargoBikeUpdateInput {
-        id: ID!
-        "see column A in info tabelle"
-        group: Group
-        name: String
+        state: BikeState
         modelName: String
         numberOfWheels: Int
         forCargo: Boolean
@@ -124,6 +51,111 @@ export default gql`
         """
         Safety is a custom type, that stores information about security features.
         TODO: Should this be called Security?
+        """
+        security: Security
+        """
+        Does not refer to an extra table in the database.
+        """
+        technicalEquipment: TechnicalEquipment
+        """
+        Does not refer to an extra table in the database.
+        """
+        dimensionsAndLoad: DimensionsAndLoad
+        "If offset or limit is not provided, both values are ignored"
+        bikeEvents(offset: Int, limit: Int): [BikeEvent]
+        "If offset or limit is not provided, both values are ignored"
+        equipment(offset: Int, limit: Int): [Equipment]
+        "Refers to equipment that is not unique. See kommentierte info tabelle -> Fragen -> Frage 2"
+        equipmentType: [EquipmentType]
+        "Sticker State"
+        stickerBikeNameState: StickerBikeNameState
+        note: String
+        provider: Provider
+        "all participants currently engaged with the cargoBike"
+        participants:  [Participant]
+        insuranceData: InsuranceData
+        lendingStation: LendingStation
+        taxes: Taxes
+        currentEngagements: [Engagement]
+        "If offset or limit is not provided, both values are ignored"
+        engagement(offset: Int, limit: Int): [Engagement]
+        timeFrames: [TimeFrame]
+        isLocked: Boolean!
+        isLockedByMe: Boolean!
+        "null if not locked by other user"
+        lockedBy: ID
+        lockedUntil: DateTime
+    }
+
+    """
+    Status of the CargoBike. More fields will be added, or removed.
+    """
+    enum BikeState {
+        ACTIVE
+        INACTIVE
+        INPREPARATION
+    }
+    
+    """
+    if you want to add bike to a lending station, create a new timeFrame with to: Date = null
+    """
+    input CargoBikeCreateInput {
+        "see column A in info tabelle"
+        group: Group!
+        name: String!
+        state: BikeState
+        modelName: String
+        numberOfWheels: Int
+        forCargo: Boolean
+        forChildren: Boolean
+        numberOfChildren: Int
+        """
+        Safety is a custom type, that stores information about security features.
+        """
+        security: SecurityCreateInput
+        """
+        Does not refer to an extra table in the database.
+        """
+        technicalEquipment: TechnicalEquipmentCreateInput
+        """
+        Does not refer to an extra table in the database.
+        """
+        dimensionsAndLoad: DimensionsAndLoadCreateInput
+        """
+        Refers to equipment that is not unique. See kommentierte info tabelle -> Fragen -> Frage 2
+        When set to null or [], no relations will be added.
+        """
+        equipmentTypeIds: [ID]
+        """
+        Refers to unique equipment
+        When set to null or [], no relations will be added.
+        When specified id is in a relation with another bike, this relation will be deleted.
+        """
+        equipmentIds: [ID]
+        "Sticker State"
+        stickerBikeNameState: StickerBikeNameState
+        note: String
+        providerId: ID
+        insuranceData: InsuranceDataCreateInput
+        taxes: TaxesCreateInput
+    }
+
+    """
+    If you want to add bike to a lending station, create a new timeFrame with to: Date = null
+    """
+    input CargoBikeUpdateInput {
+        id: ID!
+        "see column A in info tabelle"
+        group: Group
+        name: String
+        state: BikeState
+        modelName: String
+        numberOfWheels: Int
+        forCargo: Boolean
+        forChildren: Boolean
+        numberOfChildren: Int
+        """
+        Safety is a custom type, that stores information about security features.
         """
         security: SecurityUpdateInput
         """
@@ -136,9 +168,19 @@ export default gql`
         dimensionsAndLoad: DimensionsAndLoadUpdateInput
         """
         Refers to equipment that is not unique. See kommentierte info tabelle -> Fragen -> Frage 2
-        If set, ols relations will be over written. Set [] to delete all
+        When set to null, field will be ignored.
+        When set to [], all relations will be deleted.
+        Else all realtions will be deleted and the specified relations will be added.
         """
         equipmentTypeIds: [ID]
+        """
+        Refers to unique equipment
+        When set to null, field will be ignored.
+        When set to [], all relations will be deleted.
+        Else all realtions will be deleted and the specified relations will be added.
+        When specified id is in a relation with another bike, this relation will be deleted.
+        """
+        equipmentIds: [ID]
         "Sticker State"
         stickerBikeNameState: StickerBikeNameState
         note: String
@@ -153,15 +195,15 @@ export default gql`
         """
         Eventually, this field will become an enum or a separate data table and user can choose from a pool of insurance companies.
         """
-        name: String!
-        benefactor: String!
-        billing: String!
-        noPnP: String!
+        name: String
+        benefactor: String
+        billing: String
+        noPnP: String
         "eg. Anbieter, flotte, eigenleistung"
-        maintenanceResponsible: String!
-        maintenanceBenefactor: String!
+        maintenanceResponsible: String
+        maintenanceBenefactor: String
         maintenanceAgreement: String
-        hasFixedRate: Boolean!
+        hasFixedRate: Boolean
         fixedRate: Float
         """
         Projektzuschuss:
@@ -171,7 +213,7 @@ export default gql`
         There is a currency signe at the first position or second position if - is set.
         The kind of currency depends on the database.
         """
-        projectAllowance: String
+        projectAllowance: Money
         notes: String
     }
 
@@ -179,15 +221,15 @@ export default gql`
         """
         Eventually, this field will become an enum or a separate data table and user can choose from a pool of insurance companies.
         """
-        name: String!
-        benefactor: String!
-        billing: String!
-        noPnP: String!
+        name: String
+        benefactor: String
+        billing: String
+        noPnP: String
         "eg. Anbieter, flotte, eigenleistung"
-        maintenanceResponsible: String!
-        maintenanceBenefactor: String!
+        maintenanceResponsible: String
+        maintenanceBenefactor: String
         maintenanceAgreement: String
-        hasFixedRate: Boolean!
+        hasFixedRate: Boolean
         fixedRate: Float
         """
         Projektzuschuss:
@@ -197,7 +239,7 @@ export default gql`
         You can pass a currency signe at the first position or second position of + or - is set.
         The kind of currency depends on the database.
         """
-        projectAllowance: String
+        projectAllowance: Money
         notes: String
     }
 
@@ -223,37 +265,51 @@ export default gql`
         You can pass a currency signe at the first position or second position of + or - is set.
         The kind of currency depends on the database.
         """
-        projectAllowance: String
+        projectAllowance: Money
         notes: String
     }
 
+    type NumRange {
+        min: Float
+        max: Float
+    }
+    
+    """
+    If min or max is omitted, the omitted value will be the same as the other given value
+    So if you pass one as null, both values with be over written with null.
+    """
+    input NumRangeInput {
+        min: Float
+        max: Float
+    }
+    
     "How are the dimensions and how much weight can handle a bike. This data is merged in the CargoBike table and the BikeModel table."
     type DimensionsAndLoad {
-        hasCoverBox: Boolean!
+        hasCoverBox: Boolean
         "cover box can be locked"
-        lockable: Boolean!
-        boxLength: Float!
-        boxWidth: Float!
-        boxHeight: Float!
-        maxWeightBox: Float!
-        maxWeightLuggageRack: Float!
-        maxWeightTotal: Float!
-        bikeLength: Float!
+        lockable: Boolean
+        boxLengthRange: NumRange
+        boxWidthRange: NumRange
+        boxHeightRange: NumRange
+        maxWeightBox: Float
+        maxWeightLuggageRack: Float
+        maxWeightTotal: Float
+        bikeLength: Float
         bikeWidth: Float
         bikeHeight: Float
         bikeWeight: Float
     }
 
     input DimensionsAndLoadCreateInput {
-        hasCoverBox: Boolean!
-        lockable: Boolean!
-        boxLength: Float!
-        boxWidth: Float!
-        boxHeight: Float!
-        maxWeightBox: Float!
-        maxWeightLuggageRack: Float!
-        maxWeightTotal: Float!
-        bikeLength: Float!
+        hasCoverBox: Boolean
+        lockable: Boolean
+        boxLengthRange: NumRangeInput
+        boxWidthRange: NumRangeInput
+        boxHeightRange: NumRangeInput
+        maxWeightBox: Float
+        maxWeightLuggageRack: Float
+        maxWeightTotal: Float
+        bikeLength: Float
         bikeWidth: Float
         bikeHeight: Float
         bikeWeight: Float
@@ -262,9 +318,9 @@ export default gql`
     input DimensionsAndLoadUpdateInput {
         hasCoverBox: Boolean
         lockable: Boolean
-        boxLength: Float
-        boxWidth: Float
-        boxHeight: Float
+        boxLengthRange: NumRangeInput
+        boxWidthRange: NumRangeInput
+        boxHeightRange: NumRangeInput
         maxWeightBox: Float
         maxWeightLuggageRack: Float
         maxWeightTotal: Float
@@ -280,16 +336,16 @@ export default gql`
     So no id needed for mutation. One Mutation for the CargoBike will be enough.
     """
     type TechnicalEquipment {
-        bicycleShift: String!
-        isEBike: Boolean!
-        hasLightSystem: Boolean!
+        bicycleShift: String
+        isEBike: Boolean
+        hasLightSystem: Boolean
         specialFeatures: String
     }
 
     input TechnicalEquipmentCreateInput {
-        bicycleShift: String!
-        isEBike: Boolean!
-        hasLightSystem: Boolean!
+        bicycleShift: String
+        isEBike: Boolean
+        hasLightSystem: Boolean
         specialFeatures: String
     }
 
@@ -306,7 +362,7 @@ export default gql`
     So no id needed for mutation. One Mutation for the CargoBike will be enough.
     """
     type Security {
-        frameNumber: String!
+        frameNumber: String
         keyNumberFrameLock: String
         keyNumberAXAChain: String
         policeCoding: String
@@ -314,7 +370,7 @@ export default gql`
     }
 
     input SecurityCreateInput {
-        frameNumber: String!
+        frameNumber: String
         keyNumberFrameLock: String
         keyNumberAXAChain: String
         policeCoding: String
@@ -354,8 +410,7 @@ export default gql`
     """
     type Participant {
         id: ID!
-        start: Date!
-        end: Date
+        dateRange: DateRange!
         contactInformation: ContactInformation!
         usernamefLotte: String
         usernameSlack: String
@@ -375,13 +430,12 @@ export default gql`
         isLockedByMe: Boolean!
         "null if not locked by other user"
         lockedBy: ID
-        lockedUntil: Date
+        lockedUntil: DateTime
     }
 
     input ParticipantCreateInput {
         "if not set, CURRENT_DATE will be used"
-        start: Date
-        end: Date
+        dateRange: DateRangeInput!
         "must create contactinformation first, if you want to use new"
         contactInformationId: ID!
         usernamefLotte: String
@@ -396,9 +450,7 @@ export default gql`
 
     input ParticipantUpdateInput {
         id: ID!
-        "if not set, CURRENT_DATE will be used"
-        start: Date
-        end: Date
+        dateRange: DateRangeInput
         "must create contactinformation first, if you want to use new"
         contactInformationId: ID
         usernamefLotte: String
@@ -428,7 +480,7 @@ export default gql`
         isLockedByMe: Boolean!
         "null if not locked by other user"
         lockedBy: ID
-        lockedUntil: Date
+        lockedUntil: DateTime
     }
 
     input WorkshopCreateInput {
@@ -458,7 +510,7 @@ export default gql`
         isLockedByMe: Boolean!
         "null if not locked by other user"
         lockedBy: ID
-        lockedUntil: Date
+        lockedUntil: DateTime
     }
 
     input WorkshopTypeCreateInput {
@@ -478,7 +530,7 @@ export default gql`
         isLockedByMe: Boolean!
         "null if not locked by other user"
         lockedBy: ID
-        lockedUntil: Date
+        lockedUntil: DateTime
     }
 
     input EngagementTypeCreateInput {
@@ -496,43 +548,38 @@ export default gql`
     type Engagement {
         id: ID!
         engagementType: EngagementType!
-        from: Date!
-        to: Date
+        dateRange: DateRange!
         participant: Participant!
         cargoBike: CargoBike!
         isLocked: Boolean!
         isLockedByMe: Boolean!
         "null if not locked by other user"
         lockedBy: ID
-        lockedUntil: Date
+        lockedUntil: DateTime
     }
 
     input EngagementCreateInput {
         engagementTypeId: ID!
-        "will use CURRENT_DATE if not set"
-        from: Date
-        "will use infinit if not set"
-        to: Date
+        dateRange: DateRangeInput!
         participantId: ID!
         cargoBikeId: ID!
     }
     input EngagementUpdateInput {
         id: ID!
         engagementTypeId: ID
-        from: Date
-        to: Date
+        dateRange: DateRangeInput
         participantId: ID
         cargoBikeId: ID
         keepLock: Boolean
     }
 
     type Taxes {
-        costCenter: String!
+        costCenter: String
         organisationArea: OrganisationArea
     }
 
     input TaxesCreateInput {
-        costCenter: String!
+        costCenter: String
         organisationArea: OrganisationArea
     }
 
@@ -560,7 +607,7 @@ export default gql`
         isLockedByMe: Boolean!
         "null if not locked by other user"
         lockedBy: ID
-        lockedUntil: Date
+        lockedUntil: DateTime
     }
 
     input EquipmentCreateInput {
@@ -592,11 +639,11 @@ export default gql`
         isLockedByMe: Boolean!
         "null if not locked by other user"
         lockedBy: ID
-        lockedUntil: Date
+        lockedUntil: DateTime
     }
 
     input EquipmentTypeCreateInput {
-        name: String
+        name: String!
         description: String
     }
 
@@ -607,7 +654,7 @@ export default gql`
         keepLock: Boolean
     }
 
-    "An Event is a point in time, when the state of the bike somehow changed."
+    "An Event is a point in time concerning one cargo bike of an event type. For example a chain swap."
     type BikeEvent {
         id: ID!
         bikeEventType: BikeEventType!
@@ -625,7 +672,7 @@ export default gql`
         isLockedByMe: Boolean!
         "null if not locked by other user"
         lockedBy: ID
-        lockedUntil: Date
+        lockedUntil: DateTime
     }
 
     input BikeEventCreateInput {
@@ -663,7 +710,9 @@ export default gql`
         name: String!
         isLockedByMe: Boolean!
         isLocked: Boolean!
-        lockedUntil: Date
+        "null if not locked by other user"
+        lockedBy: ID
+        lockedUntil: DateTime
     }
 
     input BikeEventTypeUpdateInput {
@@ -683,7 +732,7 @@ export default gql`
         isLockedByMe: Boolean!
         "null if not locked by other user"
         lockedBy: ID
-        lockedUntil: Date
+        lockedUntil: DateTime
     }
 
     "(dt. Anbieter)"
@@ -717,7 +766,7 @@ export default gql`
         isLockedByMe: Boolean!
         "null if not locked by other user"
         lockedBy: ID
-        lockedUntil: Date
+        lockedUntil: DateTime
     }
 
     input PersonCreateInput {
@@ -744,7 +793,7 @@ export default gql`
         isLockedByMe: Boolean!
         "null if not locked by other user"
         lockedBy: ID
-        lockedUntil: Date
+        lockedUntil: DateTime
     }
 
     input ContactInformationCreateInput {
@@ -784,7 +833,7 @@ export default gql`
         isLockedByMe: Boolean!
         "null if not locked by other user"
         lockedBy: ID
-        lockedUntil: Date
+        lockedUntil: DateTime
     }
 
     input OrganisationCreateInput {
@@ -828,7 +877,7 @@ export default gql`
         isLockedByMe: Boolean!
         "null if not locked by other user"
         lockedBy: ID
-        lockedUntil: Date
+        lockedUntil: DateTime
     }
 
     """
@@ -862,13 +911,13 @@ export default gql`
     """
     type LoanPeriod {
         generalRemark: String
-        "notes for each day of the week, starting on Monday"
-        notes: [String]
-        """
-        Loan times from and until for each day of the week.
-        Starting with Monday from, Monday to, Tuesday from, ..., Sunday to
-        """
-        loanTimes: [String]
+        mo: String
+        tu: String
+        we: String
+        th: String
+        fr: String
+        sa: String
+        su: String
     }
 
     """
@@ -876,22 +925,35 @@ export default gql`
     """
     input LoanPeriodInput {
         generalRemark: String
-        "notes for each day of the week, starting on Monday"
-        notes: [String!]
-        """
-        Loan times from and until for each day of the week.
-        Starting with Monday from, Monday to, Tuesday from, ..., Sunday to
-        """
-        loanTimes: [String!]
+        mo: String
+        tu: String
+        we: String
+        th: String
+        fr: String
+        sa: String
+        su: String
     }
 
+    type DateRange{
+        from: Date!
+        "will be infinity of not omitted"
+        to: Date
+    }
+    
+    input DateRangeInput {
+        "format YYYY-MM-dd"
+        from: Date!
+        """
+        format YYYY-MM-dd
+        will be infinity of not omitted
+        """
+        to: Date
+    }
+    
     "(dt. Zeitscheibe) When was a bike where"
     type TimeFrame {
         id: ID!
-        "format YYYY-MM-dd"
-        from: Date!
-        "format YYYY-MM-dd"
-        to: Date
+        dateRange: DateRange!
         note: String
         lendingStation: LendingStation!
         cargoBike: CargoBike!
@@ -899,12 +961,11 @@ export default gql`
         isLockedByMe: Boolean!
         "null if not locked by other user"
         lockedBy: ID
-        lockedUntil: Date
+        lockedUntil: DateTime
     }
 
     input TimeFrameCreateInput {
-        from: Date!
-        to: Date
+        dateRange: DateRangeInput!
         note: String
         lendingStationId: ID!
         cargoBikeId: ID!
@@ -912,8 +973,7 @@ export default gql`
 
     input TimeFrameUpdateInput {
         id: ID!
-        from: Date
-        to: Date
+        dateRange: DateRangeInput
         note: String
         lendingStationId: ID
         cargoBikeId: ID
@@ -953,41 +1013,55 @@ export default gql`
     type Query {
         "Will (eventually) return all properties of cargo bike"
         cargoBikeById(id:ID!): CargoBike
-        "returns cargoBikes ordered by name ascending, relations are not loaded, use cargoBikeById instead"
-        cargoBikes(offset: Int!, limit: Int!): [CargoBike!]!
+        "Returns cargoBikes ordered by name ascending. If offset or limit is not provided, both values are ignored."
+        cargoBikes(offset: Int, limit: Int): [CargoBike!]!
         engagementById(id: ID!): Engagement
-        engagements(offset: Int!, limit: Int!): [Engagement!]!
+        "If offset or limit is not provided, both values are ignored"
+        engagements(offset: Int, limit: Int): [Engagement!]!
         engagementTypeById(id: ID!): EngagementType
-        engagementTypes(offset: Int!, limit: Int!): [EngagementType!]!
+        "If offset or limit is not provided, both values are ignored"
+        engagementTypes(offset: Int, limit: Int): [EngagementType!]!
         "equipment by id, will return null if id not found"
         equipmentById(id: ID!): Equipment
-        equipment(offset: Int!, limit: Int!): [Equipment!]!
+        "If offset or limit is not provided, both values are ignored"
+        equipment(offset: Int, limit: Int): [Equipment!]!
         equipmentTypeById(id: ID!): EquipmentType
-        equipmentTypes(offset: Int!, limit: Int!): [EquipmentType!]!
+        "If offset or limit is not provided, both values are ignored"
+        equipmentTypes(offset: Int, limit: Int): [EquipmentType!]!
         "return null if id not found"
         providerById(id:ID!): Provider
-        "Returns providers with pagination"
-        providers(offset: Int!, limit: Int!): [Provider!]!
+        "Returns providers with pagination. If offset or limit is not provided, both values are ignored"
+        providers(offset: Int, limit: Int): [Provider!]!
         "participant by id"
         participantById(id:ID!):  Participant
-        participants(offset: Int!, limit: Int!): [Participant!]!
+        "If offset or limit is not provided, both values are ignored"
+        participants(offset: Int, limit: Int): [Participant!]!
         workshopTypeById(id: ID!): WorkshopType
-        workshopTypes(offset: Int!, limit: Int!): [WorkshopType!]!
+        "If offset or limit is not provided, both values are ignored"
+        workshopTypes(offset: Int, limit: Int): [WorkshopType!]!
         workshopById(id: ID!): Workshop
-        workshops(offset: Int!, limit: Int!): [Workshop!]!
+        "If offset or limit is not provided, both values are ignored"
+        workshops(offset: Int, limit: Int): [Workshop!]!
         lendingStationById(id:ID!): LendingStation
-        lendingStations(offset: Int!, limit: Int!): [LendingStation!]!
+        "If offset or limit is not provided, both values are ignored"
+        lendingStations(offset: Int, limit: Int): [LendingStation!]!
         organisationById(id: ID!): Organisation
-        organisations(offset: Int!, limit: Int!): [Organisation!]!
+        "If offset or limit is not provided, both values are ignored"
+        organisations(offset: Int, limit: Int): [Organisation!]!
         timeFrameById(id: ID!): TimeFrame
-        timeFrames(offset: Int!, limit: Int!): [TimeFrame!]!
+        "If offset or limit is not provided, both values are ignored"
+        timeFrames(offset: Int, limit: Int): [TimeFrame!]!
         contactInformationById(id: ID!): ContactInformation
-        contactInformation(offset: Int!, limit: Int!): [ContactInformation!]!
+        "If offset or limit is not provided, both values are ignored"
+        contactInformation(offset: Int, limit: Int): [ContactInformation!]!
         personById(id: ID!): Person
-        persons(offset: Int!, limit: Int!): [Person!]
-        bikeEventTypes(offset: Int!, limit: Int!): [BikeEventType!]
+        "If offset or limit is not provided, both values are ignored"
+        persons(offset: Int, limit: Int): [Person!]
+        "If offset or limit is not provided, both values are ignored"
+        bikeEventTypes(offset: Int, limit: Int): [BikeEventType!]
         bikeEventTypeByd(id: ID!): BikeEventType
-        bikeEvents(offset: Int!, limit: Int!): [BikeEvent!]!
+        "If offset or limit is not provided, both values are ignored"
+        bikeEvents(offset: Int, limit: Int): [BikeEvent!]!
         bikeEventById(id:ID!): BikeEvent
         "actionLog for current user"
         actionLog: [ActionLog!]
@@ -1062,23 +1136,23 @@ export default gql`
         """
         createParticipant(participant: ParticipantCreateInput!): Participant!
         lockParticipant(id: ID!): Participant!
-        unlockParticipant(id: ID!): Boolean
+        unlockParticipant(id: ID!): Participant
         updateParticipant(participant: ParticipantUpdateInput!): Participant!
         deleteParticipant(id: ID!): Boolean!
         createWorkshopType(workshopType: WorkshopTypeCreateInput!): WorkshopType!
         lockWorkshopType(id: ID!): WorkshopType!
-        unlockWorkshopType(id: ID!): Boolean!
+        unlockWorkshopType(id: ID!): WorkshopType!
         updateWorkshopType(workshopType: WorkshopTypeUpdateInput!): WorkshopType!
         deleteWorkshopType(id: ID!): Boolean!
         createWorkshop(workshop: WorkshopCreateInput!): Workshop!
         lockWorkshop(id: ID!): Workshop!
-        unlockWorkshop(id: ID!): Boolean!
+        unlockWorkshop(id: ID!): Workshop!
         updateWorkshop(workshop: WorkshopUpdateInput!): Workshop!
         deleteWorkshop(id: ID!): Boolean!
         "create new contactInfo"
         createContactInformation(contactInformation: ContactInformationCreateInput!): ContactInformation!
         lockContactInformation(id: ID!): ContactInformation!
-        unlockContactInformation(id: ID!): Boolean!
+        unlockContactInformation(id: ID!): ContactInformation!
         updateContactInformation(contactInformation: ContactInformationUpdateInput!): ContactInformation!
         deleteContactInformation(id: ID!): Boolean!
         createPerson(person: PersonCreateInput!): Person!
@@ -1089,22 +1163,22 @@ export default gql`
         "create Engagement"
         createEngagement(engagement: EngagementCreateInput): Engagement!
         lockEngagement(id: ID!): Engagement!
-        unlockEngagement(id: ID!): Boolean!
+        unlockEngagement(id: ID!): Engagement!
         updateEngagement(engagement: EngagementUpdateInput!): Engagement!
         deleteEngagement(id: ID!): Boolean!
         createEngagementType(engagementType: EngagementTypeCreateInput!): EngagementType!
         lockEngagementType(id: ID!): EngagementType!
-        unlockEngagementType(id: ID!): Boolean!
+        unlockEngagementType(id: ID!): EngagementType!
         updateEngagementType(engagementType: EngagementTypeUpdateInput!): EngagementType!
         deleteEngagementType(id: ID!): Boolean!
         createProvider(provider: ProviderCreateInput!): Provider!
         lockProvider(id: ID!): Provider!
-        unlockProvider(id: ID!): Boolean!
+        unlockProvider(id: ID!): Provider!
         updateProvider(provider: ProviderUpdateInput!): Provider!
         deleteProvider(id: ID!): Boolean!
         createOrganisation(organisation: OrganisationCreateInput!): Organisation!
         lockOrganisation(id: ID!): Organisation!
-        unlockOrganisation(id: ID!): Boolean!
+        unlockOrganisation(id: ID!): Organisation!
         updateOrganisation(organisation: OrganisationUpdateInput!): Organisation!
         deleteOrganisation(id: ID!): Boolean!
     }
