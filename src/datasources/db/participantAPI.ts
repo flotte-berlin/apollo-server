@@ -130,7 +130,7 @@ export class ParticipantAPI extends DataSource {
     }
 
     async engagementTypes (offset?: number, limit?: number) {
-        return await DBUtils.getAllEntity(this.connection, Engagement, 'e', offset, limit);
+        return await DBUtils.getAllEntity(this.connection, EngagementType, 'et', offset, limit);
     }
 
     async engagementTypeByEngagementId (id: number) {
@@ -170,6 +170,7 @@ export class ParticipantAPI extends DataSource {
      * @param participant to be created
      */
     async createParticipant (participant: any) {
+        genDateRange(participant);
         let inserts: any;
         await this.connection.transaction(async (entityManager: EntityManager) => {
             inserts = await entityManager.getRepository(Participant)
@@ -201,8 +202,9 @@ export class ParticipantAPI extends DataSource {
         delete participant.keepLock;
         await this.connection.transaction(async (entityManager: EntityManager) => {
             if (await LockUtils.isLocked(entityManager, Participant, 'p', participant.id, userId)) {
-                throw new GraphQLError('Participant is locked by another user');
+                throw new UserInputError('Attempting to update locked resource');
             }
+            genDateRange(participant);
             const workshops = participant.workshopIds;
             delete participant.workshopIds;
             await ActionLogger.log(entityManager, Participant, 'p', participant, userId);
@@ -212,6 +214,17 @@ export class ParticipantAPI extends DataSource {
                 .set({ ...participant })
                 .where('id = :id', { id: participant.id })
                 .execute().then(value => { if (value.affected !== 1) { throw new UserInputError('ID not found'); } });
+            // check for engagements before or after dateRange
+            const engagements = await entityManager.getRepository(Engagement)
+                .createQueryBuilder('e')
+                .select()
+                .where('e."participantId" = :pid', { pid: participant.id })
+                .andWhere('not :pdr @> e."dateRange"', { pdr: participant.dateRange })
+                .getMany();
+            if (engagements.length !== 0) {
+                throw new UserInputError('Engagements with ids: ' + engagements.map((e) => { return `${e.id} ,`; }) + ' are are outside of dataRange');
+            }
+            // add and remove workshop relations
             workshops && await entityManager.getRepository(Participant)
                 .createQueryBuilder('w')
                 .relation(Participant, 'workshopIds')
@@ -240,6 +253,16 @@ export class ParticipantAPI extends DataSource {
                 .getMany();
             if (overlapping.length > 0) {
                 throw new UserInputError('Engagements with ids: ' + overlapping.map((e) => { return e.id + ', '; }) + 'are overlapping');
+            }
+            // check if participant is active
+            const participant = await entityManager.getRepository(Participant)
+                .createQueryBuilder('p')
+                .select()
+                .where('p.id = :pid', { pid: engagement.participantId })
+                .andWhere('not p."dateRange" @> :edr', { edr: engagement.dateRange })
+                .getOne();
+            if (participant) {
+                throw new UserInputError('Participant ist not active in the specified dateRange');
             }
             inserts = await entityManager.getRepository(Engagement)
                 .createQueryBuilder('engagement')
@@ -279,6 +302,20 @@ export class ParticipantAPI extends DataSource {
                 .getMany();
             if (overlapping.length > 0) {
                 throw new UserInputError('Engagements with ids: ' + overlapping.map((e) => { return e.id + ', '; }) + 'are overlapping');
+            }
+            // check if participant is active
+            if (engagement.dateRange && engagement.participantId) {
+                const participant = await entityManager.getRepository(Participant)
+                    .createQueryBuilder('p')
+                    .select()
+                    .where('p.id = :pid', { pid: engagement.participantId })
+                    .andWhere('not p."dateRange" @> :edr', { edr: engagement.dateRange })
+                    .getOne();
+                if (participant) {
+                    throw new UserInputError('Participant ist not active in the specified dateRange');
+                }
+            } else if (engagement.dateRange || engagement.dateRange) {
+                throw new UserInputError('Please specify participantId adn the dateRange');
             }
             await entityManager.getRepository(Engagement)
                 .createQueryBuilder('engagement')

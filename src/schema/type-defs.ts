@@ -40,7 +40,7 @@ export default gql`
     type CargoBike {
         id: ID!
         "see column A in info tabelle"
-        group: Group
+        group: Group!
         name: String!
         state: BikeState
         modelName: String
@@ -410,8 +410,7 @@ export default gql`
     """
     type Participant {
         id: ID!
-        start: Date!
-        end: Date
+        dateRange: DateRange!
         contactInformation: ContactInformation!
         usernamefLotte: String
         usernameSlack: String
@@ -436,8 +435,7 @@ export default gql`
 
     input ParticipantCreateInput {
         "if not set, CURRENT_DATE will be used"
-        start: Date
-        end: Date
+        dateRange: DateRangeInput!
         "must create contactinformation first, if you want to use new"
         contactInformationId: ID!
         usernamefLotte: String
@@ -452,9 +450,7 @@ export default gql`
 
     input ParticipantUpdateInput {
         id: ID!
-        "if not set, CURRENT_DATE will be used"
-        start: Date
-        end: Date
+        dateRange: DateRangeInput
         "must create contactinformation first, if you want to use new"
         contactInformationId: ID
         usernamefLotte: String
@@ -564,7 +560,7 @@ export default gql`
 
     input EngagementCreateInput {
         engagementTypeId: ID!
-        dateRange: DateRangeInput
+        dateRange: DateRangeInput!
         participantId: ID!
         cargoBikeId: ID!
     }
