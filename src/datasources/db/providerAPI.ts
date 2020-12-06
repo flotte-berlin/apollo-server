@@ -127,7 +127,7 @@ export class ProviderAPI extends DataSource {
                 .execute();
             await entityManager.getRepository(Provider)
                 .createQueryBuilder('provider')
-                .relation(Provider, 'cargoBikes')
+                .relation(Provider, 'cargoBikeIds')
                 .of(inserts.identifiers[0].id)
                 .add(provider.cargoBikeIds);
         });
