@@ -20,9 +20,15 @@ export const CREATE_CARGO_BIKE = gql`
                 dimensionsAndLoad: {
                     hasCoverBox: true
                     lockable:false
-                    boxLength: 0.1
-                    boxWidth: 0.2
-                    boxHeight:0.3
+                    boxLengthRange: {
+                        min: 0,
+                    }
+                    boxWidthRange: {
+                        min: 0.2
+                    }
+                    boxHeightRange: {
+                        min: 0.3
+                    }
                     maxWeightBox: 1.1
                     maxWeightLuggageRack: 1.2
                     maxWeightTotal: 1.3

@@ -839,7 +839,7 @@ export default gql`
         address: AddressCreateInput!
         name: String!
         "registration number of association"
-        associationNo: String!
+        associationNo: String
         "If Club, at what court registered"
         registeredAt: String
         contactInformationId: ID

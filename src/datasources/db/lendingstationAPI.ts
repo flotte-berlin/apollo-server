@@ -24,6 +24,8 @@ import { CargoBike } from '../../model/CargoBike';
 import { LendingStation } from '../../model/LendingStation';
 import { TimeFrame } from '../../model/TimeFrame';
 import { ActionLogger, genDateRange, DBUtils, LockUtils } from './utils';
+import { ResourceLockedError } from '../../errors/ResourceLockedError';
+import { NotFoundError } from '../../errors/NotFoundError';
 
 export class LendingStationAPI extends DataSource {
     connection : Connection
@@ -163,7 +165,7 @@ export class LendingStationAPI extends DataSource {
         delete lendingStation.keepLock;
         await this.connection.transaction(async (entityManager: EntityManager) => {
             if (await LockUtils.isLocked(entityManager, LendingStation, 'ls', lendingStation.id, userId)) {
-                throw new UserInputError('Attempting to update locked resource');
+                throw new ResourceLockedError('LendingStation', 'Attempting to update locked resource');
             }
             await ActionLogger.log(entityManager, LendingStation, 'ls', lendingStation, userId);
             await entityManager.getRepository(LendingStation)
@@ -222,7 +224,7 @@ export class LendingStationAPI extends DataSource {
         delete timeFrame.keepLock;
         await this.connection.transaction(async (entityManager: EntityManager) => {
             if (await LockUtils.isLocked(entityManager, TimeFrame, 'tf', timeFrame.id, userId)) {
-                throw new UserInputError('Attempting to update locked resource');
+                throw new ResourceLockedError('TimeFrame', 'Attempting to update locked resource');
             }
             genDateRange(timeFrame);
             await ActionLogger.log(entityManager, TimeFrame, 'tf', timeFrame, userId);
@@ -246,7 +248,7 @@ export class LendingStationAPI extends DataSource {
                 .set({ ...timeFrame })
                 .where('id = :id', { id: timeFrame.id })
                 .execute()
-                .then(value => { if (value.affected !== 1) { throw new UserInputError('ID not found'); } });
+                .then(value => { if (value.affected !== 1) { throw new NotFoundError('TimeFrame', 'id', timeFrame.id); } });
         });
         !keepLock && await this.unlockTimeFrame(timeFrame.id, userId);
         return this.timeFrameById(timeFrame.id);

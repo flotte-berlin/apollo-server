@@ -21,6 +21,8 @@ import { Connection, EntityManager, ObjectType } from 'typeorm';
 import { Lockable } from '../../model/CargoBike';
 import { ActionLog, Actions } from '../../model/ActionLog';
 import { UserInputError } from 'apollo-server-express';
+import { ResourceLockedError } from '../../errors/ResourceLockedError';
+import { NotFoundError } from '../../errors/NotFoundError';
 
 export function genDateRange (struct: any) {
     if (!struct.dateRange || !struct.dateRange.from) {
@@ -100,7 +102,7 @@ export class DBUtils {
     static async deleteEntity (connection: Connection, target: ObjectType<Lockable>, alias: string, id: number, userId: number): Promise<Boolean> {
         return await connection.transaction(async (entityManger: EntityManager) => {
             if (await LockUtils.isLocked(entityManger, target, alias, id, userId)) {
-                throw new UserInputError('Attempting to delete locked resource');
+                throw new ResourceLockedError('Connection', 'Attempting to delete locked resource');
             }
             await ActionLogger.log(entityManger, target, alias, { id: id }, userId, Actions.DELETE);
             return await entityManger.getRepository(target)
@@ -158,7 +160,7 @@ export class LockUtils {
             .select()
             .where(alias + '.id = :id', { id: id })
             .getOne().catch(() => {
-                throw new UserInputError('ID not found');
+                throw new NotFoundError(target.name, 'id', id);
             });
     }
 
@@ -301,7 +303,7 @@ export class ActionLogger {
             .where('id = :id', { id: updates.id })
             .getRawOne().then(value => {
                 if (value === undefined) {
-                    throw new UserInputError('Id not found');
+                    throw new NotFoundError(target.name, 'id', updates.id);
                 }
                 return value;
             }); // use getRawOne to also get ids of related entities

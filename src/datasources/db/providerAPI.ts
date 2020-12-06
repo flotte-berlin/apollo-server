@@ -25,7 +25,8 @@ import { UserInputError } from 'apollo-server-express';
 import { CargoBike } from '../../model/CargoBike';
 import { LendingStation } from '../../model/LendingStation';
 import { ActionLogger, DBUtils, LockUtils } from './utils';
-import { GraphQLError } from 'graphql';
+import { ResourceLockedError } from '../../errors/ResourceLockedError';
+import { NotFoundError } from '../../errors/NotFoundError';
 
 export class ProviderAPI extends DataSource {
     connection : Connection
@@ -150,7 +151,7 @@ export class ProviderAPI extends DataSource {
         delete provider.cargoBikeIds;
         await this.connection.transaction(async (entityManager: EntityManager) => {
             if (await LockUtils.isLocked(entityManager, Provider, 'p', provider.id, userId)) {
-                throw new GraphQLError('Provider is locked by another user');
+                throw new ResourceLockedError('Provider');
             }
             await ActionLogger.log(entityManager, Provider, 'p', provider, userId);
             await entityManager.getRepository(Provider)
@@ -158,7 +159,11 @@ export class ProviderAPI extends DataSource {
                 .update()
                 .set({ ...provider })
                 .where('id = :id', { id: provider.id })
-                .execute().then(value => { if (value.affected !== 1) { throw new GraphQLError('ID not found'); } });
+                .execute().then(value => {
+                    if (value.affected !== 1) {
+                        throw new NotFoundError('Provider', 'id', provider.id);
+                    }
+                });
             await entityManager.getRepository(Provider)
                 .createQueryBuilder('p')
                 .relation(Provider, 'cargoBikeIds')
@@ -174,15 +179,17 @@ export class ProviderAPI extends DataSource {
     }
 
     async createOrganisation (organisation: any) {
-        let inserts: any = null;
+        let createdOrganisation: any = null;
         await this.connection.transaction(async (entityManager: EntityManager) => {
-            inserts = await entityManager.getRepository(Organisation)
+            const result = await entityManager.getRepository(Organisation)
                 .createQueryBuilder('o')
                 .insert()
                 .values([organisation])
                 .execute();
+            createdOrganisation = await entityManager.getRepository(Organisation).findOne(result.identifiers[0].id);
         });
-        return inserts.generatedMaps[0];
+
+        return createdOrganisation;
     }
 
     async lockOrganisation (id: number, userId: number) {
@@ -198,7 +205,7 @@ export class ProviderAPI extends DataSource {
         delete organisation.keepLock;
         await this.connection.transaction(async (entityManager: EntityManager) => {
             if (await LockUtils.isLocked(entityManager, Organisation, 'o', organisation.id, userId)) {
-                throw new GraphQLError('Organisation is locked by another user');
+                throw new ResourceLockedError('Organisation');
             }
             await ActionLogger.log(entityManager, Organisation, 'o', organisation, userId);
             await entityManager.getRepository(Organisation)
