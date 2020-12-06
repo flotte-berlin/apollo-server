@@ -737,7 +737,7 @@ export default gql`
 
     "(dt. Anbieter)"
     input ProviderCreateInput {
-        formName: String!
+        formName: String
         privatePersonId: ID
         organisationId: ID
         cargoBikeIds: [ID!]
