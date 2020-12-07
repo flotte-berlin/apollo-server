@@ -88,6 +88,9 @@ export default {
                 throw new PermissionError();
             }
         },
+        distributedActiveBikeParte: () => {
+            return false;
+        },
         isLockedByMe: (parent: any, __: any, { req }: { req: any }) => isLockedByMe(parent, { req }),
         isLocked: (parent: any, __: any, { req }: { req: any }) => isLocked(parent, { req })
     },
