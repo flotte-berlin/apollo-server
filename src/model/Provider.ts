@@ -52,7 +52,7 @@ export class Provider implements Lockable {
     id: number;
 
     @Column({
-        nullable: false
+        nullable: true
     })
     formName: String;
 

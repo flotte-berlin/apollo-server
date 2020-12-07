@@ -145,6 +145,14 @@ export class ProviderAPI extends DataSource {
     }
 
     async updateProvider (provider: any, userId: number) {
+        // make sure that a provider cannot have both organisation and person at the same time
+        if (provider.privatePersonId && provider.organisationId) { return new UserInputError('Provider must have either privatePersonId or organisationId'); }
+        if (provider.privatePersonId) {
+            provider.organisationId = null;
+        } else if (provider.organisationId) {
+            provider.privatePersonId = null;
+        }
+
         const keepLock = provider.keepLock;
         delete provider.keepLock;
         const cargoBikes = provider.cargoBikeIds;
