@@ -422,6 +422,7 @@ export default gql`
         This value is calculated form other values.
         It is true, if the person is not on the black list and not retired
         and is either Mentor dt. Pate or Partner Mentor dt. Partnerpate for at least one bike.
+        Note: this will always be false for the moment.
         """
         distributedActiveBikeParte: Boolean!
         engagement: [Engagement]
