@@ -35,6 +35,7 @@ export default gql`
     The kind of currency depends on the database.
     """
     scalar Money
+    scalar Link
     
     "The CargoBike type is central to the graph. You could call it the root."
     type CargoBike {
@@ -667,7 +668,7 @@ export default gql`
         """
         Path to documents
         """
-        documents: [String!]!
+        documents: [Link!]!
         remark: String
         isLocked: Boolean!
         isLockedByMe: Boolean!
@@ -686,7 +687,7 @@ export default gql`
         """
         Path to documents
         """
-        documents: [String]
+        documents: [Link]
         remark: String
     }
 
@@ -701,7 +702,7 @@ export default gql`
         """
         Path to documents
         """
-        documents: [String]
+        documents: [Link]
         remark: String
         keepLock: Boolean
     }
