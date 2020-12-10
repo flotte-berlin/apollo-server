@@ -584,6 +584,5 @@ export class CargoBikeAPI extends DataSource {
             (e) => {
                 throw new ApolloError(e);
             });
-        return false;
     }
 }
