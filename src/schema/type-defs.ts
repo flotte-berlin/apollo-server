@@ -983,18 +983,21 @@ export default gql`
         street: String!
         number: String!
         zip: String!
+        city: String
     }
 
     input AddressCreateInput {
         street: String!
         number: String!
         zip: String!
+        city: String
     }
 
     input AddressUpdateInput {
         street: String
         number: String
         zip: String
+        city: String
     }
 
     type ActionLog {

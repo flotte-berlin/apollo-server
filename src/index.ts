@@ -23,6 +23,10 @@ import { getApp, getConnectionOptions, userAPI } from './app';
 
     app.listen(4000, async () => {
         await userAPI.createDefinedPermissions().catch(
-            err => console.log(err));
+            err => {
+                console.log(err);
+                // exit so docker can restart the container and reattempt
+                process.exit(1);
+            });
     });
 })();
