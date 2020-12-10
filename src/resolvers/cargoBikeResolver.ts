@@ -51,7 +51,7 @@ export default {
                 throw new PermissionError();
             }
         },
-        bikeEventTypeByd: (_:any, { id }: { id: number }, { dataSources, req }: { dataSources: any, req: any }) => {
+        bikeEventTypeById: (_:any, { id }: { id: number }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.ReadBikeEvent)) {
                 return dataSources.cargoBikeAPI.bikeEventTypeById(id);
             } else {

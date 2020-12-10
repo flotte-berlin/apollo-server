@@ -1058,7 +1058,7 @@ export default gql`
         persons(offset: Int, limit: Int): [Person!]
         "If offset or limit is not provided, both values are ignored"
         bikeEventTypes(offset: Int, limit: Int): [BikeEventType!]
-        bikeEventTypeByd(id: ID!): BikeEventType
+        bikeEventTypeById(id: ID!): BikeEventType
         "If offset or limit is not provided, both values are ignored"
         bikeEvents(offset: Int, limit: Int): [BikeEvent!]!
         bikeEventById(id:ID!): BikeEvent

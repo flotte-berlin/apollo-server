@@ -25,7 +25,7 @@ export default {
     Query: {
         participantById: (_: any, { id }: { id: any }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.ReadParticipant)) {
-                return dataSources.participantAPI.getParticipantById(id);
+                return dataSources.participantAPI.participantById(id);
             } else {
                 throw new PermissionError();
             }
@@ -116,6 +116,10 @@ export default {
                 throw new PermissionError();
             }
         },
+        isLockedByMe: (parent: any, __: any, { req }: { req: any }) => isLockedByMe(parent, { req }),
+        isLocked: (parent: any, __: any, { req }: { req: any }) => isLocked(parent, { req })
+    },
+    EngagementType: {
         isLockedByMe: (parent: any, __: any, { req }: { req: any }) => isLockedByMe(parent, { req }),
         isLocked: (parent: any, __: any, { req }: { req: any }) => isLocked(parent, { req })
     },
