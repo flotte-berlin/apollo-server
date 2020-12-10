@@ -35,6 +35,7 @@ export default gql`
     The kind of currency depends on the database.
     """
     scalar Money
+    scalar Link
     
     "The CargoBike type is central to the graph. You could call it the root."
     type CargoBike {
@@ -667,7 +668,7 @@ export default gql`
         """
         Path to documents
         """
-        documents: [String!]!
+        documents: [Link!]!
         remark: String
         isLocked: Boolean!
         isLockedByMe: Boolean!
@@ -686,7 +687,7 @@ export default gql`
         """
         Path to documents
         """
-        documents: [String]
+        documents: [Link]
         remark: String
     }
 
@@ -701,7 +702,7 @@ export default gql`
         """
         Path to documents
         """
-        documents: [String]
+        documents: [Link]
         remark: String
         keepLock: Boolean
     }
@@ -1011,6 +1012,8 @@ export default gql`
     type Query {
         "Will (eventually) return all properties of cargo bike"
         cargoBikeById(id:ID!): CargoBike
+        "copies cargoBike, the id of the copy needs to be delted by the front end. This function will not create a new entry in the data base"
+        copyCargoBikeById(id: ID!): CargoBike
         "Returns cargoBikes ordered by name ascending. If offset or limit is not provided, both values are ignored."
         cargoBikes(offset: Int, limit: Int): [CargoBike!]!
         engagementById(id: ID!): Engagement
@@ -1057,7 +1060,7 @@ export default gql`
         persons(offset: Int, limit: Int): [Person!]
         "If offset or limit is not provided, both values are ignored"
         bikeEventTypes(offset: Int, limit: Int): [BikeEventType!]
-        bikeEventTypeByd(id: ID!): BikeEventType
+        bikeEventTypeById(id: ID!): BikeEventType
         "If offset or limit is not provided, both values are ignored"
         bikeEvents(offset: Int, limit: Int): [BikeEvent!]!
         bikeEventById(id:ID!): BikeEvent
@@ -1083,6 +1086,8 @@ export default gql`
         updateCargoBike(cargoBike: CargoBikeUpdateInput!): CargoBike!
         "true on success"
         deleteCargoBike(id: ID!): Boolean!
+        "edit or add key value pair to copy config for cargo bikes"
+        editCopyConfig(key: String!, value: Boolean!): Boolean!
         """
         EQUIPMENT
         creates new peace of unique Equipment

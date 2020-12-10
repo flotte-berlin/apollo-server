@@ -61,7 +61,8 @@ export enum Permission {
     DeleteWorkshopType = 'WORKSHOP_TYPE_DELETE',
     DeleteEventType = 'EVENT_TYPE_DELETE',
     DeleteEquipmentType = 'EQUIPMENT_TYPE_DELETE',
-    DeleteEngagementType = 'ENGAGEMENT_TYPE_DELETE'
+    DeleteEngagementType = 'ENGAGEMENT_TYPE_DELETE',
+    EditCopyConfig = 'EDIT_COPY_CONFIG'
 }
 
 // Permissions where the creation will be requested on startup
@@ -237,5 +238,9 @@ export const requiredPermissions = [
     {
         name: Permission.DeleteEngagementType,
         description: 'Allows to delete engagement types'
+    },
+    {
+        name: Permission.EditCopyConfig,
+        description: 'Allow to edit the copy config for cargo bikes'
     }
 ];

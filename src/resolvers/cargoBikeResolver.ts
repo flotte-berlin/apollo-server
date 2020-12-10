@@ -51,7 +51,7 @@ export default {
                 throw new PermissionError();
             }
         },
-        bikeEventTypeByd: (_:any, { id }: { id: number }, { dataSources, req }: { dataSources: any, req: any }) => {
+        bikeEventTypeById: (_:any, { id }: { id: number }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.ReadBikeEvent)) {
                 return dataSources.cargoBikeAPI.bikeEventTypeById(id);
             } else {
@@ -89,6 +89,13 @@ export default {
         equipmentTypeById: (_:any, { id }: { id: number }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.ReadEquipment)) {
                 return dataSources.cargoBikeAPI.equipmentTypeById(id);
+            } else {
+                throw new PermissionError();
+            }
+        },
+        copyCargoBikeById: (_:any, { id }: {id:number}, { dataSources, req }: { dataSources: any, req: any }) => {
+            if (req.permissions.includes(Permission.ReadBike)) {
+                return dataSources.cargoBikeAPI.copyCargoBikeById(id);
             } else {
                 throw new PermissionError();
             }
@@ -392,6 +399,13 @@ export default {
         deleteBikeEventType: (_: any, { id }: { id: number }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.DeleteEventType)) {
                 return dataSources.cargoBikeAPI.deleteBikeEventType(id, req.userId);
+            } else {
+                throw new PermissionError();
+            }
+        },
+        editCopyConfig: (_: any, { key, value }: { key: string, value: boolean }, { dataSources, req }: { dataSources: any, req: any }) => {
+            if (req.permissions.includes(Permission.EditCopyConfig)) {
+                return dataSources.cargoBikeAPI.editCopyConfig(key, value);
             } else {
                 throw new PermissionError();
             }

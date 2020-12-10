@@ -18,6 +18,7 @@ This file is part of fLotte-API-Server.
 */
 
 import { DataSource } from 'apollo-datasource';
+import { ApolloError } from 'apollo-server-express';
 import { Connection, EntityManager, getConnection } from 'typeorm';
 import { CargoBike } from '../../model/CargoBike';
 import { BikeEvent } from '../../model/BikeEvent';
@@ -31,6 +32,7 @@ import { BikeEventType } from '../../model/BikeEventType';
 import { Actions } from '../../model/ActionLog';
 import { ResourceLockedError } from '../../errors/ResourceLockedError';
 import { NotFoundError } from '../../errors/NotFoundError';
+import { CopyConfig } from '../../model/CopyConfig';
 
 /**
  * extended datasource to feed resolvers with data about cargoBikes
@@ -42,6 +44,55 @@ export class CargoBikeAPI extends DataSource {
         this.connection = getConnection();
     }
 
+    private async addCopyConfig (key: string, value: boolean) {
+        return await this.connection.getRepository(CopyConfig)
+            .createQueryBuilder('cc')
+            .insert()
+            .values([{ key, value }])
+            .execute();
+    }
+
+    /**
+     * populate CopyConfig with default values
+     */
+    async populateCopyConfig () {
+        if (await this.connection.getRepository(CopyConfig)
+            .createQueryBuilder('cc')
+            .select()
+            .getCount() === 0) {
+            const config: CopyConfig[] = [
+                { key: 'id', value: false },
+                { key: 'group', value: true },
+                { key: 'name', value: true },
+                { key: 'state', value: true },
+                { key: 'equipmentIds', value: false },
+                { key: 'equipmentTypeIds', value: false },
+                { key: 'security', value: false },
+                { key: 'stickerBikeNameState', value: true },
+                { key: 'note', value: true },
+                { key: 'providerId', value: false },
+                { key: 'bikeEvents', value: false },
+                { key: 'insuranceData', value: true },
+                { key: 'timeFrames', value: false },
+                { key: 'engagement', value: false },
+                { key: 'taxes', value: true },
+                { key: 'description', value: true },
+                { key: 'modelName', value: true },
+                { key: 'numberOfWheels', value: true },
+                { key: 'forCargo', value: true },
+                { key: 'forChildren', value: true },
+                { key: 'numberOfChildren', value: true },
+                { key: 'technicalEquipment', value: true },
+                { key: 'dimensionsAndLoad', value: true }
+            ];
+            await this.connection.getRepository(CopyConfig)
+                .createQueryBuilder('cc')
+                .insert()
+                .values(config)
+                .execute();
+        }
+    }
+
     async getCargoBikes (offset?: number, limit?: number) {
         return await DBUtils.getAllEntity(this.connection, CargoBike, 'cb', offset, limit);
     }
@@ -50,12 +101,14 @@ export class CargoBikeAPI extends DataSource {
      * Finds cargo bike by id, returns null if id was not found
      * @param id
      */
-    async findCargoBikeById (id: number) {
+    async findCargoBikeById (id: number) : Promise<CargoBike> {
         return await this.connection.getRepository(CargoBike)
             .createQueryBuilder('cb')
             .select()
             .where('id = :id', { id })
-            .getOne();
+            .getOne().catch(() => {
+                throw new NotFoundError('CargoBike', 'id', id);
+            });
     }
 
     async findCargoBikeByEngagementId (id: number) {
@@ -497,5 +550,39 @@ export class CargoBikeAPI extends DataSource {
             .relation(CargoBike, 'equipmentTypeIds')
             .of(id)
             .loadMany();
+    }
+
+    async copyCargoBikeById (id: number) {
+        // load keys
+        const keys = await this.connection.getRepository(CopyConfig)
+            .createQueryBuilder('cc')
+            .select()
+            .getMany();
+        const cargoBike: any = await this.findCargoBikeById(id);
+        keys.forEach(value => {
+            if (value.value === false && value.key !== 'id') {
+                delete cargoBike[value.key];
+            }
+        });
+        return cargoBike;
+    }
+
+    async editCopyConfig (key: string, value: boolean) : Promise<boolean> {
+        return await this.connection.getRepository(CopyConfig)
+            .createQueryBuilder('cc')
+            .update()
+            .set({ value: value })
+            .where('key = :key', { key: key })
+            .returning('*')
+            .execute().then((v) => {
+                if (v.affected !== 1) {
+                    throw new NotFoundError('CopyConfig', 'key', key);
+                } else {
+                    return true;
+                }
+            },
+            (e) => {
+                throw new ApolloError(e);
+            });
     }
 }

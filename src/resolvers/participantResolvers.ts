@@ -25,7 +25,7 @@ export default {
     Query: {
         participantById: (_: any, { id }: { id: any }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.ReadParticipant)) {
-                return dataSources.participantAPI.getParticipantById(id);
+                return dataSources.participantAPI.participantById(id);
             } else {
                 throw new PermissionError();
             }
@@ -119,6 +119,10 @@ export default {
         isLockedByMe: (parent: any, __: any, { req }: { req: any }) => isLockedByMe(parent, { req }),
         isLocked: (parent: any, __: any, { req }: { req: any }) => isLocked(parent, { req })
     },
+    EngagementType: {
+        isLockedByMe: (parent: any, __: any, { req }: { req: any }) => isLockedByMe(parent, { req }),
+        isLocked: (parent: any, __: any, { req }: { req: any }) => isLocked(parent, { req })
+    },
     Mutation: {
         createParticipant: (_: any, { participant }: { participant: any }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.WriteParticipant)) {
@@ -136,7 +140,7 @@ export default {
         },
         unlockParticipant: (_: any, { id }: { id: number }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.WriteParticipant)) {
-                return dataSources.participantAPI.unlockeParticipant(id, req.userId);
+                return dataSources.participantAPI.unlockParticipant(id, req.userId);
             } else {
                 throw new PermissionError();
             }

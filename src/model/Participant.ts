@@ -44,7 +44,7 @@ export class Participant implements Lockable {
     @Column({
         nullable: true
     })
-    usernameflotte: string;
+    usernamefLotte: string;
 
     @Column({
         nullable: true

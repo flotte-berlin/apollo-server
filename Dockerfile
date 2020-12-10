@@ -1,5 +1,4 @@
 FROM node:14.14.0-alpine3.10 AS builder
-RUN npm --version
 WORKDIR /
 
 COPY ./src /src

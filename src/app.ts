@@ -56,6 +56,7 @@ import { ActionLog } from './model/ActionLog';
 import actionLogResolvers from './resolvers/actionLogResolvers';
 import { ActionLogAPI } from './datasources/db/actionLogAPI';
 import bodyParser from 'body-parser';
+import { CopyConfig } from './model/CopyConfig';
 const cors = require('cors');
 require('dotenv').config();
 
@@ -83,7 +84,8 @@ export function getConnectionOptions (): ConnectionOptions {
             Workshop,
             Person,
             WorkshopType,
-            ActionLog
+            ActionLog,
+            CopyConfig
         ],
         synchronize: true,
         logging: false
@@ -127,8 +129,12 @@ export async function getApp (connOptions: ConnectionOptions) {
         }
     }
 
+    let cargoBikeAPI: CargoBikeAPI;
     try {
         await createConnection(connOptions);
+        // init copy config
+        cargoBikeAPI = new CargoBikeAPI();
+        await cargoBikeAPI.populateCopyConfig();
     } catch (err) {
         console.error(err);
     }
@@ -145,7 +151,7 @@ export async function getApp (connOptions: ConnectionOptions) {
         ],
         typeDefs,
         dataSources: () => ({
-            cargoBikeAPI: new CargoBikeAPI(),
+            cargoBikeAPI: cargoBikeAPI,
             lendingStationAPI: new LendingStationAPI(),
             participantAPI: new ParticipantAPI(),
             contactInformationAPI: new ContactInformationAPI(),
