@@ -92,6 +92,13 @@ export default {
             } else {
                 throw new PermissionError();
             }
+        },
+        copyCargoBikeById: (_:any, { id }: {id:number}, { dataSources, req }: { dataSources: any, req: any }) => {
+            if (req.permissions.includes(Permission.ReadBike)) {
+                return dataSources.cargoBikeAPI.copyCargoBikeById(id);
+            } else {
+                throw new PermissionError();
+            }
         }
     },
     CargoBike: {
@@ -392,6 +399,13 @@ export default {
         deleteBikeEventType: (_: any, { id }: { id: number }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.DeleteEventType)) {
                 return dataSources.cargoBikeAPI.deleteBikeEventType(id, req.userId);
+            } else {
+                throw new PermissionError();
+            }
+        },
+        editCopyConfig: (_: any, { key, value }: { key: string, value: boolean }, { dataSources, req }: { dataSources: any, req: any }) => {
+            if (req.permissions.includes(Permission.EditCopyConfig)) {
+                return dataSources.cargoBikeAPI.editCopyConfig(key, value);
             } else {
                 throw new PermissionError();
             }

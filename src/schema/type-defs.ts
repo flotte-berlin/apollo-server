@@ -1012,6 +1012,8 @@ export default gql`
     type Query {
         "Will (eventually) return all properties of cargo bike"
         cargoBikeById(id:ID!): CargoBike
+        "copies cargoBike, the id of the copy needs to be delted by the front end. This function will not create a new entry in the data base"
+        copyCargoBikeById(id: ID!): CargoBike
         "Returns cargoBikes ordered by name ascending. If offset or limit is not provided, both values are ignored."
         cargoBikes(offset: Int, limit: Int): [CargoBike!]!
         engagementById(id: ID!): Engagement
@@ -1084,6 +1086,8 @@ export default gql`
         updateCargoBike(cargoBike: CargoBikeUpdateInput!): CargoBike!
         "true on success"
         deleteCargoBike(id: ID!): Boolean!
+        "edit or add key value pair to copy config for cargo bikes"
+        editCopyConfig(key: String!, value: Boolean!): Boolean!
         """
         EQUIPMENT
         creates new peace of unique Equipment
