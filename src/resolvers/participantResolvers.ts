@@ -140,7 +140,7 @@ export default {
         },
         unlockParticipant: (_: any, { id }: { id: number }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.WriteParticipant)) {
-                return dataSources.participantAPI.unlockeParticipant(id, req.userId);
+                return dataSources.participantAPI.unlockParticipant(id, req.userId);
             } else {
                 throw new PermissionError();
             }
