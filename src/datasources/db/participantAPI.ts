@@ -230,7 +230,7 @@ export class ParticipantAPI extends DataSource {
                 .createQueryBuilder('w')
                 .relation(Participant, 'workshopIds')
                 .of(participant.id)
-                .add(workshops);
+                .addAndRemove(workshops, await this.workshopsByParticipantId(participant.id));
         });
         !keepLock && await this.unlockParticipant(participant.id, userId);
         return await this.participantById(participant.id);
