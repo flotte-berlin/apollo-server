@@ -232,7 +232,7 @@ export default {
     },
     InsuranceData: {
         projectAllowance: (parent: any): any => {
-            return (parent as string)?.replace(/€\$/, '');
+            return (parent.projectAllowance as string)?.replace(/€\$/, '');
         }
     },
     Mutation: {
