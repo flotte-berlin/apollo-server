@@ -723,6 +723,10 @@ export default gql`
         keepLock: Boolean
     }
 
+    input BikeEventTypeCreateInput {
+        name: String!
+    }
+
     "(dt. Anbieter) bezieht sich auf die Beziehung einer Person oder Organisation zum Lastenrad"
     type Provider {
         id: ID!
@@ -1126,7 +1130,7 @@ export default gql`
         """
         BIKEEVENT
         """
-        createBikeEventType(name: String!): BikeEventType!
+        createBikeEventType(bikeEventType: BikeEventTypeCreateInput!): BikeEventType!
         lockBikeEventType(id: ID!): BikeEventType!
         unlockBikeEventType(id:ID!): BikeEventType!
         updateBikeEventType(bikeEventType: BikeEventTypeUpdateInput!): BikeEventType!

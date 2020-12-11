@@ -75,6 +75,13 @@ export default {
                 throw new PermissionError();
             }
         },
+        workshopType (parent: any, _: any, { dataSources, req }: { dataSources: any; req: any }) {
+            if (req.permissions.includes(Permission.ReadWorkshop)) {
+                return dataSources.workshopAPI.workshopTypeByWorkshopId(parent.id);
+            } else {
+                throw new PermissionError();
+            }
+        },
         isLockedByMe: (parent: any, __: any, { req }: { req: any }) => isLockedByMe(parent, { req }),
         isLocked: (parent: any, __: any, { req }: { req: any }) => isLocked(parent, { req })
     },

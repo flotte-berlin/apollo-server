@@ -237,12 +237,13 @@ export class CargoBikeAPI extends DataSource {
     }
 
     async createBikeEvent ({ bikeEvent }: { bikeEvent: any }) {
-        return (await this.connection.getRepository(BikeEvent)
+        const inserts = await this.connection.getRepository(BikeEvent)
             .createQueryBuilder('be')
             .insert()
             .values([bikeEvent])
             .returning('*')
-            .execute()).generatedMaps[0];
+            .execute();
+        return await this.bikeEventById(inserts.identifiers[0].id);
     }
 
     async updateBikeEvent (bikeEvent: any, userId: number) {
@@ -310,7 +311,7 @@ export class CargoBikeAPI extends DataSource {
         return (await this.connection.getRepository(BikeEventType)
             .createQueryBuilder('bet')
             .insert()
-            .values([{ name: bikeEventType }])
+            .values([bikeEventType])
             .returning('*')
             .execute())?.generatedMaps[0];
     }

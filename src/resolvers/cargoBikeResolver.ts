@@ -215,10 +215,13 @@ export default {
         },
         related (parent: any, __: any, { dataSources, req }: { dataSources: any, req: any }) {
             if (req.permissions.includes(Permission.ReadParticipant)) {
-                return dataSources.cargoBikeAPI.relatedByBikeEventId(parent.id);
+                return dataSources.cargoBikeAPI.relatedByBikeEventId(parent.workshopTypeId);
             } else {
                 throw new PermissionError();
             }
+        },
+        documents: (parent: any) => {
+            return (parent.documents) ? parent.documents : [];
         },
         isLockedByMe: (parent: any, __: any, { req }: { req: any }) => isLockedByMe(parent, { req }),
         isLocked: (parent: any, __: any, { req }: { req: any }) => isLocked(parent, { req })
@@ -368,9 +371,9 @@ export default {
                 throw new PermissionError();
             }
         },
-        createBikeEventType: (_: any, { name }: { name: any }, { dataSources, req }: { dataSources: any, req: any }) => {
+        createBikeEventType: (_: any, { bikeEventType }: { bikeEventType: any }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.WriteEventType)) {
-                return dataSources.cargoBikeAPI.createBikeEventType(name);
+                return dataSources.cargoBikeAPI.createBikeEventType(bikeEventType);
             } else {
                 throw new PermissionError();
             }

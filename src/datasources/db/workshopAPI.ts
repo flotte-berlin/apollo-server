@@ -134,6 +134,14 @@ export class WorkshopAPI extends DataSource {
             .getOne();
     }
 
+    async workshopTypeByWorkshopId (id: number) {
+        return await this.connection.getRepository(Workshop)
+            .createQueryBuilder('w')
+            .relation(Workshop, 'workshopTypeId')
+            .of(id)
+            .loadOne();
+    }
+
     async workshopTypes (offset?: number, limit?: number) {
         return DBUtils.getAllEntity(this.connection, WorkshopType, 'wt', offset, limit);
     }
