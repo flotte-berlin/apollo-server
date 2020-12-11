@@ -40,6 +40,12 @@ export class LoanPeriod {
     })
     generalRemark: string;
 
+    @Column({
+        nullable: true,
+        type: 'text'
+    })
+    holidays: string;
+
     /**
      * validity for loanPeriods
      */
@@ -119,6 +125,11 @@ export class LendingStation implements Lockable {
         name: 'organisationId'
     })
     organisationId: number;
+
+    @Column({
+        nullable: true
+    })
+    remark: string;
 
     @Column({
         nullable: true,

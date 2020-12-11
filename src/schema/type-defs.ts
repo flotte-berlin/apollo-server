@@ -876,6 +876,7 @@ export default gql`
         "Total amount of cargoBikes currently assigned to the lending station"
         numCargoBikes: Int!
         organisation: Organisation
+        remark: String
         isLocked: Boolean!
         isLockedByMe: Boolean!
         "null if not locked by other user"
@@ -893,6 +894,7 @@ export default gql`
         address: AddressCreateInput!
         loanPeriod: LoanPeriodInput
         organisationId: ID
+        remark: String
     }
 
     """
@@ -906,6 +908,7 @@ export default gql`
         address: AddressUpdateInput
         loanPeriod: LoanPeriodInput
         organisationId: ID
+        remark: String
         keepLock: Boolean
     }
 
@@ -914,6 +917,7 @@ export default gql`
     """
     type LoanPeriod {
         generalRemark: String
+        holidays: String
         mo: String
         tu: String
         we: String
@@ -928,6 +932,7 @@ export default gql`
     """
     input LoanPeriodInput {
         generalRemark: String
+        holidays: String
         mo: String
         tu: String
         we: String
