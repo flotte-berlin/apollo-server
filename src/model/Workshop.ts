@@ -60,7 +60,7 @@ export class Workshop implements Lockable {
     @JoinColumn({
         name: 'trainer2Id'
     })
-    trainer2: Participant;
+    trainer2Id: number;
 
     @Column({
         nullable: true,
