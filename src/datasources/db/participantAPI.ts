@@ -25,7 +25,6 @@ import { Participant } from '../../model/Participant';
 import { EngagementType } from '../../model/EngagementType';
 import { ActionLogger, DBUtils, genDateRange, LockUtils } from './utils';
 import { UserInputError } from 'apollo-server-express';
-import { GraphQLError } from 'graphql';
 import { ResourceLockedError } from '../../errors/ResourceLockedError';
 
 export class ParticipantAPI extends DataSource {

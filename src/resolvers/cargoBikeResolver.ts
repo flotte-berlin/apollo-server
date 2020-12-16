@@ -215,7 +215,7 @@ export default {
         },
         related (parent: any, __: any, { dataSources, req }: { dataSources: any, req: any }) {
             if (req.permissions.includes(Permission.ReadParticipant)) {
-                return dataSources.cargoBikeAPI.relatedByBikeEventId(parent.workshopTypeId);
+                return dataSources.cargoBikeAPI.relatedByBikeEventId(parent.id);
             } else {
                 throw new PermissionError();
             }
