@@ -41,7 +41,7 @@ The following environment variables can be used to configure the server:
 ```bash
 RPC_HOST=host:port
 NODE_ENV=develop/production
-POSTGRES_CONNECTION_URL=postgres://username:password@host:port/database_name
+DATABASE_URL=postgres://username:password@host:port/database_name
 ```
 - __RPC_HOST__ is used for the connection with the [flotte-user-management server](https://github.com/fLotte-meets-HWR-DB/flotte-user-management).
 - __NODE_ENV__ will not check authentication if set to development

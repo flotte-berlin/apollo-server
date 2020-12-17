@@ -565,6 +565,7 @@ export class CargoBikeAPI extends DataSource {
                 delete cargoBike[value.key];
             }
         });
+        cargoBike.id = -1;
         return cargoBike;
     }
 
