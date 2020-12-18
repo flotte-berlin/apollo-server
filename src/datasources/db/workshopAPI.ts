@@ -55,6 +55,8 @@ export class WorkshopAPI extends DataSource {
     async updateWorkshop (workshop: any, userId: number) {
         const keepLock = workshop.keepLock;
         delete workshop.keepLock;
+        const workshopTypeId = workshop.workshopTypeId;
+        delete workshop.workshopTypeId;
         await this.connection.transaction(async (entityManger: EntityManager) => {
             if (await LockUtils.isLocked(entityManger, Workshop, 'w', workshop.id, userId)) {
                 throw new ResourceLockedError('Workshop', 'Attempting to update locked resource');
@@ -71,6 +73,11 @@ export class WorkshopAPI extends DataSource {
                         throw new NotFoundError('Workshop', 'id', workshop.id);
                     }
                 });
+            workshopTypeId && await entityManger.getRepository(Workshop)
+                .createQueryBuilder('w')
+                .relation(Workshop, 'workshopTypeId')
+                .of(workshop.id)
+                .set(workshopTypeId);
         });
         !keepLock && await this.unlockWorkshop(workshop.id, userId);
         return await this.workshopById(workshop.id);
@@ -132,6 +139,14 @@ export class WorkshopAPI extends DataSource {
             .select()
             .where('id = :id', { id: id })
             .getOne();
+    }
+
+    async workshopTypeByWorkshopId (id: number) {
+        return await this.connection.getRepository(Workshop)
+            .createQueryBuilder('w')
+            .relation(Workshop, 'workshopTypeId')
+            .of(id)
+            .loadOne();
     }
 
     async workshopTypes (offset?: number, limit?: number) {

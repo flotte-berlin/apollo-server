@@ -723,6 +723,10 @@ export default gql`
         keepLock: Boolean
     }
 
+    input BikeEventTypeCreateInput {
+        name: String!
+    }
+
     "(dt. Anbieter) bezieht sich auf die Beziehung einer Person oder Organisation zum Lastenrad"
     type Provider {
         id: ID!
@@ -872,6 +876,7 @@ export default gql`
         "Total amount of cargoBikes currently assigned to the lending station"
         numCargoBikes: Int!
         organisation: Organisation
+        remark: String
         isLocked: Boolean!
         isLockedByMe: Boolean!
         "null if not locked by other user"
@@ -889,6 +894,7 @@ export default gql`
         address: AddressCreateInput!
         loanPeriod: LoanPeriodInput
         organisationId: ID
+        remark: String
     }
 
     """
@@ -902,6 +908,7 @@ export default gql`
         address: AddressUpdateInput
         loanPeriod: LoanPeriodInput
         organisationId: ID
+        remark: String
         keepLock: Boolean
     }
 
@@ -910,6 +917,7 @@ export default gql`
     """
     type LoanPeriod {
         generalRemark: String
+        holidays: String
         mo: String
         tu: String
         we: String
@@ -924,6 +932,7 @@ export default gql`
     """
     input LoanPeriodInput {
         generalRemark: String
+        holidays: String
         mo: String
         tu: String
         we: String
@@ -983,18 +992,21 @@ export default gql`
         street: String!
         number: String!
         zip: String!
+        city: String
     }
 
     input AddressCreateInput {
         street: String!
         number: String!
         zip: String!
+        city: String
     }
 
     input AddressUpdateInput {
         street: String
         number: String
         zip: String
+        city: String
     }
 
     type ActionLog {
@@ -1123,7 +1135,7 @@ export default gql`
         """
         BIKEEVENT
         """
-        createBikeEventType(name: String!): BikeEventType!
+        createBikeEventType(bikeEventType: BikeEventTypeCreateInput!): BikeEventType!
         lockBikeEventType(id: ID!): BikeEventType!
         unlockBikeEventType(id:ID!): BikeEventType!
         updateBikeEventType(bikeEventType: BikeEventTypeUpdateInput!): BikeEventType!

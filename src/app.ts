@@ -137,6 +137,8 @@ export async function getApp (connOptions: ConnectionOptions) {
         await cargoBikeAPI.populateCopyConfig();
     } catch (err) {
         console.error(err);
+        // exit so docker can restart the container and reattempt
+        process.exit(1);
     }
 
     const server = new ApolloServer({

@@ -220,12 +220,20 @@ export default {
                 throw new PermissionError();
             }
         },
+        documents: (parent: any) => {
+            return (parent.documents) ? parent.documents : [];
+        },
         isLockedByMe: (parent: any, __: any, { req }: { req: any }) => isLockedByMe(parent, { req }),
         isLocked: (parent: any, __: any, { req }: { req: any }) => isLocked(parent, { req })
     },
     BikeEventType: {
         isLockedByMe: (parent: any, __: any, { req }: { req: any }) => isLockedByMe(parent, { req }),
         isLocked: (parent: any, __: any, { req }: { req: any }) => isLocked(parent, { req })
+    },
+    InsuranceData: {
+        projectAllowance: (parent: any): any => {
+            return (parent.projectAllowance as string)?.replace(/€\$/, '');
+        }
     },
     Mutation: {
         createCargoBike: (_: any, { cargoBike }: { cargoBike: any }, { dataSources, req }: { dataSources: any, req: any }) => {
@@ -368,9 +376,9 @@ export default {
                 throw new PermissionError();
             }
         },
-        createBikeEventType: (_: any, { name }: { name: any }, { dataSources, req }: { dataSources: any, req: any }) => {
+        createBikeEventType: (_: any, { bikeEventType }: { bikeEventType: any }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.WriteEventType)) {
-                return dataSources.cargoBikeAPI.createBikeEventType(name);
+                return dataSources.cargoBikeAPI.createBikeEventType(bikeEventType);
             } else {
                 throw new PermissionError();
             }

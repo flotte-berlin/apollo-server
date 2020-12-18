@@ -25,7 +25,6 @@ import { Participant } from '../../model/Participant';
 import { EngagementType } from '../../model/EngagementType';
 import { ActionLogger, DBUtils, genDateRange, LockUtils } from './utils';
 import { UserInputError } from 'apollo-server-express';
-import { GraphQLError } from 'graphql';
 import { ResourceLockedError } from '../../errors/ResourceLockedError';
 
 export class ParticipantAPI extends DataSource {
@@ -230,7 +229,7 @@ export class ParticipantAPI extends DataSource {
                 .createQueryBuilder('w')
                 .relation(Participant, 'workshopIds')
                 .of(participant.id)
-                .add(workshops);
+                .addAndRemove(workshops, await this.workshopsByParticipantId(participant.id));
         });
         !keepLock && await this.unlockParticipant(participant.id, userId);
         return await this.participantById(participant.id);
