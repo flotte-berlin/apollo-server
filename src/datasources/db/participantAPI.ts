@@ -315,7 +315,7 @@ export class ParticipantAPI extends DataSource {
                     throw new UserInputError('Participant ist not active in the specified dateRange');
                 }
             } else if (engagement.dateRange || engagement.dateRange) {
-                throw new UserInputError('Please specify participantId adn the dateRange');
+                throw new UserInputError('Please specify participantId and the dateRange');
             }
             await entityManager.getRepository(Engagement)
                 .createQueryBuilder('engagement')
