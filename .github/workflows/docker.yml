@@ -3,7 +3,7 @@ name: Build Docker Image
 
 on:
   push:
-    branches: [ main, dev ]
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
@@ -13,6 +13,9 @@ jobs:
 
       - name: Copy Repo Files
         uses: actions/checkout@v2
+
+      - id: sha
+        run: echo "::set-output name=sha::$(git describe --always --tags --dirty)"
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
@@ -32,6 +35,6 @@ jobs:
         with:
           context: .
           file: ./Dockerfile
-          platforms: linux/amd64
+          platforms: linux/arm64, linux/arm, linux/amd64
           push: true
-          tags: flotte-docker-registry.spdns.org/apollo-server:latest
+          tags: flotte-docker-registry.spdns.org/apollo-server:latest, flotte-docker-registry.spdns.org/apollo-server:${{ steps.sha.outputs.sha }}
