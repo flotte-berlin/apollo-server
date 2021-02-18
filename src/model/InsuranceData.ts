@@ -74,5 +74,10 @@ export class InsuranceData {
     @Column({
         nullable: true
     })
+    frameworkAgreement: string;
+
+    @Column({
+        nullable: true
+    })
     notes: string;
 }

@@ -77,6 +77,10 @@ export default gql`
         insuranceData: InsuranceData
         lendingStation: LendingStation
         taxes: Taxes
+        miscellaneous: String
+        ownUse: String
+        preDamage: String
+
         currentEngagements: [Engagement]
         "If offset or limit is not provided, both values are ignored"
         engagement(offset: Int, limit: Int): [Engagement]
@@ -139,6 +143,9 @@ export default gql`
         providerId: ID
         insuranceData: InsuranceDataCreateInput
         taxes: TaxesCreateInput
+        miscellaneous: String
+        ownUse: String
+        preDamage: String
     }
 
     """
@@ -188,6 +195,9 @@ export default gql`
         providerId: ID
         insuranceData: InsuranceDataUpdateInput
         taxes: TaxesUpdateInput
+        miscellaneous: String
+        ownUse: String
+        preDamage: String
         "will keep Bike locked if set to true, default = false"
         keepLock: Boolean
     }
@@ -215,6 +225,7 @@ export default gql`
         The kind of currency depends on the database.
         """
         projectAllowance: Money
+        frameworkAgreement: String
         notes: String
     }
 
@@ -241,6 +252,7 @@ export default gql`
         The kind of currency depends on the database.
         """
         projectAllowance: Money
+        frameworkAgreement: String
         notes: String
     }
 
@@ -267,6 +279,7 @@ export default gql`
         The kind of currency depends on the database.
         """
         projectAllowance: Money
+        frameworkAgreement: String
         notes: String
     }
 

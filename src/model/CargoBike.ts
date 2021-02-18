@@ -302,6 +302,21 @@ export class CargoBike implements Lockable {
     dimensionsAndLoad: DimensionsAndLoad;
 
     @Column({
+        nullable: true
+    })
+    miscellaneous: string;
+
+    @Column({
+        nullable: true
+    })
+    ownUse: string;
+
+    @Column({
+        nullable: true
+    })
+    preDamage: string;
+
+    @Column({
         type: 'int',
         nullable: true
     })
