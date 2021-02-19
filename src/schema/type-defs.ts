@@ -54,6 +54,7 @@ export default gql`
         TODO: Should this be called Security?
         """
         security: Security
+        spareKeyLocations: SpareKeyLocations
         """
         Does not refer to an extra table in the database.
         """
@@ -118,6 +119,7 @@ export default gql`
         Safety is a custom type, that stores information about security features.
         """
         security: SecurityCreateInput
+        spareKeyLocations: SpareKeyLocationsCreateInput
         """
         Does not refer to an extra table in the database.
         """
@@ -166,6 +168,7 @@ export default gql`
         Safety is a custom type, that stores information about security features.
         """
         security: SecurityUpdateInput
+        spareKeyLocations: SpareKeyLocationsUpdateInput
         """
         Does not refer to an extra table in the database.
         """
@@ -397,6 +400,27 @@ export default gql`
         keyNumberAXAChain: String
         policeCoding: String
         adfcCoding: String
+    }
+
+    """
+    Locations where spare keys are stored
+    """
+    type SpareKeyLocations {
+        projectOffice: Boolean
+        lendingStation: Boolean
+        provider: Boolean
+    }
+
+    input SpareKeyLocationsCreateInput {
+        projectOffice: Boolean
+        lendingStation: Boolean
+        provider: Boolean
+    }
+
+    input SpareKeyLocationsUpdateInput {
+        projectOffice: Boolean
+        lendingStation: Boolean
+        provider: Boolean
     }
 
     enum StickerBikeNameState {

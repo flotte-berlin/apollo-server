@@ -68,6 +68,7 @@ export class CargoBikeAPI extends DataSource {
                 { key: 'equipmentIds', value: false },
                 { key: 'equipmentTypeIds', value: false },
                 { key: 'security', value: false },
+                { key: 'spareKeyLocations', value: false },
                 { key: 'stickerBikeNameState', value: true },
                 { key: 'note', value: true },
                 { key: 'providerId', value: false },

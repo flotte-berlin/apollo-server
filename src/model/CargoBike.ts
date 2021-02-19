@@ -90,6 +90,22 @@ export class Security {
     })
     adfcCoding: string;
 }
+export class SpareKeyLocations {
+    @Column({
+        nullable: true
+    })
+    projectOffice: boolean;
+
+    @Column({
+        nullable: true
+    })
+    lendingStation: boolean;
+
+    @Column({
+        nullable: true
+    })
+    provider: boolean;
+}
 export class TechnicalEquipment {
     @Column({
         nullable: true
@@ -222,6 +238,10 @@ export class CargoBike implements Lockable {
     // Security information
     @Column(type => Security)
     security: Security;
+
+    // spare key locations
+    @Column(type => SpareKeyLocations)
+    spareKeyLocations: SpareKeyLocations;
 
     @Column({
         type: 'enum',
