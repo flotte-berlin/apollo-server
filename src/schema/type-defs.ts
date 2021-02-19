@@ -641,6 +641,7 @@ export default gql`
         serialNo: String!
         title: String!
         description: String
+        availableForSupply: Boolean
         cargoBike: CargoBike
         isLocked: Boolean!
         isLockedByMe: Boolean!
@@ -653,6 +654,7 @@ export default gql`
         serialNo: String!
         title: String!
         description: String
+        availableForSupply: Boolean
         cargoBikeId: ID
     }
 
@@ -661,6 +663,7 @@ export default gql`
         serialNo: String
         title: String
         description: String
+        availableForSupply: Boolean
         cargoBikeId: ID
         "will keep Bike locked if set to true, default = false"
         keepLock: Boolean
@@ -674,6 +677,7 @@ export default gql`
         id: ID!
         name: String!
         description: String!
+        availableForSupply: Boolean
         isLocked: Boolean!
         isLockedByMe: Boolean!
         "null if not locked by other user"
@@ -684,12 +688,14 @@ export default gql`
     input EquipmentTypeCreateInput {
         name: String!
         description: String
+        availableForSupply: Boolean
     }
 
     input EquipmentTypeUpdateInput {
         id: ID!
         name: String
         description: String
+        availableForSupply: Boolean
         keepLock: Boolean
     }
 
