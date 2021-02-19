@@ -904,6 +904,8 @@ export default gql`
     type LendingStation {
         id: ID!
         name: String!
+        longName: String!
+        district: String
         contactInformationIntern: ContactInformation
         contactInformationExtern: ContactInformation
         address: Address!
@@ -926,6 +928,8 @@ export default gql`
     """
     input LendingStationCreateInput {
         name: String!
+        longName: String!
+        district: String
         contactInformationInternId: ID
         contactInformationExternId: ID
         address: AddressCreateInput!
@@ -940,6 +944,8 @@ export default gql`
     input LendingStationUpdateInput {
         id: ID!
         name: String
+        longName: String
+        district: String
         contactInformationInternId: ID
         contactInformationExternId: ID
         address: AddressUpdateInput
@@ -954,6 +960,7 @@ export default gql`
     """
     type LoanPeriod {
         generalRemark: String
+        particularities: String
         holidays: String
         mo: String
         tu: String
@@ -969,6 +976,7 @@ export default gql`
     """
     input LoanPeriodInput {
         generalRemark: String
+        particularities: String
         holidays: String
         mo: String
         tu: String
