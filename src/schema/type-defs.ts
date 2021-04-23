@@ -81,7 +81,7 @@ export default gql`
         miscellaneous: String
         ownUse: String
         preDamage: String
-
+        supplier: String
         currentEngagements: [Engagement]
         "If offset or limit is not provided, both values are ignored"
         engagement(offset: Int, limit: Int): [Engagement]
@@ -148,6 +148,7 @@ export default gql`
         miscellaneous: String
         ownUse: String
         preDamage: String
+        supplier: String
     }
 
     """
@@ -201,6 +202,7 @@ export default gql`
         miscellaneous: String
         ownUse: String
         preDamage: String
+        supplier: String
         "will keep Bike locked if set to true, default = false"
         keepLock: Boolean
     }
@@ -406,21 +408,21 @@ export default gql`
     Locations where spare keys are stored
     """
     type SpareKeyLocations {
-        projectOffice: Boolean
-        lendingStation: Boolean
-        provider: Boolean
+        projectOffice: String
+        lendingStation: String
+        provider: String
     }
 
     input SpareKeyLocationsCreateInput {
-        projectOffice: Boolean
-        lendingStation: Boolean
-        provider: Boolean
+        projectOffice: String
+        lendingStation: String
+        provider: String
     }
 
     input SpareKeyLocationsUpdateInput {
-        projectOffice: Boolean
-        lendingStation: Boolean
-        provider: Boolean
+        projectOffice: String
+        lendingStation: String
+        provider: String
     }
 
     enum StickerBikeNameState {

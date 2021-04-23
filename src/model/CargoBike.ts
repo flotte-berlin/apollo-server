@@ -94,17 +94,17 @@ export class SpareKeyLocations {
     @Column({
         nullable: true
     })
-    projectOffice: boolean;
+    projectOffice: string;
 
     @Column({
         nullable: true
     })
-    lendingStation: boolean;
+    lendingStation: string;
 
     @Column({
         nullable: true
     })
-    provider: boolean;
+    provider: string;
 }
 export class TechnicalEquipment {
     @Column({
@@ -335,6 +335,11 @@ export class CargoBike implements Lockable {
         nullable: true
     })
     preDamage: string;
+
+    @Column({
+        nullable: true
+    })
+    supplier: string;
 
     @Column({
         type: 'int',

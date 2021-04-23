@@ -80,6 +80,7 @@ export class CargoBikeAPI extends DataSource {
                 { key: 'miscellaneous', value: false },
                 { key: 'ownUse', value: false },
                 { key: 'preDamage', value: false },
+                { key: 'supplier', value: false },
                 { key: 'description', value: true },
                 { key: 'modelName', value: true },
                 { key: 'numberOfWheels', value: true },
