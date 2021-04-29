@@ -44,6 +44,12 @@ export class LoanPeriod {
         nullable: true,
         type: 'text'
     })
+    particularities: string;
+
+    @Column({
+        nullable: true,
+        type: 'text'
+    })
     holidays: string;
 
     /**
@@ -110,6 +116,16 @@ export class LendingStation implements Lockable {
         name: 'contactInformationExternId'
     })
     contactInformationExternId: number;
+
+    @Column({
+        nullable: true
+    })
+    longName: string;
+
+    @Column({
+        nullable: true
+    })
+    district: String
 
     @Column(type => Address)
     address: Address;
