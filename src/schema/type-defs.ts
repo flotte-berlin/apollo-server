@@ -54,6 +54,7 @@ export default gql`
         TODO: Should this be called Security?
         """
         security: Security
+        spareKeyLocations: SpareKeyLocations
         """
         Does not refer to an extra table in the database.
         """
@@ -77,6 +78,10 @@ export default gql`
         insuranceData: InsuranceData
         lendingStation: LendingStation
         taxes: Taxes
+        miscellaneous: String
+        ownUse: String
+        preDamage: String
+        supplier: String
         currentEngagements: [Engagement]
         "If offset or limit is not provided, both values are ignored"
         engagement(offset: Int, limit: Int): [Engagement]
@@ -114,6 +119,7 @@ export default gql`
         Safety is a custom type, that stores information about security features.
         """
         security: SecurityCreateInput
+        spareKeyLocations: SpareKeyLocationsCreateInput
         """
         Does not refer to an extra table in the database.
         """
@@ -139,6 +145,10 @@ export default gql`
         providerId: ID
         insuranceData: InsuranceDataCreateInput
         taxes: TaxesCreateInput
+        miscellaneous: String
+        ownUse: String
+        preDamage: String
+        supplier: String
     }
 
     """
@@ -159,6 +169,7 @@ export default gql`
         Safety is a custom type, that stores information about security features.
         """
         security: SecurityUpdateInput
+        spareKeyLocations: SpareKeyLocationsUpdateInput
         """
         Does not refer to an extra table in the database.
         """
@@ -188,6 +199,10 @@ export default gql`
         providerId: ID
         insuranceData: InsuranceDataUpdateInput
         taxes: TaxesUpdateInput
+        miscellaneous: String
+        ownUse: String
+        preDamage: String
+        supplier: String
         "will keep Bike locked if set to true, default = false"
         keepLock: Boolean
     }
@@ -215,6 +230,7 @@ export default gql`
         The kind of currency depends on the database.
         """
         projectAllowance: Money
+        frameworkAgreement: String
         notes: String
     }
 
@@ -241,6 +257,7 @@ export default gql`
         The kind of currency depends on the database.
         """
         projectAllowance: Money
+        frameworkAgreement: String
         notes: String
     }
 
@@ -267,6 +284,7 @@ export default gql`
         The kind of currency depends on the database.
         """
         projectAllowance: Money
+        frameworkAgreement: String
         notes: String
     }
 
@@ -384,6 +402,27 @@ export default gql`
         keyNumberAXAChain: String
         policeCoding: String
         adfcCoding: String
+    }
+
+    """
+    Locations where spare keys are stored
+    """
+    type SpareKeyLocations {
+        projectOffice: String
+        lendingStation: String
+        provider: String
+    }
+
+    input SpareKeyLocationsCreateInput {
+        projectOffice: String
+        lendingStation: String
+        provider: String
+    }
+
+    input SpareKeyLocationsUpdateInput {
+        projectOffice: String
+        lendingStation: String
+        provider: String
     }
 
     enum StickerBikeNameState {
@@ -604,6 +643,7 @@ export default gql`
         serialNo: String!
         title: String!
         description: String
+        availableForSupply: Boolean
         cargoBike: CargoBike
         isLocked: Boolean!
         isLockedByMe: Boolean!
@@ -616,6 +656,7 @@ export default gql`
         serialNo: String!
         title: String!
         description: String
+        availableForSupply: Boolean
         cargoBikeId: ID
     }
 
@@ -624,6 +665,7 @@ export default gql`
         serialNo: String
         title: String
         description: String
+        availableForSupply: Boolean
         cargoBikeId: ID
         "will keep Bike locked if set to true, default = false"
         keepLock: Boolean
@@ -637,6 +679,7 @@ export default gql`
         id: ID!
         name: String!
         description: String!
+        availableForSupply: Boolean
         isLocked: Boolean!
         isLockedByMe: Boolean!
         "null if not locked by other user"
@@ -647,12 +690,14 @@ export default gql`
     input EquipmentTypeCreateInput {
         name: String!
         description: String
+        availableForSupply: Boolean
     }
 
     input EquipmentTypeUpdateInput {
         id: ID!
         name: String
         description: String
+        availableForSupply: Boolean
         keepLock: Boolean
     }
 
@@ -867,6 +912,8 @@ export default gql`
     type LendingStation {
         id: ID!
         name: String!
+        longName: String!
+        district: String
         contactInformationIntern: ContactInformation
         contactInformationExtern: ContactInformation
         address: Address!
@@ -889,6 +936,8 @@ export default gql`
     """
     input LendingStationCreateInput {
         name: String!
+        longName: String!
+        district: String
         contactInformationInternId: ID
         contactInformationExternId: ID
         address: AddressCreateInput!
@@ -903,6 +952,8 @@ export default gql`
     input LendingStationUpdateInput {
         id: ID!
         name: String
+        longName: String
+        district: String
         contactInformationInternId: ID
         contactInformationExternId: ID
         address: AddressUpdateInput
@@ -917,6 +968,7 @@ export default gql`
     """
     type LoanPeriod {
         generalRemark: String
+        particularities: String
         holidays: String
         mo: String
         tu: String
@@ -932,6 +984,7 @@ export default gql`
     """
     input LoanPeriodInput {
         generalRemark: String
+        particularities: String
         holidays: String
         mo: String
         tu: String

@@ -39,6 +39,11 @@ export class Equipment implements Lockable {
     })
     description: string;
 
+    @Column({
+        nullable: true
+    })
+    availableForSupply: boolean;
+
     @ManyToOne(type => CargoBike, cargoBike => cargoBike.equipmentIds, {
         nullable: true
     })
