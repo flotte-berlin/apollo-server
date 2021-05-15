@@ -839,6 +839,7 @@ export default gql`
         phone2: String
         email: String
         email2: String
+        address: Address
         note: String
         isLocked: Boolean!
         isLockedByMe: Boolean!
@@ -853,6 +854,7 @@ export default gql`
         phone2: String
         email: String
         email2: String
+        address: AddressUpdateInput
         note: String
     }
 
@@ -863,6 +865,7 @@ export default gql`
         phone2: String
         email: String
         email2: String
+        address: AddressUpdateInput
         note: String
         keepLock: Boolean
     }
@@ -1045,14 +1048,14 @@ export default gql`
         street: String!
         number: String!
         zip: String!
-        city: String
+        city: String!
     }
 
     input AddressCreateInput {
         street: String!
         number: String!
         zip: String!
-        city: String
+        city: String!
     }
 
     input AddressUpdateInput {
