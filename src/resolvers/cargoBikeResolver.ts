@@ -230,11 +230,6 @@ export default {
         isLockedByMe: (parent: any, __: any, { req }: { req: any }) => isLockedByMe(parent, { req }),
         isLocked: (parent: any, __: any, { req }: { req: any }) => isLocked(parent, { req })
     },
-    InsuranceData: {
-        projectAllowance: (parent: any): any => {
-            return (parent.projectAllowance as string)?.replace(/€\$/, '');
-        }
-    },
     Mutation: {
         createCargoBike: (_: any, { cargoBike }: { cargoBike: any }, { dataSources, req }: { dataSources: any, req: any }) => {
             if (req.permissions.includes(Permission.WriteBike)) {
