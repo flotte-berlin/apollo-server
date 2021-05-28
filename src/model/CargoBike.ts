@@ -39,9 +39,9 @@ import { BikeEvent } from './BikeEvent';
 import { EquipmentType } from './EquipmentType';
 
 export enum Group {
-    KL = 'KL',
-    LI = 'LI',
-    SP = 'SP',
+    Kl = 'Kl',
+    Li = 'Li',
+    Sp = 'Sp',
     FK = 'FK',
     MH = 'MH',
     SZ = 'SZ',

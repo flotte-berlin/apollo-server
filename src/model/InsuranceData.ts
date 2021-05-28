@@ -61,15 +61,21 @@ export class InsuranceData {
     hasFixedRate: boolean;
 
     @Column({
+        type: 'int',
         nullable: true
     })
     fixedRate: number;
 
     @Column({
-        type: 'money',
         nullable: true
     })
-    projectAllowance: string;
+    fixedRateCycle: string;
+
+    @Column({
+        type: 'int',
+        nullable: true
+    })
+    projectAllowance: number;
 
     @Column({
         nullable: true

@@ -20,8 +20,10 @@ import { getApp, getConnectionOptions, userAPI } from './app';
 
 (async () => {
     const app = await getApp(getConnectionOptions());
+    const port = 4000;
 
     app.listen(4000, async () => {
+        console.log('app started, listening on port', port);
         await userAPI.createDefinedPermissions().catch(
             err => {
                 console.log(err);

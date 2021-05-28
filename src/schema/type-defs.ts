@@ -27,14 +27,6 @@ export default gql`
     scalar DateTime
     "only time hh-mm-ss"
     scalar Time
-    """
-    is of american format [-]$[0-9]+.[0-9][0-9]
-    commas every three digits and . for decimals with 2 digits after the .
-    There can be a leading  -.
-    There is a currency signe at the first position or second position if - is set.
-    The kind of currency depends on the database.
-    """
-    scalar Money
     scalar Link
     
     "The CargoBike type is central to the graph. You could call it the root."
@@ -220,16 +212,9 @@ export default gql`
         maintenanceBenefactor: String
         maintenanceAgreement: String
         hasFixedRate: Boolean
-        fixedRate: Float
-        """
-        Projektzuschuss:
-        is of american format [-]$[0-9]+.[0-9][0-9]
-        commas every three digits and . for decimals with 2 digits after the .
-        There can be a leading  -.
-        There is a currency signe at the first position or second position if - is set.
-        The kind of currency depends on the database.
-        """
-        projectAllowance: Money
+        fixedRate: Int
+        fixedRateCycle: String
+        projectAllowance: Int
         frameworkAgreement: String
         notes: String
     }
@@ -247,16 +232,9 @@ export default gql`
         maintenanceBenefactor: String
         maintenanceAgreement: String
         hasFixedRate: Boolean
-        fixedRate: Float
-        """
-        Projektzuschuss:
-        must be of format [+|-][$][0-9]*[.[0-9]*]
-        commas are ignored, non numeric values except , and . lead to errors
-        There can be a leading + or -.
-        You can pass a currency signe at the first position or second position of + or - is set.
-        The kind of currency depends on the database.
-        """
-        projectAllowance: Money
+        fixedRate: Int
+        fixedRateCycle: String
+        projectAllowance: Int
         frameworkAgreement: String
         notes: String
     }
@@ -274,16 +252,9 @@ export default gql`
         maintenanceBenefactor: String
         maintenanceAgreement: String
         hasFixedRate: Boolean
-        fixedRate: Float
-        """
-        Projektzuschuss:
-        must be of format [+|-][$][0-9]*[.[0-9]*]
-        commas are ignored, non numeric values except , and . lead to errors
-        There can be a leading + or -.
-        You can pass a currency signe at the first position or second position of + or - is set.
-        The kind of currency depends on the database.
-        """
-        projectAllowance: Money
+        fixedRate: Int
+        fixedRateCycle: String
+        projectAllowance: Int
         frameworkAgreement: String
         notes: String
     }
@@ -435,9 +406,9 @@ export default gql`
     }
 
     enum Group{
-        KL
-        LI
-        SP
+        Kl
+        Li
+        Sp
         FK
         MH
         SZ
