@@ -85,6 +85,11 @@ export class Participant implements Lockable {
 
     @Column({
         nullable: true,
+    })
+    comment: string;
+
+    @Column({
+        nullable: true,
         type: 'timestamp'
     })
     lockedUntil: Date;

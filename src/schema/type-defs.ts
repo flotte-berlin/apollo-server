@@ -428,6 +428,7 @@ export default gql`
         memberADFC: Boolean!
         locationZIPs: [String]!
         memberCoreTeam: Boolean!
+        comment: String
         """
         Note the kommentierte Infodaten Tabelle.
         This value is calculated form other values.
@@ -457,6 +458,7 @@ export default gql`
         locationZIPs: [String]!
         "default: false"
         memberCoreTeam: Boolean
+        comment: String
         workshopIds: [ID]
     }
 
@@ -472,6 +474,7 @@ export default gql`
         locationZIPs: [String]
         "default: false"
         memberCoreTeam: Boolean
+        comment: String
         workshopIds: [ID]
         keepLock: Boolean
     }
